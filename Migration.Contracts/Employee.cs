@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace Migration.Contracts
 {
     /// <summary>
-    /// Interface for employee
+    /// Abstract class for employee
     /// </summary>
-    public interface IEmployee
+    public class Employee
     {
         /// <summary>
         /// Employee Identifier (unique)
