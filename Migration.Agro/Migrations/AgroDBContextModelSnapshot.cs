@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Migration.Contracts;
+using Migration.Agro;
 
 #nullable disable
 
@@ -22,15 +22,14 @@ namespace Migration.Agro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Contracts.Employee", b =>
+            modelBuilder.Entity("Migration.Agro.EmployeeAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("HasTracktorLicense")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
