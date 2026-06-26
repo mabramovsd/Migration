@@ -16,7 +16,7 @@ namespace Migration.Agro.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    HasTracktorLicense = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
