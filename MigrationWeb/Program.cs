@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Migration.Contracts;
+using MigrationWeb.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +10,15 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var connectionString = "Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True";
+builder.Services.AddDbContext<CoreDBContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+});
+
+builder.Services.AddScoped<HRService>();
 
 var app = builder.Build();
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Migration.Contracts
+﻿namespace Migration.Contracts.DTO
 {
     /// <summary>
     /// Abstract class for employee
@@ -16,8 +10,16 @@ namespace Migration.Contracts
         /// </summary>
         public Guid Id { get; set; }
         /// <summary>
+        /// Birth Date
+        /// </summary>
+        public DateTime BirthDate { get; set; }
+        /// <summary>
         /// Employee name
         /// </summary>
         public string FullName { get; set; }
+        /// <summary>
+        /// Cerrent company
+        /// </summary>
+        public string CurrentCompany { get; set; }
     }
 }
