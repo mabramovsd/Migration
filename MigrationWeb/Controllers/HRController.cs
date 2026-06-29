@@ -17,6 +17,14 @@ namespace MigrationWeb.Controllers
             _hrService = hrService;
         }
 
+
+        [HttpGet("All")]
+        public async Task<IEnumerable<EmployeeSummaryInfo>> GetAll()
+        {
+            var employeeList = await _hrService.GetEmployeeList();
+            return employeeList;
+        }
+
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)
         {
