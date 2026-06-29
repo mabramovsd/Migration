@@ -1,14 +1,20 @@
-﻿using Migration.Contracts;
+﻿using Migration.Agro.Services;
+using Migration.Contracts;
 using Migration.Contracts.DTO;
+using Migration.Shipbuilding.Services;
 
 namespace MigrationWeb.Services
 {
     public class HRService
     {
+        private readonly HRServiceAgro _hrServiceAgro;
+        private readonly HRServiceShipbuilding _hrServiceShipbuilding;
         private readonly CoreDBContext _coreDBContext;
-        public HRService(CoreDBContext coreDBContext) 
+        public HRService(CoreDBContext coreDBContext, HRServiceAgro hrServiceAgro, HRServiceShipbuilding hrServiceShipbuilding)
         { 
             _coreDBContext = coreDBContext;
+            _hrServiceAgro = hrServiceAgro;
+            _hrServiceShipbuilding = hrServiceShipbuilding;
         }
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
@@ -17,25 +23,25 @@ namespace MigrationWeb.Services
 
             try
             {
-                // Часть 1: Сохраняем в Ядро (всегда выполняется)
-                await _coreDBContext.Employees.AddAsync(new Employee { Id = employeeId, FullName = request.CoreData.FullName });
-                await _coreDBContext.SaveChangesAsync(); // Локальная транзакция для ядра
+                // Core part
+                await _coreDBContext.Employees.AddAsync(new Employee 
+                { 
+                    Id = employeeId, 
+                    FullName = request.CoreData.FullName,
+                    CurrentCompany = request.CoreData.CurrentCompany,
+                    BirthDate = request.CoreData.BirthDate,
+                });
+                await _coreDBContext.SaveChangesAsync();
 
-                // Часть 2: Сохраняем в Специализированный сервис
-                //if (request.CompanyCode == "agro")
+                // Special part
+                if (request.CoreData.CurrentCompany == "Agro")
                 {
-                    // Здесь кроется проблема распределенной транзакции.
-                    // Простой вызов может упасть, и мы получим несогласованность данных.
-                    // Для надежности здесь должен использоваться Outbox/Saga.
-                    //await _agroApiClient.AddAgroEmployeeAsync(new AgroEmployeeDto
-                    //{
-                    //    Id = employeeId,
-                    //    HasTracktorLicense = request.HasTracktorLicense ?? false
-                    //});
+                    await _hrServiceAgro.AddEmployeeAsync(request);
                 }
-                // else if for other companies...
-
-
+                else if (request.CoreData.CurrentCompany == "Shipbuilding")
+                {
+                    await _hrServiceShipbuilding.AddEmployeeAsync(request);
+                }
             }
             catch (Exception ex)
             {

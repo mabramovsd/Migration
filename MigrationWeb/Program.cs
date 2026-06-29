@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Migration.Agro;
+using Migration.Agro.Services;
 using Migration.Contracts;
+using Migration.Shipbuilding;
+using Migration.Shipbuilding.Services;
 using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +15,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
+
+
+var connectionStringAgro = "Data Source=MSI;Initial Catalog=Migration_Agro;Integrated Security=True;Trust Server Certificate=True";
+builder.Services.AddDbContext<AgroDBContext>(options =>
+{
+    options.UseSqlServer(connectionStringAgro);
+});
+
+builder.Services.AddScoped<HRServiceAgro>();
+
+var connectionStringShip = "Data Source=MSI;Initial Catalog=Migration_Shipbuilding;Integrated Security=True;Trust Server Certificate=True";
+builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
+{
+    options.UseSqlServer(connectionStringShip);
+});
+
+builder.Services.AddScoped<HRServiceShipbuilding>();
+
+
+
+
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var connectionString = "Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True";
 builder.Services.AddDbContext<CoreDBContext>(options =>
@@ -19,6 +46,8 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 });
 
 builder.Services.AddScoped<HRService>();
+
+
 
 var app = builder.Build();
 
