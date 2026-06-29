@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Migration.Agro;
 using Migration.Agro.Services;
 using Migration.Contracts;
+using Migration.Shipbuilding;
+using Migration.Shipbuilding.Services;
 using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,14 @@ builder.Services.AddDbContext<AgroDBContext>(options =>
 });
 
 builder.Services.AddScoped<HRServiceAgro>();
+
+var connectionStringShip = "Data Source=MSI;Initial Catalog=Migration_Shipbuilding;Integrated Security=True;Trust Server Certificate=True";
+builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
+{
+    options.UseSqlServer(connectionStringShip);
+});
+
+builder.Services.AddScoped<HRServiceShipbuilding>();
 
 
 
