@@ -1,4 +1,4 @@
-﻿namespace Migration.Agro
+﻿namespace Migration.Agro.DTO
 {
     public class EmployeeAgro
     {

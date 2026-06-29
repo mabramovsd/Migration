@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Migration.Agro;
+using Migration.Agro.Services;
 using Migration.Contracts;
 using MigrationWeb.Services;
 
@@ -11,6 +13,21 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
+
+
+var connectionStringAgro = "Data Source=MSI;Initial Catalog=Migration_Agro;Integrated Security=True;Trust Server Certificate=True";
+builder.Services.AddDbContext<AgroDBContext>(options =>
+{
+    options.UseSqlServer(connectionStringAgro);
+});
+
+builder.Services.AddScoped<HRServiceAgro>();
+
+
+
+
 //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 var connectionString = "Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True";
 builder.Services.AddDbContext<CoreDBContext>(options =>
@@ -19,6 +36,8 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 });
 
 builder.Services.AddScoped<HRService>();
+
+
 
 var app = builder.Build();
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Migration.Agro.DTO;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Agro
