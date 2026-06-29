@@ -1,5 +1,6 @@
 ﻿using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace Migration.Agro.Services
 {
@@ -9,6 +10,21 @@ namespace Migration.Agro.Services
         public HRServiceAgro(AgroDBContext dbContext) 
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeList()
+        {
+            return await _dbContext.EmployeesAgro
+                .Take(10)
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = new Dictionary<string, object>
+                    {
+                        { "HasTracktorLicense", employee.HasTracktorLicense }
+                    }
+                })
+                .ToListAsync();
         }
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)

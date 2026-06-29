@@ -1,5 +1,6 @@
 ﻿using Migration.Shipbuilding.DTO;
 using Migration.Contracts.DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace Migration.Shipbuilding.Services
 {
@@ -9,6 +10,23 @@ namespace Migration.Shipbuilding.Services
         public HRServiceShipbuilding(ShipbuildingDBContext dbContext) 
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeList()
+        {
+            return await _dbContext.EmployeesShipbuilding
+                .Take(10)
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = new Dictionary<string, object>
+                    {
+                        { "CanDesignShip", employee.CanDesignShip },
+                        { "CanCarpentry", employee.CanCarpentry },
+                        { "CanWeld", employee.CanWeld },
+                    }
+                })
+                .ToListAsync();
         }
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)

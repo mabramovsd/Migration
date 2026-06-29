@@ -3,7 +3,7 @@
     /// <summary>
     /// Abstract class for employee
     /// </summary>
-    public class Employee
+    public class EmployeeSummaryInfo
     {
         /// <summary>
         /// Employee Identifier (unique)
@@ -21,5 +21,9 @@
         /// Cerrent company
         /// </summary>
         public string? CurrentCompany { get; set; }
+        /// <summary>
+        /// Dictionary with additional fields, depends of company
+        /// </summary>
+        public Dictionary<string, object>? AdditionalData { get; set; }
     }
 }
