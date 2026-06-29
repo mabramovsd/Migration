@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Migration.Contracts.DTO;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Contracts
@@ -16,6 +17,8 @@ namespace Migration.Contracts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //Something like clear cache for migration
+            modelBuilder.Entity<Employee>();
             base.OnModelCreating(modelBuilder);
         }
     }

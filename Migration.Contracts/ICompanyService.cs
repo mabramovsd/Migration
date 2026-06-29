@@ -1,4 +1,6 @@
-﻿namespace Migration.Contracts
+﻿using Migration.Contracts.DTO;
+
+namespace Migration.Contracts
 {
     /// <summary>
     /// Interface for company
