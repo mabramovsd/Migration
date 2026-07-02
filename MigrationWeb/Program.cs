@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Migration.Agro;
 using Migration.Agro.Services;
 using Migration.Contracts;
@@ -15,6 +15,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+// When we will execute services separately
+//builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
+
+// keyed services for ICompanyServices
+builder.Services.AddKeyedScoped<ICompanyService, HRServiceAgro>("Agro");
+builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
 
 
 

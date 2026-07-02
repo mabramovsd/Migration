@@ -8,10 +8,13 @@ namespace MigrationWeb.Services
 {
     public class HRService
     {
-        private readonly HRServiceAgro _hrServiceAgro;
-        private readonly HRServiceShipbuilding _hrServiceShipbuilding;
+        private readonly ICompanyService _hrServiceAgro;
+        private readonly ICompanyService _hrServiceShipbuilding;
         private readonly CoreDBContext _coreDBContext;
-        public HRService(CoreDBContext coreDBContext, HRServiceAgro hrServiceAgro, HRServiceShipbuilding hrServiceShipbuilding)
+        public HRService(
+            CoreDBContext coreDBContext,
+            [FromKeyedServices("Agro")] ICompanyService hrServiceAgro,
+            [FromKeyedServices("Shipbuilding")] ICompanyService hrServiceShipbuilding)
         { 
             _coreDBContext = coreDBContext;
             _hrServiceAgro = hrServiceAgro;
