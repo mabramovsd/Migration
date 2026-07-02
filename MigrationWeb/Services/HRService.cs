@@ -1,97 +1,119 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Migration.Agro.Services;
+using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 using Migration.Contracts.DTO;
-using Migration.Shipbuilding.Services;
 
-namespace MigrationWeb.Services
+namespace MigrationWeb.Services;
+
+public class HRService
 {
-    public class HRService
+    private readonly CoreDBContext _coreDBContext;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<HRService> _logger;
+
+    public HRService(
+        CoreDBContext coreDBContext,
+        IServiceProvider serviceProvider,
+        ILogger<HRService> logger)
     {
-        private readonly HRServiceAgro _hrServiceAgro;
-        private readonly HRServiceShipbuilding _hrServiceShipbuilding;
-        private readonly CoreDBContext _coreDBContext;
-        public HRService(CoreDBContext coreDBContext, HRServiceAgro hrServiceAgro, HRServiceShipbuilding hrServiceShipbuilding)
-        { 
-            _coreDBContext = coreDBContext;
-            _hrServiceAgro = hrServiceAgro;
-            _hrServiceShipbuilding = hrServiceShipbuilding;
+        _coreDBContext = coreDBContext;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
+
+    private ICompanyService GetServiceForCompany(string? companyName) =>
+        companyName?.ToLowerInvariant() switch
+        {
+            "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
+            "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            _ => null
+        };
+
+    public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeList()
+    {
+        // Core data
+        var employeesFromCore = await _coreDBContext.Employees.Take(10).ToListAsync();
+        if (!employeesFromCore.Any())
+        {
+            return new List<EmployeeSummaryInfo>();
         }
 
-        public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeList()
+        // Additional data
+        var tasks = new List<Task<IEnumerable<EmployeeAdditionalInfo>>>();
+        var companyTypes = employeesFromCore.Select(e => e.CurrentCompany).Distinct().Where(c => !string.IsNullOrEmpty(c));
+        
+        foreach (var ct in companyTypes)
         {
-            // Core data
-            var employeesFromCore = await _coreDBContext.Employees.Take(10).ToListAsync();
-            if (!employeesFromCore.Any())
+            var service = GetServiceForCompany(ct);
+            if (service is null)
             {
-                return new List<EmployeeSummaryInfo>();
+                _logger.LogWarning("No service registered for company type: {CompanyType}", ct);
+                continue;
             }
+            tasks.Add(service.GetEmployeeListAsync());
+        }
 
-            // Additional data
-            var tasks = new List<Task<IEnumerable<EmployeeAdditionalInfo>>>()
+        await Task.WhenAll(tasks);
+
+        //Some formatting for code simplifying
+        var agroDataById = tasks[0].Result.ToDictionary(x => x.Id);
+        var shipDataById = tasks[1].Result.ToDictionary(x => x.Id);
+
+        return employeesFromCore.Select(employee =>
+        {
+            var companyDict = employee.CurrentCompany switch
             {
-                 _hrServiceAgro.GetEmployeeList(),
-                 _hrServiceShipbuilding.GetEmployeeList()
+                "Agro" => agroDataById,
+                "Shipbuilding" => shipDataById,
+                _ => null
             };
-            await Task.WhenAll(tasks);
 
-            //Some formatting for code simplifying
-            var agroDataById = tasks[0].Result.ToDictionary(x => x.Id);
-            var shipDataById = tasks[1].Result.ToDictionary(x => x.Id);
-
-            return employeesFromCore.Select(employee =>
+            return new EmployeeSummaryInfo
             {
-                var companyDict = employee.CurrentCompany switch
-                {
-                    "Agro" => agroDataById,
-                    "Shipbuilding" => shipDataById,
-                    _ => null
-                };
+                Id = employee.Id,
+                FullName = employee.FullName,
+                CurrentCompany = employee.CurrentCompany,
+                BirthDate = employee.BirthDate,
+                AdditionalData = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.AdditionalData : null
+            };
+        }).ToList();
+    }
 
-                return new EmployeeSummaryInfo
-                {
-                    Id = employee.Id,
-                    FullName = employee.FullName,
-                    CurrentCompany = employee.CurrentCompany,
-                    BirthDate = employee.BirthDate,
-                    AdditionalData = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.AdditionalData : null
-                };
-            }).ToList();
+    public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+    {
+        var employeeId = Guid.NewGuid();
+        request.CoreData.Id = employeeId;
+
+        var companyName = request.CoreData.CurrentCompany ?? string.Empty;
+
+        var service = GetServiceForCompany(companyName);
+        if (service is null)
+        {
+            _logger.LogError("No service registered for company: {Company}", companyName);
+            throw new InvalidOperationException($"Unknown company type: {companyName}");
         }
 
-        public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+        try
         {
-            var employeeId = Guid.NewGuid();
-            request.CoreData.Id = employeeId;
-
-            try
+            // Core part
+            await _coreDBContext.Employees.AddAsync(new Employee
             {
-                // Core part
-                await _coreDBContext.Employees.AddAsync(new Employee 
-                { 
-                    Id = request.CoreData.Id, 
-                    FullName = request.CoreData.FullName,
-                    CurrentCompany = request.CoreData.CurrentCompany,
-                    BirthDate = request.CoreData.BirthDate,
-                });
-                await _coreDBContext.SaveChangesAsync();
+                Id = employeeId,
+                FullName = request.CoreData.FullName,
+                CurrentCompany = companyName,
+                BirthDate = request.CoreData.BirthDate,
+            });
+            await _coreDBContext.SaveChangesAsync();
 
-                // Special part
-                if (request.CoreData.CurrentCompany == "Agro")
-                {
-                    await _hrServiceAgro.AddEmployeeAsync(request);
-                }
-                else if (request.CoreData.CurrentCompany == "Shipbuilding")
-                {
-                    await _hrServiceShipbuilding.AddEmployeeAsync(request);
-                }
-            }
-            catch (Exception ex)
-            {
-                var s = ex.Message;
-            }
+            // Special part
+            await service.AddEmployeeAsync(request);
 
             return employeeId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add employee {EmployeeId} to company {Company}", employeeId, companyName);
+            throw;
         }
     }
 }
