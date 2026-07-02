@@ -1,20 +1,27 @@
 ﻿using Migration.Contracts.DTO;
 
-namespace Migration.Contracts
+namespace Migration.Contracts;
+
+/// <summary>
+/// Interface for managing employees.
+/// Used by Agro and Shipbuilding services.
+/// </summary>
+public interface ICompanyService
 {
     /// <summary>
-    /// Interface for company
+    /// Hire employee to the company
     /// </summary>
-    public interface ICompanyService
-    {
-        /// <summary>
-        /// Hire employee to the company
-        /// </summary>
-        public bool AddEmployee(Employee employee);
 
-        /// <summary>
-        /// Fire employee from the company
-        /// </summary>
-        public bool RemoveEmployee(Employee employee);
-    }
+    Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request);
+    
+    /// <summary>
+    /// Getting list of company employees
+    /// </summary>
+    Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync();
+
+    /// <summary>
+    /// Fire employee from the company
+    /// // ToDo: Implement it (soft/hard delete + reason)
+    /// </summary>
+    Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
 }

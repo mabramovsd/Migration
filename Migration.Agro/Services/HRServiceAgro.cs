@@ -1,10 +1,11 @@
 ﻿using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
+using Migration.Contracts;
 
 namespace Migration.Agro.Services
 {
-    public class HRServiceAgro
+    public class HRServiceAgro : ICompanyService
     {
         private readonly AgroDBContext _dbContext;
         public HRServiceAgro(AgroDBContext dbContext) 
@@ -12,7 +13,7 @@ namespace Migration.Agro.Services
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeList()
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesAgro
                 .Take(10)
@@ -50,10 +51,16 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                var s = ex.Message;
+                // TODO: logging
+                Console.WriteLine($"Failed to add agro employee: {ex.Message}");
             }
 
             return employeeId;
+        }
+
+        public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
+        {
+            return false;
         }
     }
 }

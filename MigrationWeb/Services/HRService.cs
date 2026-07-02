@@ -30,8 +30,8 @@ namespace MigrationWeb.Services
             // Additional data
             var tasks = new List<Task<IEnumerable<EmployeeAdditionalInfo>>>()
             {
-                 _hrServiceAgro.GetEmployeeList(),
-                 _hrServiceShipbuilding.GetEmployeeList()
+                 _hrServiceAgro.GetEmployeeListAsync(),
+                 _hrServiceShipbuilding.GetEmployeeListAsync()
             };
             await Task.WhenAll(tasks);
 

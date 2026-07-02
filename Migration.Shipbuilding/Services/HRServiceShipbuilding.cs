@@ -1,18 +1,19 @@
 ﻿using Migration.Shipbuilding.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
+using Migration.Contracts;
 
 namespace Migration.Shipbuilding.Services
 {
-    public class HRServiceShipbuilding
+    public class HRServiceShipbuilding : ICompanyService
     {
         private readonly ShipbuildingDBContext _dbContext;
-        public HRServiceShipbuilding(ShipbuildingDBContext dbContext) 
+        public HRServiceShipbuilding(ShipbuildingDBContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeList()
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesShipbuilding
                 .Take(10)
@@ -64,10 +65,16 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                var s = ex.Message;
+                // TODO: logging
+                Console.WriteLine($"Failed to add shipbuilding employee: {ex.Message}");
             }
 
             return employeeId;
+        }
+
+        public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
+        {
+            return false;
         }
     }
 }
