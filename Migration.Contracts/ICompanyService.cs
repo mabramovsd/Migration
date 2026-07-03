@@ -11,7 +11,6 @@ public interface ICompanyService
     /// <summary>
     /// Hire employee to the company
     /// </summary>
-
     Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request);
     
     /// <summary>

@@ -8,10 +8,14 @@ using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+//Connection strings
+builder.Services.AddOptions();
+var agroCs = builder.Configuration.GetConnectionString("AgroDb");
+var shipCs = builder.Configuration.GetConnectionString("ShipbuildingDb");
+var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 
+// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,37 +26,18 @@ builder.Services.AddSwaggerGen();
 // keyed services for ICompanyServices
 builder.Services.AddKeyedScoped<ICompanyService, HRServiceAgro>("Agro");
 builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
-
-
-
-
-var connectionStringAgro = "Data Source=MSI;Initial Catalog=Migration_Agro;Integrated Security=True;Trust Server Certificate=True";
-builder.Services.AddDbContext<AgroDBContext>(options =>
-{
-    options.UseSqlServer(connectionStringAgro);
-});
-
-builder.Services.AddScoped<HRServiceAgro>();
-
-var connectionStringShip = "Data Source=MSI;Initial Catalog=Migration_Shipbuilding;Integrated Security=True;Trust Server Certificate=True";
-builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
-{
-    options.UseSqlServer(connectionStringShip);
-});
-
-builder.Services.AddScoped<HRServiceShipbuilding>();
-
-
-
-
-//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-var connectionString = "Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True";
-builder.Services.AddDbContext<CoreDBContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
-
 builder.Services.AddScoped<HRService>();
+
+
+builder.Services.AddDbContext<AgroDBContext>(options =>
+    options.UseSqlServer(agroCs));
+
+builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
+    options.UseSqlServer(shipCs));
+
+builder.Services.AddDbContext<CoreDBContext>(options =>
+    options.UseSqlServer(coreCs));
+
 
 
 
