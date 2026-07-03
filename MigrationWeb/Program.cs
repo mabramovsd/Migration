@@ -4,6 +4,7 @@ using Migration.Agro.Services;
 using Migration.Contracts;
 using Migration.Shipbuilding;
 using Migration.Shipbuilding.Services;
+using MigrationWeb;
 using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,7 @@ builder.Services.AddKeyedScoped<ICompanyService, HRServiceAgro>("Agro");
 builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
 builder.Services.AddScoped<HRService>();
 
-
+//DB contexts
 builder.Services.AddDbContext<AgroDBContext>(options =>
     options.UseSqlServer(agroCs));
 
@@ -42,6 +43,8 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 
 
 var app = builder.Build();
+
+app.UseErrorHandling();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
