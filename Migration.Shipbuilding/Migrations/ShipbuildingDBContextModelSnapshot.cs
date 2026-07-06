@@ -37,6 +37,9 @@ namespace Migration.Shipbuilding.Migrations
                     b.Property<bool>("CanWeld")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("EmployeesShipbuilding");

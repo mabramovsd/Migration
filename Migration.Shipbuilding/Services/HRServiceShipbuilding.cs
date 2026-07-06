@@ -74,7 +74,29 @@ namespace Migration.Shipbuilding.Services
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
         {
-            return false;
+            var entity = await _dbContext.EmployeesShipbuilding.FindAsync(request.Id);
+            if (entity == null) return false;
+
+            try
+            {
+                if (request.SoftDelete)
+                {
+                    entity.IsDeleted = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    _dbContext.EmployeesShipbuilding.Remove(entity);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Shipbuilding] Failed to delete employee {request.Id}: {ex}");
+                return false;
+            }
         }
     }
 }

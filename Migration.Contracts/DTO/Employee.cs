@@ -18,8 +18,12 @@
         /// </summary>
         public string? FullName { get; set; }
         /// <summary>
-        /// Cerrent company
+        /// Current company
         /// </summary>
         public string? CurrentCompany { get; set; }
+        /// <summary>
+        /// Flag to mark disabled employees
+        /// </summary>
+        public bool IsDeleted { get; set; }
     }
 }

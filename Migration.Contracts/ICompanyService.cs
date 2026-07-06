@@ -20,7 +20,6 @@ public interface ICompanyService
 
     /// <summary>
     /// Fire employee from the company
-    /// // ToDo: Implement it (soft/hard delete + reason)
     /// </summary>
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
 }
