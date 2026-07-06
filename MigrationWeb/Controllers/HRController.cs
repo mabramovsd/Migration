@@ -8,10 +8,10 @@ namespace MigrationWeb.Controllers
     [Route("[controller]")]
     public class HRController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<HRController> _logger;
         private readonly HRService _hrService;
 
-        public HRController(ILogger<WeatherForecastController> logger, HRService hrService)
+        public HRController(ILogger<HRController> logger, HRService hrService)
         {
             _logger = logger;
             _hrService = hrService;
@@ -24,6 +24,14 @@ namespace MigrationWeb.Controllers
             var employeeList = await _hrService.GetEmployeeList();
             return employeeList;
         }
+
+        [HttpGet("Stats/CategoryCounts")]
+        public async Task<IEnumerable<CategoryCountDTO>> GetCategoryCounts()
+        {
+            var stats = await _hrService.GetEmployeeCategoryStatistics();
+            return stats;
+        }
+
 
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)
