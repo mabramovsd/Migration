@@ -7,6 +7,10 @@
         /// </summary>
         public Guid Id { get; set; }
         /// <summary>
+        /// Flag to mark disabled employees
+        /// </summary>
+        public bool IsDeleted { get; set; }
+        /// <summary>
         /// Can be a carpenter
         /// </summary>
         public bool CanCarpentry { get; set; }

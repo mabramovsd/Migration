@@ -60,7 +60,29 @@ namespace Migration.Agro.Services
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
         {
-            return false;
+            var entity = await _dbContext.EmployeesAgro.FindAsync(request.Id);
+            if (entity == null) return false;
+
+            try
+            {
+                if (request.SoftDelete)
+                {
+                    entity.IsDeleted = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    _dbContext.EmployeesAgro.Remove(entity);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Agro] Failed to remove employee {request.Id}: {ex}");
+                return false;
+            }
         }
     }
 }

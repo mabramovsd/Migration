@@ -142,4 +142,45 @@ public class HRService
             throw;
         }
     }
+
+    public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
+    {
+        var employee = await _coreDBContext.Employees.FindAsync(request.Id);
+        if (employee == null) return false;
+
+        var companyName = employee.CurrentCompany ?? string.Empty;
+
+        var service = GetServiceForCompany(companyName);
+        if (service == null)
+        {
+            _logger.LogWarning("No service registered for company '{Company}' of employee {EmployeeId}", companyName, request.Id);
+        }
+
+        try
+        {
+            if (request.SoftDelete)
+            {
+                employee.IsDeleted = true;
+                await _coreDBContext.SaveChangesAsync();
+            }
+            // Hard delete
+            else
+            {
+                _coreDBContext.Employees.Remove(employee);
+                await _coreDBContext.SaveChangesAsync();
+
+                if (service != null)
+                {
+                    await service.RemoveEmployeeAsync(request);
+                }
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove employee {EmployeeId}", request.Id);
+            return false;
+        }
+    }
 }

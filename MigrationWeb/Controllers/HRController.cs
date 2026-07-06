@@ -41,5 +41,21 @@ namespace MigrationWeb.Controllers
 
             return Ok(new { message = "File successfully saved", userId });
         }
+
+        [HttpDelete("Delete")]
+        public async Task<IActionResult> Delete([FromBody] RemoveEmployeeRequest request)
+        {
+            var success = await _hrService.RemoveEmployeeAsync(request);
+
+            if (!success)
+                return NotFound(new { message = "Error when deleting employee" });
+
+            return Ok(new
+            {
+                message = request.SoftDelete
+                ? "Employee marked as deleted (soft delete)"
+                : "Employee was successfullt removed"
+            });
+        }
     }
 }
