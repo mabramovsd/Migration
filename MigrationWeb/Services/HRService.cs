@@ -79,6 +79,32 @@ public class HRService
         }).ToList();
     }
 
+    public async Task<IEnumerable<CategoryCountDTO>> GetEmployeeCategoryStatistics()
+    {
+        //Employees grouped by company
+        var data = await _coreDBContext.Employees
+            .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
+            .Select(g => new
+            {
+                Category = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
+
+        int totalCount = data.Sum(x => x.Count);
+
+        // Adding category 'All' as first line
+        var finalResult = data.Select(x => new CategoryCountDTO
+        {
+            CategoryName = x.Category,
+            Count = x.Count
+        }).ToList();
+
+        finalResult.Insert(0, new CategoryCountDTO { CategoryName = "All", Count = totalCount });
+
+        return finalResult;
+    }
+
     public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
     {
         var employeeId = Guid.NewGuid();
