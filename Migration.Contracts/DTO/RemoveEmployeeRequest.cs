@@ -1,4 +1,6 @@
-﻿namespace Migration.Contracts.DTO;
+using System.ComponentModel.DataAnnotations;
+
+namespace Migration.Contracts.DTO;
 
 /// <summary>
 /// Request DTO for removing an employee.
@@ -9,6 +11,7 @@ public class RemoveEmployeeRequest
     /// <summary>
     /// Employee ID to remove.
     /// </summary>
+    [Required(ErrorMessage = "Employee ID is required")]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -20,5 +23,6 @@ public class RemoveEmployeeRequest
     /// <summary>
     /// Optional: reason or metadata for audit trail.
     /// </summary>
+    [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
     public string? Reason { get; set; }
 }

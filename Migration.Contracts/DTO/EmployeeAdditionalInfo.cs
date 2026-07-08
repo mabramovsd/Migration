@@ -1,4 +1,6 @@
-﻿namespace Migration.Contracts.DTO
+using System.ComponentModel.DataAnnotations;
+
+namespace Migration.Contracts.DTO
 {
     public class EmployeeAdditionalInfo
     {
@@ -6,6 +8,7 @@
         /// Employee Identifier (unique)
         /// </summary>
         public Guid Id { get; set; }
+
         /// <summary>
         /// Dictionary with additional fields, depends of company
         /// </summary>
