@@ -1,6 +1,7 @@
 ﻿using Migration.Shipbuilding.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 
 namespace Migration.Shipbuilding.Services
@@ -8,9 +9,12 @@ namespace Migration.Shipbuilding.Services
     public class HRServiceShipbuilding : ICompanyService
     {
         private readonly ShipbuildingDBContext _dbContext;
-        public HRServiceShipbuilding(ShipbuildingDBContext dbContext)
+        private readonly ILogger<HRServiceShipbuilding> _logger;
+
+        public HRServiceShipbuilding(ShipbuildingDBContext dbContext, ILogger<HRServiceShipbuilding> logger)
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
@@ -65,8 +69,7 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                // TODO: logging
-                Console.WriteLine($"Failed to add shipbuilding employee: {ex.Message}");
+                _logger.LogError(ex, "Failed to add shipbuilding employee: {ErrorMessage}", ex.Message);
             }
 
             return employeeId;
@@ -94,7 +97,7 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Shipbuilding] Failed to delete employee {request.Id}: {ex}");
+                _logger.LogError(ex, "[Shipbuilding] Failed to delete employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
                 return false;
             }
         }
