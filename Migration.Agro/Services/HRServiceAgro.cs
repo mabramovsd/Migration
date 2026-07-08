@@ -1,6 +1,7 @@
 ﻿using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 
 namespace Migration.Agro.Services
@@ -8,9 +9,12 @@ namespace Migration.Agro.Services
     public class HRServiceAgro : ICompanyService
     {
         private readonly AgroDBContext _dbContext;
-        public HRServiceAgro(AgroDBContext dbContext) 
+        private readonly ILogger<HRServiceAgro> _logger;
+
+        public HRServiceAgro(AgroDBContext dbContext, ILogger<HRServiceAgro> logger) 
         {
             _dbContext = dbContext;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
@@ -51,8 +55,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                // TODO: logging
-                Console.WriteLine($"Failed to add agro employee: {ex.Message}");
+                _logger.LogError(ex, "Failed to add agro employee: {ErrorMessage}", ex.Message);
             }
 
             return employeeId;
@@ -80,7 +83,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Agro] Failed to remove employee {request.Id}: {ex}");
+                _logger.LogError(ex, "[Agro] Failed to remove employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
                 return false;
             }
         }
