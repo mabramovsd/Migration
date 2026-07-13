@@ -49,13 +49,23 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var agroContext = scope.ServiceProvider.GetRequiredService<AgroDBContext>();
-        agroContext.Database.Migrate();
-        
+        if (agroContext.Database.GetPendingMigrations().Any())
+        {
+            agroContext.Database.Migrate();
+        }
+
         var shipContext = scope.ServiceProvider.GetRequiredService<ShipbuildingDBContext>();
+        if (shipContext.Database.GetPendingMigrations().Any())
+        {
+            shipContext.Database.Migrate();
+        }
         shipContext.Database.Migrate();
         
         var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
-        coreContext.Database.Migrate();
+        if (coreContext.Database.GetPendingMigrations().Any())
+        {
+            coreContext.Database.Migrate();
+        }
     }
 }
 

@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Migration.Contracts;
+using Migration.Shipbuilding;
 
 #nullable disable
 
-namespace Migration.Contracts.Migrations
+namespace Migration.Shipbuilding.Migrations
 {
-    [DbContext(typeof(CoreDBContext))]
-    partial class CoreDBContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ShipbuildingDBContext))]
+    [Migration("20260713081936_AddSeedDataShip")]
+    partial class AddSeedDataShip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,30 +25,27 @@ namespace Migration.Contracts.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Contracts.DTO.Employee", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.DTO.EmployeeShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("BirthDate")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("CanCarpentry")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("CurrentCompany")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<bool>("CanDesignShip")
+                        .HasColumnType("bit");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<bool>("CanWeld")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employees");
+                    b.ToTable("EmployeesShipbuilding");
                 });
 #pragma warning restore 612, 618
         }
