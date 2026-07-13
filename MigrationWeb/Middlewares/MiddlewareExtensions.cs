@@ -1,4 +1,4 @@
-﻿using MigrationWeb.Middlewares;
+using MigrationWeb.Middlewares;
 
 namespace MigrationWeb;
 

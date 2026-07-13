@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Migration.Agro;
+using Microsoft.EntityFrameworkCore;
 using Migration.Agro.Services;
 using Migration.Contracts;
 using Migration.Shipbuilding;
@@ -9,9 +8,8 @@ using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Connection strings
+// Connection strings
 builder.Services.AddOptions();
-var agroCs = builder.Configuration.GetConnectionString("AgroDb");
 var shipCs = builder.Configuration.GetConnectionString("ShipbuildingDb");
 var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 
@@ -20,29 +18,50 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure ServiceUrls
+builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
 
-// When we will execute services separately
-//builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
+// HTTP services (running as separate microservices)
+builder.Services.AddKeyedScoped<ICompanyService, HTTPCompanyService>("AgroHttp");
+builder.Services.AddKeyedScoped<ICompanyService, HTTPCompanyService>("ShipbuildingHttp");
 
-// keyed services for ICompanyServices
-builder.Services.AddKeyedScoped<ICompanyService, HRServiceAgro>("Agro");
+// Register HTTP clients
+builder.Services.AddHttpClient<HTTPCompanyService>("AgroHttpClient", options =>
+{
+    var serviceUrls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    options.BaseAddress = new Uri(serviceUrls?.Agro ?? "http://localhost:5002");
+});
+
+builder.Services.AddHttpClient<HTTPCompanyService>("ShipbuildingHttpClient", options =>
+{
+    var serviceUrls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    options.BaseAddress = new Uri(serviceUrls?.Shipbuilding ?? "http://localhost:5001");
+});
+
 builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
 builder.Services.AddScoped<HRService>();
 
-//DB contexts
-builder.Services.AddDbContext<AgroDBContext>(options =>
-    options.UseSqlServer(agroCs));
-
+// DB context (only CoreDBContext in MigrationWeb now)
 builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
     options.UseSqlServer(shipCs));
 
 builder.Services.AddDbContext<CoreDBContext>(options =>
     options.UseSqlServer(coreCs));
 
-
-
-
 var app = builder.Build();
+
+// Apply migrations automatically (for development only)
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
+        if (coreContext.Database.GetPendingMigrations().Any())
+        {
+            coreContext.Database.Migrate();
+        }
+    }
+}
 
 app.UseErrorHandling();
 

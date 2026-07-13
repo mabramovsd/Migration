@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 using Migration.Contracts.DTO;
@@ -21,11 +21,15 @@ public class HRService
         _logger = logger;
     }
 
-    private ICompanyService GetServiceForCompany(string? companyName) =>
+    private ICompanyService? GetServiceForCompany(string? companyName, bool useHttpClient = false) =>
         companyName?.ToLowerInvariant() switch
         {
-            "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
-            "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            "agro" => useHttpClient 
+                ? _serviceProvider.GetKeyedService<ICompanyService>("AgroHttp")
+                : _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
+            "shipbuilding" => useHttpClient
+                ? _serviceProvider.GetKeyedService<ICompanyService>("ShipbuildingHttp")
+                : _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
             _ => null
         };
 
@@ -44,7 +48,7 @@ public class HRService
         
         foreach (var ct in companyTypes)
         {
-            var service = GetServiceForCompany(ct);
+            var service = GetServiceForCompany(ct, useHttpClient: true);
             if (service is null)
             {
                 _logger.LogWarning("No service registered for company type: {CompanyType}", ct);
@@ -56,8 +60,8 @@ public class HRService
         await Task.WhenAll(tasks);
 
         //Some formatting for code simplifying
-        var agroDataById = tasks[0].Result.ToDictionary(x => x.Id);
-        var shipDataById = tasks[1].Result.ToDictionary(x => x.Id);
+        var agroDataById = tasks.Count > 0 ? tasks[0].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
+        var shipDataById = tasks.Count > 1 ? tasks[1].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
 
         return employeesFromCore.Select(employee =>
         {
@@ -112,7 +116,7 @@ public class HRService
 
         var companyName = request.CoreData.CurrentCompany ?? string.Empty;
 
-        var service = GetServiceForCompany(companyName);
+        var service = GetServiceForCompany(companyName, useHttpClient: true);
         if (service is null)
         {
             _logger.LogError("No service registered for company: {Company}", companyName);
@@ -150,7 +154,7 @@ public class HRService
 
         var companyName = employee.CurrentCompany ?? string.Empty;
 
-        var service = GetServiceForCompany(companyName);
+        var service = GetServiceForCompany(companyName, useHttpClient: true);
         if (service == null)
         {
             _logger.LogWarning("No service registered for company '{Company}' of employee {EmployeeId}", companyName, request.Id);
