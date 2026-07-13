@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Connection strings
 var agroCs = builder.Configuration.GetConnectionString("AgroDb");
-var serviceUrl = builder.Configuration.GetValue<string>("ServiceUrl");
 
 // Add services to the container.
 builder.Services.AddControllers();

@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using Migration.Agro.Services;
+using Microsoft.Extensions.Options;
 using Migration.Contracts;
 using Migration.Shipbuilding;
 using Migration.Shipbuilding.Services;
 using MigrationWeb;
 using MigrationWeb.Services;
+
+Console.WriteLine("=== STARTING MIGRATIONWEB ===");
+Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,26 +22,26 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configure ServiceUrls
-builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
+var serviceUrlsSection = builder.Configuration.GetSection("ServiceUrls");
+var serviceUrls = new ServiceUrls();
+serviceUrlsSection.Bind(serviceUrls);
+Console.WriteLine($"ServiceUrls loaded: Agro={serviceUrls.Agro}, Shipbuilding={serviceUrls.Shipbuilding}");
+builder.Services.Configure<ServiceUrls>(serviceUrlsSection);
 
-// HTTP services (running as separate microservices)
+// Register HttpClient for Agro service as singleton
+builder.Services.AddSingleton<HttpClient>(sp =>
+{
+    var serviceUrlsOptions = sp.GetRequiredService<IOptions<ServiceUrls>>().Value;
+    var httpClient = new HttpClient(new HttpClientHandler())
+    {
+        BaseAddress = new Uri(serviceUrlsOptions.Agro ?? "http://localhost:5002")
+    };
+    return httpClient;
+});
+
+// keyed registration for ICompanyService
 builder.Services.AddKeyedScoped<ICompanyService, HTTPCompanyService>("AgroHttp");
-builder.Services.AddKeyedScoped<ICompanyService, HTTPCompanyService>("ShipbuildingHttp");
 
-// Register HTTP clients
-builder.Services.AddHttpClient<HTTPCompanyService>("AgroHttpClient", options =>
-{
-    var serviceUrls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
-    options.BaseAddress = new Uri(serviceUrls?.Agro ?? "http://localhost:5002");
-});
-
-builder.Services.AddHttpClient<HTTPCompanyService>("ShipbuildingHttpClient", options =>
-{
-    var serviceUrls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
-    options.BaseAddress = new Uri(serviceUrls?.Shipbuilding ?? "http://localhost:5001");
-});
-
-builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
 builder.Services.AddScoped<HRService>();
 
 // DB context (only CoreDBContext in MigrationWeb now)
@@ -49,7 +52,6 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
     options.UseSqlServer(coreCs));
 
 var app = builder.Build();
-
 
 // Apply migrations automatically (for development only)
 if (app.Environment.IsDevelopment())
@@ -62,7 +64,7 @@ if (app.Environment.IsDevelopment())
             shipContext.Database.Migrate();
         }
         shipContext.Database.Migrate();
-        
+
         var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
         if (coreContext.Database.GetPendingMigrations().Any())
         {
