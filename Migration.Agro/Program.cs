@@ -13,12 +13,7 @@ var agroCs = builder.Configuration.GetConnectionString("AgroDb");
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-// Register ICompanyService (only one implementation in Agro service)
 builder.Services.AddScoped<ICompanyService, HRServiceAgro>();
-
-// Configure ServiceUrl for HTTP client
-builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
 
 // DB context
 builder.Services.AddDbContext<AgroDBContext>(options =>

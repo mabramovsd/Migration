@@ -6,9 +6,6 @@ using Migration.Shipbuilding.Services;
 using MigrationWeb;
 using MigrationWeb.Services;
 
-Console.WriteLine("=== STARTING MIGRATIONWEB ===");
-Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Connection strings

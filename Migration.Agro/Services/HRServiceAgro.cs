@@ -1,7 +1,6 @@
 ﻿using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 
 namespace Migration.Agro.Services

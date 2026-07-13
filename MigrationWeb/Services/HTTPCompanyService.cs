@@ -11,13 +11,7 @@ public class HTTPCompanyService : ICompanyService
     private readonly ILogger<HTTPCompanyService> _logger;
 
     public HTTPCompanyService(HttpClient httpClient, ILogger<HTTPCompanyService> logger)
-    {
-        // Set BaseAddress here if it's not already set
-        if (httpClient.BaseAddress == null)
-        {
-            httpClient.BaseAddress = new Uri("http://localhost:5002");
-        }
-        
+    {        
         _httpClient = httpClient;
         _logger = logger;
     }
