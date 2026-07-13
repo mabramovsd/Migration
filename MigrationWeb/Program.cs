@@ -41,8 +41,33 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 
 
 
-
 var app = builder.Build();
+
+// Apply migrations automatically (for development only)
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var agroContext = scope.ServiceProvider.GetRequiredService<AgroDBContext>();
+        if (agroContext.Database.GetPendingMigrations().Any())
+        {
+            agroContext.Database.Migrate();
+        }
+
+        var shipContext = scope.ServiceProvider.GetRequiredService<ShipbuildingDBContext>();
+        if (shipContext.Database.GetPendingMigrations().Any())
+        {
+            shipContext.Database.Migrate();
+        }
+        shipContext.Database.Migrate();
+        
+        var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
+        if (coreContext.Database.GetPendingMigrations().Any())
+        {
+            coreContext.Database.Migrate();
+        }
+    }
+}
 
 app.UseErrorHandling();
 

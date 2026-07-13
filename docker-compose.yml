@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # MS SQL Server
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: petproject_mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_strong_P@ssw0rd123"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  # API
+  webapi:
+    build:
+      context: .
+      dockerfile: MigrationWeb/Dockerfile
+    container_name: petproject_api
+    depends_on:
+      mssql:
+        condition: service_started # Check if DB is started (not health)
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__AgroDb=Server=mssql,1433;Database=Migration_Agro;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+      - ConnectionStrings__ShipbuildingDb=Server=mssql,1433;Database=Migration_Shipbuilding;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+      - ConnectionStrings__CoreDb=Server=mssql,1433;Database=Migration_Core;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+volumes:
+  mssql_data:
