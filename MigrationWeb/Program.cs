@@ -41,8 +41,23 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 
 
 
-
 var app = builder.Build();
+
+// Apply migrations automatically (for development only)
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var agroContext = scope.ServiceProvider.GetRequiredService<AgroDBContext>();
+        agroContext.Database.Migrate();
+        
+        var shipContext = scope.ServiceProvider.GetRequiredService<ShipbuildingDBContext>();
+        shipContext.Database.Migrate();
+        
+        var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
+        coreContext.Database.Migrate();
+    }
+}
 
 app.UseErrorHandling();
 
