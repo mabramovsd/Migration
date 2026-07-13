@@ -1,0 +1,8 @@
+services:
+  webapi:
+    environment:
+      - ConnectionStrings__AgroDb=Server=mssql,1433;Database=Migration_Agro;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+      - ConnectionStrings__ShipbuildingDb=Server=mssql,1433;Database=Migration_Shipbuilding;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+      - ConnectionStrings__CoreDb=Server=mssql,1433;Database=Migration_Core;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "5000:80"
