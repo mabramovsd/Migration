@@ -1,5 +1,3 @@
-using System.Net.Http;
-using System.Net.Http.Json;
 using Migration.Contracts;
 using Migration.Contracts.DTO;
 

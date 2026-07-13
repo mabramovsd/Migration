@@ -16,13 +16,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Migration.Agro\Migration.Agro.csproj" />
-    <ProjectReference Include="..\Migration.Contracts\Migration.Contracts.csproj" />
-    <ProjectReference Include="..\Migration.Shipbuilding\Migration.Shipbuilding.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.28" />
+    <ProjectReference Include="..\Migration.Contracts\Migration.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

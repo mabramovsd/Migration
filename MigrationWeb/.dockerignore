@@ -1,0 +1,60 @@
+# Exclude all appsettings.json files except the one in MigrationWeb
+**/appsettings.json
+!MigrationWeb/appsettings.json
+!MigrationWeb/appsettings.Development.json
+
+# Exclude all other project directories (we only need MigrationWeb and its dependencies)
+**/*.csproj
+!MigrationWeb/*.csproj
+!Migration.Contracts/*.csproj
+!Migration.Agro/*.csproj
+!Migration.Shipbuilding/*.csproj
+
+# Exclude everything else
+*
+!MigrationWeb/
+!Migration.Contracts/
+!Migration.Agro/
+!Migration.Shipbuilding/
+
+# Re-include only the necessary files in MigrationWeb
+!MigrationWeb/Dockerfile
+!MigrationWeb/Program.cs
+!MigrationWeb/Controllers/
+!MigrationWeb/Services/
+!MigrationWeb/MigrationWeb.csproj
+!MigrationWeb/appsettings.json
+!MigrationWeb/appsettings.Development.json
+!MigrationWeb/Properties/
+!MigrationWeb/wwwroot/
+
+# Re-include contracts
+!Migration.Contracts/Contracts/
+!Migration.Contracts/Models/
+
+# Re-include agro and shipbuilding models (if needed by HTTP clients)
+!Migration.Agro/Models/
+!Migration.Shipbuilding/Models/
+
+# Exclude obj and bin directories
+obj/
+bin/
+**/obj/
+**/bin/
+
+# Exclude .vs, .docker, and other IDE files
+.vs/
+.docker/
+.git/
+*.user
+*.suo
+*.cache
+*.log
+
+# Exclude test files
+**/*Test*
+**/*test*
+
+# Exclude README and other documentation
+README.md
+DOCKER_SETUP.md
