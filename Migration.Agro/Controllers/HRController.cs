@@ -5,7 +5,7 @@ using Migration.Contracts.DTO;
 namespace Migration.Agro.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class HRController : ControllerBase
 {
     private readonly ICompanyService _companyService;
