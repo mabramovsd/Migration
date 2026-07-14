@@ -14,23 +14,54 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql
 
-  # API
+  # Agro Service
+  agro:
+    build:
+      context: .
+      dockerfile: Migration.Agro/Dockerfile
+    container_name: petproject_agro
+    depends_on:
+      mssql:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__AgroDb=Server=mssql,1433;Database=Migration_Agro;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "5002:5002"
+
+  # Shipbuilding Service
+  shipbuilding:
+    build:
+      context: .
+      dockerfile: Migration.Shipbuilding/Dockerfile
+    container_name: petproject_shipbuilding
+    depends_on:
+      mssql:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__ShipbuildingDb=Server=mssql,1433;Database=Migration_Shipbuilding;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "5001:5001"
+
+  # Web API
   webapi:
     build:
       context: .
       dockerfile: MigrationWeb/Dockerfile
     container_name: petproject_api
     depends_on:
-      mssql:
-        condition: service_started # Check if DB is started (not health)
+      - mssql
+      - agro
+      - shipbuilding
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__AgroDb=Server=mssql,1433;Database=Migration_Agro;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
-      - ConnectionStrings__ShipbuildingDb=Server=mssql,1433;Database=Migration_Shipbuilding;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
       - ConnectionStrings__CoreDb=Server=mssql,1433;Database=Migration_Core;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+      - ServiceUrls__Agro=http://agro:5002
+      - ServiceUrls__Shipbuilding=http://shipbuilding:5001
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "5000:5000"
+      - "5001:5001"
 
 volumes:
   mssql_data:

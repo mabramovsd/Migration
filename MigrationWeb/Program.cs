@@ -1,18 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Migration.Agro;
-using Migration.Agro.Services;
+using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
-using Migration.Shipbuilding;
-using Migration.Shipbuilding.Services;
 using MigrationWeb;
 using MigrationWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//Connection strings
+// Connection strings
 builder.Services.AddOptions();
-var agroCs = builder.Configuration.GetConnectionString("AgroDb");
-var shipCs = builder.Configuration.GetConnectionString("ShipbuildingDb");
 var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 
 // Add services to the container.
@@ -20,52 +14,67 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region Company Services
+// Configure ServiceUrls
+var serviceUrlsSection = builder.Configuration.GetSection("ServiceUrls");
+var serviceUrls = new ServiceUrls();
+serviceUrlsSection.Bind(serviceUrls);
+builder.Services.Configure<ServiceUrls>(serviceUrlsSection);
 
-// When we will execute services separately
-//builder.Services.Configure<ServiceUrls>(builder.Configuration.GetSection("ServiceUrls"));
+// Register HttpClient for company services
+builder.Services.AddHttpClient("Agro", client =>
+{
+    var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    client.BaseAddress = new Uri(urls?.Agro ?? "http://localhost:5002");
+});
 
-// keyed services for ICompanyServices
-builder.Services.AddKeyedScoped<ICompanyService, HRServiceAgro>("Agro");
-builder.Services.AddKeyedScoped<ICompanyService, HRServiceShipbuilding>("Shipbuilding");
+builder.Services.AddHttpClient("Shipbuilding", client =>
+{
+    var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    client.BaseAddress = new Uri(urls?.Shipbuilding ?? "http://localhost:5001");
+});
+
+// keyed registration for company services
+builder.Services.AddKeyedScoped<ICompanyService>("Agro", (sp, key) =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Agro");
+    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
+    return new HTTPCompanyService(httpClient, logger);
+});
+
+builder.Services.AddKeyedScoped<ICompanyService>("Shipbuilding", (sp, key) =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Shipbuilding");
+    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
+    return new HTTPCompanyService(httpClient, logger);
+});
+#endregion Company Services
+
 builder.Services.AddScoped<HRService>();
 
-//DB contexts
-builder.Services.AddDbContext<AgroDBContext>(options =>
-    options.UseSqlServer(agroCs));
-
-builder.Services.AddDbContext<ShipbuildingDBContext>(options =>
-    options.UseSqlServer(shipCs));
-
+// DB context
 builder.Services.AddDbContext<CoreDBContext>(options =>
     options.UseSqlServer(coreCs));
 
-
-
 var app = builder.Build();
 
-// Apply migrations automatically (for development only)
+// Apply migrations automatically
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
+    try
     {
-        var agroContext = scope.ServiceProvider.GetRequiredService<AgroDBContext>();
-        if (agroContext.Database.GetPendingMigrations().Any())
+        using (var scope = app.Services.CreateScope())
         {
-            agroContext.Database.Migrate();
+            var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
+            if (coreContext.Database.GetPendingMigrations().Any())
+            {
+                coreContext.Database.Migrate();
+            }
         }
-
-        var shipContext = scope.ServiceProvider.GetRequiredService<ShipbuildingDBContext>();
-        if (shipContext.Database.GetPendingMigrations().Any())
-        {
-            shipContext.Database.Migrate();
-        }
-        shipContext.Database.Migrate();
-        
-        var coreContext = scope.ServiceProvider.GetRequiredService<CoreDBContext>();
-        if (coreContext.Database.GetPendingMigrations().Any())
-        {
-            coreContext.Database.Migrate();
-        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to apply migrations: {ex.Message}");
     }
 }
 

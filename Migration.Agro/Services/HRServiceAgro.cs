@@ -1,7 +1,6 @@
 ﻿using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 
 namespace Migration.Agro.Services
@@ -34,8 +33,6 @@ namespace Migration.Agro.Services
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
         {
-            var employeeId = Guid.NewGuid();
-
             try
             {
                 //Parsing fields
@@ -48,7 +45,7 @@ namespace Migration.Agro.Services
                 //Saving to DB
                 await _dbContext.EmployeesAgro.AddAsync(new EmployeeAgro
                 {
-                    Id = employeeId,
+                    Id = request.CoreData.Id,
                     HasTracktorLicense = hasTracktorLicense
                 });
                 await _dbContext.SaveChangesAsync();
@@ -58,7 +55,7 @@ namespace Migration.Agro.Services
                 _logger.LogError(ex, "Failed to add agro employee: {ErrorMessage}", ex.Message);
             }
 
-            return employeeId;
+            return request.CoreData.Id;
         }
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)

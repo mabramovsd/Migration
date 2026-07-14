@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 using Migration.Contracts.DTO;
@@ -21,7 +21,7 @@ public class HRService
         _logger = logger;
     }
 
-    private ICompanyService GetServiceForCompany(string? companyName) =>
+    private ICompanyService? GetServiceForCompany(string? companyName) =>
         companyName?.ToLowerInvariant() switch
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
@@ -56,8 +56,8 @@ public class HRService
         await Task.WhenAll(tasks);
 
         //Some formatting for code simplifying
-        var agroDataById = tasks[0].Result.ToDictionary(x => x.Id);
-        var shipDataById = tasks[1].Result.ToDictionary(x => x.Id);
+        var agroDataById = tasks.Count > 0 ? tasks[0].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
+        var shipDataById = tasks.Count > 1 ? tasks[1].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
 
         return employeesFromCore.Select(employee =>
         {
