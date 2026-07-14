@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1>📊 HR Dashboard</h1>
+        <p class="subtitle">Обзор сотрудников по категориям</p>
+    </header>
+
+    <main class="container">
+        <section class="dashboard-card">
+            <div class="card-header">
+                <h2>Общая статистика</h2>
+            </div>
+            <div class="card-content">
+                <div id="loading">Загрузка данных...</div>
+                <div id="error" class="error-message" style="display: none;"></div>
+                <div id="dashboard" class="dashboard-grid" style="display: none;"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-actions">
+            <button onclick="location.href='#'" class="action-btn">➕ Добавить сотрудника</button>
+            <button onclick="location.href='#'" class="action-btn">📋 Список сотрудников</button>
+            <button onclick="location.href='#'" class="action-btn">ℹ️ О системе</button>
+        </section>
+
+        <section class="info-section">
+            <h2>ℹ️ Информация</h2>
+            <div class="info-content">
+                <p>Этот дашборд показывает количество сотрудников в каждой категории.</p>
+                <p>Нажмите на кнопки выше для навигации по системе.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© 2026 Migration System. All rights reserved.</p>
+    </footer>
+
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
