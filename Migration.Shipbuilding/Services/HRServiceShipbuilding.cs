@@ -36,8 +36,6 @@ namespace Migration.Shipbuilding.Services
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
         {
-            var employeeId = Guid.NewGuid();
-
             try
             {
                 //Parsing fields
@@ -60,7 +58,7 @@ namespace Migration.Shipbuilding.Services
                 //Saving to DB
                 await _dbContext.EmployeesShipbuilding.AddAsync(new EmployeeShipbuilding
                 {
-                    Id = employeeId,
+                    Id = request.CoreData.Id,
                     CanCarpentry = canCarpentry,
                     CanDesignShip = canDesignShip,
                     CanWeld = canWeld,
@@ -72,7 +70,7 @@ namespace Migration.Shipbuilding.Services
                 _logger.LogError(ex, "Failed to add shipbuilding employee: {ErrorMessage}", ex.Message);
             }
 
-            return employeeId;
+            return request.CoreData.Id;
         }
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)

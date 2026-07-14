@@ -3,6 +3,9 @@ using Migration.Contracts.DTO;
 
 namespace MigrationWeb.Services;
 
+/// <summary>
+/// HTTP-Facade for company services (Agro, Shipbuilding etc) using REST API
+/// </summary>
 public class HTTPCompanyService : ICompanyService
 {
     private readonly HttpClient _httpClient;

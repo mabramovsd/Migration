@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Migration.Contracts;
 using MigrationWeb;
 using MigrationWeb.Services;
@@ -15,14 +14,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region Company Services
 // Configure ServiceUrls
 var serviceUrlsSection = builder.Configuration.GetSection("ServiceUrls");
 var serviceUrls = new ServiceUrls();
 serviceUrlsSection.Bind(serviceUrls);
-Console.WriteLine($"ServiceUrls loaded: Agro={serviceUrls.Agro}, Shipbuilding={serviceUrls.Shipbuilding}");
 builder.Services.Configure<ServiceUrls>(serviceUrlsSection);
 
-// Register HttpClient for Agro service as singleton
+// Register HttpClient for company services
 builder.Services.AddHttpClient("Agro", client =>
 {
     var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
@@ -35,6 +34,7 @@ builder.Services.AddHttpClient("Shipbuilding", client =>
     client.BaseAddress = new Uri(urls?.Shipbuilding ?? "http://localhost:5001");
 });
 
+// keyed registration for company services
 builder.Services.AddKeyedScoped<ICompanyService>("Agro", (sp, key) =>
 {
     var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Agro");
@@ -48,21 +48,7 @@ builder.Services.AddKeyedScoped<ICompanyService>("Shipbuilding", (sp, key) =>
     var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
     return new HTTPCompanyService(httpClient, logger);
 });
-
-// keyed registration for ICompanyService
-builder.Services.AddKeyedScoped<ICompanyService>("AgroHttp", (sp, key) =>
-{
-    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Agro");
-    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
-    return new HTTPCompanyService(httpClient, logger);
-});
-
-builder.Services.AddKeyedScoped<ICompanyService>("ShipbuildingHttp", (sp, key) =>
-{
-    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Shipbuilding");
-    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
-    return new HTTPCompanyService(httpClient, logger);
-});
+#endregion Company Services
 
 builder.Services.AddScoped<HRService>();
 
@@ -72,7 +58,7 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 
 var app = builder.Build();
 
-// Apply migrations automatically (for development only)
+// Apply migrations automatically
 if (app.Environment.IsDevelopment())
 {
     try
