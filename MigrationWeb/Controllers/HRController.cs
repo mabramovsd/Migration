@@ -36,9 +36,7 @@ namespace MigrationWeb.Controllers
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)
         {
-            Guid userId = Guid.NewGuid();
-            await _hrService.AddEmployeeAsync(request);
-
+            Guid userId = await _hrService.AddEmployeeAsync(request);
             return Ok(new { message = "File successfully saved", userId });
         }
 

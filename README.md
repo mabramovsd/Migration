@@ -1,6 +1,5 @@
 ## 🏝️ Migration Island
-- RU: Пет-проект-симулятор замкнутой экосистемы острова для отработки микросервисной архитектуры, миграций Entity Framework Core и работы с RabbitMQ.
-- EN: Pet project — a closed ecosystem simulator of an island to practice microservice architecture, EF Core migrations and RabbitMQ.
+Пет-проект-симулятор замкнутой экосистемы острова для отработки микросервисной архитектуры, миграций Entity Framework Core и работы с RabbitMQ.
 
 ## 📄 Table of Contents
 - [💡 О проекте](#Описание)
