@@ -21,7 +21,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/hr/employees");
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
         }
         catch (Exception ex)
@@ -35,7 +35,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/hr/employees", request);
+            var response = await _httpClient.PostAsJsonAsync("api/v1/hr/employees", request);
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadFromJsonAsync<Guid>();
@@ -56,7 +56,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var url = $"api/hr/employees/{request.Id}?softDelete={request.SoftDelete}";
+            var url = $"api/v1/hr/employees/{request.Id}?softDelete={request.SoftDelete}";
             var response = await _httpClient.DeleteAsync(url);
             
             if (response.IsSuccessStatusCode)
