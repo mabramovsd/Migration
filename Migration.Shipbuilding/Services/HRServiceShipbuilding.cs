@@ -99,5 +99,10 @@ namespace Migration.Shipbuilding.Services
                 return false;
             }
         }
+
+        public Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

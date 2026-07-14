@@ -25,10 +25,10 @@ namespace MigrationWeb.Controllers
             return employeeList;
         }
 
-        [HttpGet("Stats/CategoryCounts")]
-        public async Task<IEnumerable<CategoryCountDTO>> GetCategoryCounts()
+        [HttpGet("Stats/CompanyCounts")]
+        public async Task<IEnumerable<CompanyCountDTO>> GetCompanyCounts()
         {
-            var stats = await _hrService.GetEmployeeCategoryStatistics();
+            var stats = await _hrService.GetEmployeeCompanyStatistics();
             return stats;
         }
 

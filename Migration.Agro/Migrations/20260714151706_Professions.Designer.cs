@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Migration.Agro;
 
@@ -11,9 +12,11 @@ using Migration.Agro;
 namespace Migration.Agro.Migrations
 {
     [DbContext(typeof(AgroDBContext))]
-    partial class AgroDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260714151706_Professions")]
+    partial class Professions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -79,7 +79,7 @@ public class HRService
         }).ToList();
     }
 
-    public async Task<IEnumerable<CategoryCountDTO>> GetEmployeeCategoryStatistics()
+    public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatistics()
     {
         //Employees grouped by company
         var data = await _coreDBContext.Employees
@@ -93,14 +93,14 @@ public class HRService
 
         int totalCount = data.Sum(x => x.Count);
 
-        // Adding category 'All' as first line
-        var finalResult = data.Select(x => new CategoryCountDTO
+        // Adding company 'All' as first line
+        var finalResult = data.Select(x => new CompanyCountDTO
         {
-            CategoryName = x.Category,
+            CompanyName = x.Category,
             Count = x.Count
         }).ToList();
 
-        finalResult.Insert(0, new CategoryCountDTO { CategoryName = "All", Count = totalCount });
+        finalResult.Insert(0, new CompanyCountDTO { CompanyName = "All", Count = totalCount });
 
         return finalResult;
     }

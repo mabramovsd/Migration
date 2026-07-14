@@ -74,4 +74,9 @@ public class HTTPCompanyService : ICompanyService
             return false;
         }
     }
+
+    public Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+    {
+        throw new NotImplementedException();
+    }
 }
