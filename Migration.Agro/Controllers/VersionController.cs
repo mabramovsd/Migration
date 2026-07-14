@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
+using Migration.Contracts;
 
 namespace Migration.Agro.Controllers;
 
@@ -9,11 +11,14 @@ public class VersionController : ControllerBase
     [HttpGet("version")]
     public IActionResult GetVersion()
     {
+        var assembly = Assembly.GetExecutingAssembly();
+        var apiVersion = ApiVersion.CurrentVersion;
+        
         return Ok(new
         {
             Service = "Migration.Agro",
-            Version = "1.0.0",
-            ContractsVersion = "1.0.0",
+            AssemblyVersion = assembly.GetName().Version?.ToString() ?? "unknown",
+            ApiVersion = apiVersion,
             Timestamp = DateTime.UtcNow
         });
     }
