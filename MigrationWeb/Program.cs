@@ -87,9 +87,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Serve static files (SPA)
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// Default route for SPA
+app.MapFallbackToFile("index.html");
 
 app.MapControllers();
 
