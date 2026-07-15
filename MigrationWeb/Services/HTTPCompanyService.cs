@@ -1,5 +1,7 @@
 using Migration.Contracts;
 using Migration.Contracts.DTO;
+using System.Text;
+using System.Text.Json;
 
 namespace MigrationWeb.Services;
 
@@ -10,18 +12,27 @@ public class HTTPCompanyService : ICompanyService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<HTTPCompanyService> _logger;
+    private readonly JsonSerializerOptions _jsonOptions;
 
     public HTTPCompanyService(HttpClient httpClient, ILogger<HTTPCompanyService> logger)
     {        
         _httpClient = httpClient;
         _logger = logger;
+        
+        // Configure JSON options to not escape Unicode characters (for Cyrillic)
+        _jsonOptions = new JsonSerializerOptions
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            PropertyNamingPolicy = null,
+            PropertyNameCaseInsensitive = true
+        };
     }
 
     public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
     {
         try
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
+            var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
         }
         catch (Exception ex)
@@ -35,11 +46,15 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("api/v1/hr/employees", request);
+            var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
+            using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+            
+            var response = await _httpClient.PostAsync("api/v1/hr/employees", content);
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadFromJsonAsync<Guid>();
-                return content;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var deserializedContent = JsonSerializer.Deserialize<Guid>(responseContent, _jsonOptions);
+                return deserializedContent != default ? deserializedContent : Guid.Empty;
             }
             
             _logger.LogError("Failed to add employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
@@ -61,8 +76,9 @@ public class HTTPCompanyService : ICompanyService
             
             if (response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadFromJsonAsync<bool>();
-                return content;
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var deserializedContent = JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
+                return deserializedContent;
             }
             
             _logger.LogError("Failed to remove employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
@@ -79,7 +95,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await _httpClient.GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/hr/count-professions");
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/hr/count-professions");
             return result ?? Enumerable.Empty<ProfessionCountDTO>();
         }
         catch (Exception ex)
@@ -87,5 +103,14 @@ public class HTTPCompanyService : ICompanyService
             _logger.LogError(ex, "Failed to get professions from HTTP service");
             return Enumerable.Empty<ProfessionCountDTO>();
         }
+    }
+
+    private async Task<T?> GetFromJsonAsync<T>(string requestUri)
+    {
+        using var response = await _httpClient.GetAsync(requestUri);
+        response.EnsureSuccessStatusCode();
+        
+        var responseContent = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<T>(responseContent, _jsonOptions);
     }
 }

@@ -8,7 +8,6 @@
 **/*.pidb
 **/*.pdb
 **/*.jpg
-**/*.png
 **/*.gif
 **/*.dll
 **/*.exe
