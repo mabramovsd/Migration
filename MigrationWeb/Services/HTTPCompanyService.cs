@@ -75,8 +75,17 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
-    public Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+    public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/hr/count-professions");
+            return result ?? Enumerable.Empty<ProfessionCountDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get professions from HTTP service");
+            return Enumerable.Empty<ProfessionCountDTO>();
+        }
     }
 }

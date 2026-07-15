@@ -102,21 +102,23 @@ namespace Migration.Shipbuilding.Services
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
         {
-            var data = await _dbContext.Professions
+            var allEmployees = await _dbContext.EmployeesShipbuilding
+                .Where(e => !e.IsDeleted)
+                .ToListAsync();
+
+            var data = _dbContext.Professions
                 .Select(p => new ProfessionCountDTO
                 {
                     Id = p.Id,
                     ProfessionTitle = p.Title,
-                    Count = _dbContext.EmployeesShipbuilding.Count(e =>
-                        (
-                            (p.Column == "All") ||
-                            (p.Column == "CanCarpentry" && e.CanCarpentry) ||
-                            (p.Column == "CanDesignShip" && e.CanDesignShip) ||
-                            (p.Column == "CanWeld" && e.CanWeld)
-                        )
+                    Count = allEmployees.Count(e =>
+                        (p.Column == "All") ||
+                        (p.Column == "CanCarpentry" && e.CanCarpentry) ||
+                        (p.Column == "CanDesignShip" && e.CanDesignShip) ||
+                        (p.Column == "CanWeld" && e.CanWeld)
                     )
                 })
-                .ToListAsync();
+                .ToList();
 
             return data;
         }

@@ -87,19 +87,21 @@ namespace Migration.Agro.Services
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
         {
-            var data = await _dbContext.Professions
+            var allEmployees = await _dbContext.EmployeesAgro
+                .Where(e => !e.IsDeleted)
+                .ToListAsync();
+
+            var data = _dbContext.Professions
                 .Select(p => new ProfessionCountDTO
                 {
                     Id = p.Id,
                     ProfessionTitle = p.Title,
-                    Count = _dbContext.EmployeesAgro.Count(e =>
-                        (
-                            (p.Column == "All") ||
-                            (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
-                        )
+                    Count = allEmployees.Count(e =>
+                        (p.Column == "All") ||
+                        (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
                     )
                 })
-                .ToListAsync();
+                .ToList();
 
             return data;
         }
