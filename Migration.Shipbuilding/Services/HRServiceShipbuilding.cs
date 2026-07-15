@@ -100,9 +100,25 @@ namespace Migration.Shipbuilding.Services
             }
         }
 
-        public Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
         {
-            throw new NotImplementedException();
+            var data = await _dbContext.Professions
+                .Select(p => new ProfessionCountDTO
+                {
+                    Id = p.Id,
+                    ProfessionTitle = p.Title,
+                    Count = _dbContext.EmployeesShipbuilding.Count(e =>
+                        (
+                            (p.Column == "All") ||
+                            (p.Column == "CanCarpentry" && e.CanCarpentry) ||
+                            (p.Column == "CanDesignShip" && e.CanDesignShip) ||
+                            (p.Column == "CanWeld" && e.CanWeld)
+                        )
+                    )
+                })
+                .ToListAsync();
+
+            return data;
         }
     }
 }
