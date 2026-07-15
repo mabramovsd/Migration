@@ -19,7 +19,6 @@ namespace Migration.Agro.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesAgro
-                .Take(10)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,

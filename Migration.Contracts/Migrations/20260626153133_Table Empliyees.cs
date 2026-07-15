@@ -16,7 +16,7 @@ namespace Migration.Contracts.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FullName = table.Column<string>(type: "nvarchar(max)", collation: "Cyrillic_General_CI_AS", unicode: true, nullable: false)
                 },
                 constraints: table =>
                 {

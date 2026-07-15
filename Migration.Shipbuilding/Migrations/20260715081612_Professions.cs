@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,7 +7,6 @@ namespace Migration.Shipbuilding.Migrations
     /// <inheritdoc />
     public partial class Professions : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             //Table
@@ -17,53 +15,57 @@ namespace Migration.Shipbuilding.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Column = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Title = table.Column<string>(type: "nvarchar(max)", collation: "Cyrillic_General_CI_AS", unicode: true, nullable: false),
+                    Column = table.Column<string>(type: "nvarchar(max)", unicode: true, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Professions", x => x.Id);
                 });
 
-            //Seed
-            migrationBuilder.Sql($@"
-                INSERT INTO Professions (Id, Title, [Column])
-                VALUES (
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567890', 
-                    'Все', 
-                    'All'
-                ),
-                (
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567891', 
-                    'Плотник', 
-                    'CanCarpentry'
-                ),
-                (
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567892', 
-                    'Проектировщик', 
-                    'CanDesignShip'
-                ),
-                (
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567893', 
-                    'Сварщик', 
-                    'CanWeld'
-                );"
-            );
+            //Seed (вместо raw SQL)
+            migrationBuilder.InsertData(
+                table: "Professions",
+                columns: new[] { "Id", "Title", "Column" },
+                values: new object[,]
+                {
+                    {
+                        Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567890"),
+                        "Все",
+                        "All"
+                    },
+                    {
+                        Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567891"),
+                        "Плотник",
+                        "CanCarpentry"
+                    },
+                    {
+                        Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567892"),
+                        "Проектировщик",
+                        "CanDesignShip"
+                    },
+                    {
+                        Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567893"),
+                        "Сварщик",
+                        "CanWeld"
+                    }
+                });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            //Seed
-            migrationBuilder.Sql($@"
-                DELETE FROM Professions
-                WHERE Id IN (
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567890',
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567891',
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567892',
-                    'a1a1a1a1-a1a1-0123-abcd-aa1234567893'
-                )"
-            );
+            //Seed rollback
+            migrationBuilder.DeleteData(
+                table: "Professions",
+                keyColumn: "Id",
+                keyValues: new object[]
+                {
+                    Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567890"),
+                    Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567891"),
+                    Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567892"),
+                    Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567893")
+                });
+
             //Table
             migrationBuilder.DropTable(
                 name: "Professions");

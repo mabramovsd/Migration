@@ -32,7 +32,7 @@ public class HRService
     public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeList()
     {
         // Core data
-        var employeesFromCore = await _coreDBContext.Employees.Take(10).ToListAsync();
+        var employeesFromCore = await _coreDBContext.Employees.ToListAsync();
         if (!employeesFromCore.Any())
         {
             return new List<EmployeeSummaryInfo>();

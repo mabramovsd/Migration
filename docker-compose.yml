@@ -9,6 +9,7 @@ services:
     container_name: petproject_mssql
     environment:
       ACCEPT_EULA: "Y"
+      MSSQL_COLLATION: Cyrillic_General_CI_AS
       MSSQL_SA_PASSWORD: "Your_strong_P@ssw0rd123"
       MSSQL_PID: "Developer"
     ports:

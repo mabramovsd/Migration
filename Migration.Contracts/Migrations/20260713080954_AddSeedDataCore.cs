@@ -7,34 +7,52 @@ namespace Migration.Contracts.Migrations
     /// <inheritdoc />
     public partial class AddSeedDataCore : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql($@"
-                INSERT INTO Employees 
-                    (Id, BirthDate, FullName, CurrentCompany, IsDeleted) 
-                VALUES 
-                    ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', '1990-05-15', 'Иван Иванов', 'Agro', 0)");
-
-            migrationBuilder.Sql($@"
-                INSERT INTO Employees 
-                    (Id, BirthDate, FullName, CurrentCompany, IsDeleted) 
-                VALUES 
-                    ('b2c3d4e5-f6a7-8901-bcde-f12345678901', '1996-12-15', 'Петр Петров', 'Second Company', 0)");
-
-            migrationBuilder.Sql($@"
-                INSERT INTO Employees 
-                    (Id, BirthDate, FullName, CurrentCompany, IsDeleted) 
-                VALUES 
-                    ('c1b2c3d4-e5f6-7890-abcd-ef1234567890', '1989-08-06', 'Семен Семенов', 'Shipbuilding', 0)");
+            // Insert seed data for Employees table in a single batch operation.
+            // Using object[,] array where each inner array represents one row.
+            migrationBuilder.InsertData(
+                table: "Employees",
+                columns: new[] { "Id", "BirthDate", "FullName", "CurrentCompany", "IsDeleted" },
+                values: new object[,]
+                {
+                    {
+                        Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                        new DateTime(1990, 5, 15),
+                        "Иван Иванов",
+                        "Agro",
+                        false
+                    },
+                    {
+                        Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901"),
+                        new DateTime(1996, 12, 15),
+                        "Пётр Петров",
+                        "Second Company",
+                        false
+                    },
+                    {
+                        Guid.Parse("c1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                        new DateTime(1989, 8, 6),
+                        "Семён Семёнов",
+                        "Shipbuilding",
+                        false
+                    }
+                });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DELETE FROM Employees WHERE Id = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'");
-            migrationBuilder.Sql("DELETE FROM Employees WHERE Id = 'b2c3d4e5-f6a7-8901-bcde-f12345678901'");
-            migrationBuilder.Sql("DELETE FROM Employees WHERE Id = 'c1b2c3d4-e5f6-7890-abcd-ef1234567890'");
+            // Remove all seeded employee records by their primary keys (Ids).
+            // This executes before dropping any dependent tables if they existed.
+            migrationBuilder.DeleteData(
+                table: "Employees",
+                keyColumn: "Id",
+                keyValues: new object[]
+                {
+                    Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+                    Guid.Parse("b2c3d4e5-f6a7-8901-bcde-f12345678901"),
+                    Guid.Parse("c1b2c3d4-e5f6-7890-abcd-ef1234567890")
+                });
         }
     }
 }
