@@ -32,6 +32,17 @@ namespace MigrationWeb.Controllers
             return stats;
         }
 
+        [HttpGet("Stats/ProfessionCounts/{companyName}")]
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionCounts(string companyName)
+        {
+            var service = _hrService.GetServiceForCompany(companyName);
+            if (service == null)
+            {
+                return Enumerable.Empty<ProfessionCountDTO>();
+            }
+            
+            return await service.GetProfessionListAsync();
+        }
 
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)

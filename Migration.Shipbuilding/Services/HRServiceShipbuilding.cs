@@ -1,4 +1,4 @@
-﻿using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -106,19 +106,19 @@ namespace Migration.Shipbuilding.Services
                 .Where(e => !e.IsDeleted)
                 .ToListAsync();
 
-            var data = _dbContext.Professions
-                .Select(p => new ProfessionCountDTO
-                {
-                    Id = p.Id,
-                    ProfessionTitle = p.Title,
-                    Count = allEmployees.Count(e =>
-                        (p.Column == "All") ||
-                        (p.Column == "CanCarpentry" && e.CanCarpentry) ||
-                        (p.Column == "CanDesignShip" && e.CanDesignShip) ||
-                        (p.Column == "CanWeld" && e.CanWeld)
-                    )
-                })
-                .ToList();
+            var professions = await _dbContext.Professions.ToListAsync();
+
+            var data = professions.Select(p => new ProfessionCountDTO
+            {
+                Id = p.Id,
+                ProfessionTitle = p.Title,
+                Count = allEmployees.Count(e =>
+                    (p.Column == "All") ||
+                    (p.Column == "CanCarpentry" && e.CanCarpentry) ||
+                    (p.Column == "CanDesignShip" && e.CanDesignShip) ||
+                    (p.Column == "CanWeld" && e.CanWeld)
+                )
+            }).ToList();
 
             return data;
         }

@@ -21,7 +21,7 @@ public class HRService
         _logger = logger;
     }
 
-    private ICompanyService? GetServiceForCompany(string? companyName) =>
+    public ICompanyService? GetServiceForCompany(string? companyName) =>
         companyName?.ToLowerInvariant() switch
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),

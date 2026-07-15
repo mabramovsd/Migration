@@ -1,4 +1,4 @@
-﻿using Migration.Agro.DTO;
+using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
@@ -91,17 +91,17 @@ namespace Migration.Agro.Services
                 .Where(e => !e.IsDeleted)
                 .ToListAsync();
 
-            var data = _dbContext.Professions
-                .Select(p => new ProfessionCountDTO
-                {
-                    Id = p.Id,
-                    ProfessionTitle = p.Title,
-                    Count = allEmployees.Count(e =>
-                        (p.Column == "All") ||
-                        (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
-                    )
-                })
-                .ToList();
+            var professions = await _dbContext.Professions.ToListAsync();
+
+            var data = professions.Select(p => new ProfessionCountDTO
+            {
+                Id = p.Id,
+                ProfessionTitle = p.Title,
+                Count = allEmployees.Count(e =>
+                    (p.Column == "All") ||
+                    (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
+                )
+            }).ToList();
 
             return data;
         }
