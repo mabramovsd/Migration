@@ -20,7 +20,6 @@ namespace Migration.Shipbuilding.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesShipbuilding
-                .Take(10)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
