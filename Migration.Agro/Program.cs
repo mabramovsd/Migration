@@ -3,6 +3,8 @@ using Migration.Agro;
 using Migration.Agro.Middlewares;
 using Migration.Agro.Services;
 using Migration.Contracts;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,10 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 var agroCs = builder.Configuration.GetConnectionString("AgroDb");
 
 // Add services to the container.
-builder.Services.AddControllers();
+var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICompanyService, HRServiceAgro>();
+
+// Configure JSON serialization to not escape Unicode (for Cyrillic)
+controllers.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+});
 
 // DB context
 builder.Services.AddDbContext<AgroDBContext>(options =>

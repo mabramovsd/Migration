@@ -2,17 +2,25 @@ using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
 using MigrationWeb;
 using MigrationWeb.Services;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Connection strings
-builder.Services.AddOptions();
 var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 
 // Add services to the container.
-builder.Services.AddControllers();
+var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure JSON serialization to not escape Unicode (for Cyrillic)
+controllers.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+});
 
 #region Company Services
 // Configure ServiceUrls

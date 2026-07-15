@@ -14,6 +14,7 @@ namespace Migration.Agro
         }
 
         public DbSet<EmployeeAgro> EmployeesAgro { get; set; }
+        public DbSet<Profession> Professions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

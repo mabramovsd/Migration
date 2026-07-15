@@ -1,4 +1,6 @@
-version: '3.8'
+networks:
+  default:
+    driver: bridge
 
 services:
   # MS SQL Server
@@ -13,6 +15,8 @@ services:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
+    networks:
+      - default
 
   # Agro Service
   agro:
@@ -25,9 +29,12 @@ services:
         condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5002
       - ConnectionStrings__AgroDb=Server=mssql,1433;Database=Migration_Agro;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
     ports:
       - "5002:5002"
+    networks:
+      - default
 
   # Shipbuilding Service
   shipbuilding:
@@ -40,9 +47,12 @@ services:
         condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5001
       - ConnectionStrings__ShipbuildingDb=Server=mssql,1433;Database=Migration_Shipbuilding;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
     ports:
       - "5001:5001"
+    networks:
+      - default
 
   # Web API
   webapi:
@@ -60,8 +70,10 @@ services:
       - ServiceUrls__Agro=http://agro:5002
       - ServiceUrls__Shipbuilding=http://shipbuilding:5001
     ports:
-      - "5000:5000"
-      - "5001:5001"
+      - "8080:8080"
+      - "8081:8081"
+    networks:
+      - default
 
 volumes:
   mssql_data:

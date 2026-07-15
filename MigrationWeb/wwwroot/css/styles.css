@@ -168,7 +168,7 @@ body {
     justify-items: center;
 }
 
-.category-card {
+.company-card {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: 2rem;
@@ -178,18 +178,18 @@ body {
     cursor: pointer;
 }
 
-.category-card:hover {
+.company-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
-.category-card .category-name {
+.company-card .company-name {
     font-size: 1.2rem;
     margin-bottom: 0.5rem;
     opacity: 0.9;
 }
 
-.category-card .category-count {
+.company-card .company-count {
     font-size: 3rem;
     font-weight: bold;
 }

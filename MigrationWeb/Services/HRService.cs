@@ -21,7 +21,7 @@ public class HRService
         _logger = logger;
     }
 
-    private ICompanyService? GetServiceForCompany(string? companyName) =>
+    public ICompanyService? GetServiceForCompany(string? companyName) =>
         companyName?.ToLowerInvariant() switch
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
@@ -79,28 +79,28 @@ public class HRService
         }).ToList();
     }
 
-    public async Task<IEnumerable<CategoryCountDTO>> GetEmployeeCategoryStatistics()
+    public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatistics()
     {
         //Employees grouped by company
         var data = await _coreDBContext.Employees
             .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
             .Select(g => new
             {
-                Category = g.Key,
+                Company = g.Key,
                 Count = g.Count()
             })
             .ToListAsync();
 
         int totalCount = data.Sum(x => x.Count);
 
-        // Adding category 'All' as first line
-        var finalResult = data.Select(x => new CategoryCountDTO
+        // Adding company 'All' as first line
+        var finalResult = data.Select(x => new CompanyCountDTO
         {
-            CategoryName = x.Category,
+            CompanyName = x.Company,
             Count = x.Count
         }).ToList();
 
-        finalResult.Insert(0, new CategoryCountDTO { CategoryName = "All", Count = totalCount });
+        finalResult.Insert(0, new CompanyCountDTO { CompanyName = "All", Count = totalCount });
 
         return finalResult;
     }

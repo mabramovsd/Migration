@@ -14,6 +14,7 @@ namespace Migration.Shipbuilding
         }
 
         public DbSet<EmployeeShipbuilding> EmployeesShipbuilding { get; set; }
+        public DbSet<Profession> Professions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

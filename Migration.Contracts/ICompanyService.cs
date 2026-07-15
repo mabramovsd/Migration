@@ -22,4 +22,9 @@ public interface ICompanyService
     /// Fire employee from the company
     /// </summary>
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
+
+    /// <summary>
+    /// Getting list of professions
+    /// </summary>
+    Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync();
 }

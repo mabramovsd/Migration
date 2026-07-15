@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Migration.Shipbuilding;
+using Migration.Agro;
 
 #nullable disable
 
-namespace Migration.Shipbuilding.Migrations
+namespace Migration.Agro.Migrations
 {
-    [DbContext(typeof(ShipbuildingDBContext))]
-    partial class ShipbuildingDBContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(AgroDBContext))]
+    [Migration("20260714151706_Professions")]
+    partial class Professions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,19 +25,13 @@ namespace Migration.Shipbuilding.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.EmployeeShipbuilding", b =>
+            modelBuilder.Entity("Migration.Agro.DTO.EmployeeAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("CanCarpentry")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanDesignShip")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanWeld")
+                    b.Property<bool>("HasTracktorLicense")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
@@ -42,10 +39,10 @@ namespace Migration.Shipbuilding.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmployeesShipbuilding");
+                    b.ToTable("EmployeesAgro");
                 });
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.Profession", b =>
+            modelBuilder.Entity("Migration.Agro.DTO.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

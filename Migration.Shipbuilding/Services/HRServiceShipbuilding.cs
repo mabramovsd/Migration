@@ -1,4 +1,4 @@
-﻿using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -98,6 +98,29 @@ namespace Migration.Shipbuilding.Services
                 _logger.LogError(ex, "[Shipbuilding] Failed to delete employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
                 return false;
             }
+        }
+
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        {
+            var allEmployees = await _dbContext.EmployeesShipbuilding
+                .Where(e => !e.IsDeleted)
+                .ToListAsync();
+
+            var professions = await _dbContext.Professions.ToListAsync();
+
+            var data = professions.Select(p => new ProfessionCountDTO
+            {
+                Id = p.Id,
+                ProfessionTitle = p.Title,
+                Count = allEmployees.Count(e =>
+                    (p.Column == "All") ||
+                    (p.Column == "CanCarpentry" && e.CanCarpentry) ||
+                    (p.Column == "CanDesignShip" && e.CanDesignShip) ||
+                    (p.Column == "CanWeld" && e.CanWeld)
+                )
+            }).ToList();
+
+            return data;
         }
     }
 }

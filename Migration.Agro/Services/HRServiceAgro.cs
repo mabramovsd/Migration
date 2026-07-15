@@ -1,4 +1,4 @@
-﻿using Migration.Agro.DTO;
+using Migration.Agro.DTO;
 using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
@@ -83,6 +83,27 @@ namespace Migration.Agro.Services
                 _logger.LogError(ex, "[Agro] Failed to remove employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
                 return false;
             }
+        }
+
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        {
+            var allEmployees = await _dbContext.EmployeesAgro
+                .Where(e => !e.IsDeleted)
+                .ToListAsync();
+
+            var professions = await _dbContext.Professions.ToListAsync();
+
+            var data = professions.Select(p => new ProfessionCountDTO
+            {
+                Id = p.Id,
+                ProfessionTitle = p.Title,
+                Count = allEmployees.Count(e =>
+                    (p.Column == "All") ||
+                    (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
+                )
+            }).ToList();
+
+            return data;
         }
     }
 }

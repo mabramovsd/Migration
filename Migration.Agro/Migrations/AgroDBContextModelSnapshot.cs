@@ -38,6 +38,25 @@ namespace Migration.Agro.Migrations
 
                     b.ToTable("EmployeesAgro");
                 });
+
+            modelBuilder.Entity("Migration.Agro.DTO.Profession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Column")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Professions");
+                });
 #pragma warning restore 612, 618
         }
     }
