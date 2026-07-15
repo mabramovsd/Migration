@@ -86,7 +86,7 @@ public class HRService
             .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
             .Select(g => new
             {
-                Category = g.Key,
+                Company = g.Key,
                 Count = g.Count()
             })
             .ToListAsync();
@@ -96,7 +96,7 @@ public class HRService
         // Adding company 'All' as first line
         var finalResult = data.Select(x => new CompanyCountDTO
         {
-            CompanyName = x.Category,
+            CompanyName = x.Company,
             Count = x.Count
         }).ToList();
 

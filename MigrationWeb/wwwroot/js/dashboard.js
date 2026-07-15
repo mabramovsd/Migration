@@ -9,8 +9,8 @@ async function loadDashboardData() {
     const dashboardDiv = document.getElementById('dashboard');
 
     try {
-        // Make API call to get category counts
-        const response = await fetch('/HR/Stats/CategoryCounts');
+        // Make API call to get company counts
+        const response = await fetch('/HR/Stats/CompanyCounts');
         
         if (!response.ok) {
             throw new Error(`Ошибка при загрузке данных: ${response.status} ${response.statusText}`);
@@ -26,15 +26,15 @@ async function loadDashboardData() {
         loadingDiv.style.display = 'none';
         dashboardDiv.style.display = 'grid';
         
-        // Render category cards
-        const categoryCards = data.map(item => `
-            <div class="category-card">
-                <div class="category-name">${escapeHtml(item.categoryName)}</div>
-                <div class="category-count">${item.count}</div>
+        // Render company cards
+        const companyCards = data.map(item => `
+            <div class="company-card">
+                <div class="company-name">${escapeHtml(item.companyName)}</div>
+                <div class="company-count">${item.count}</div>
             </div>
         `).join('');
         
-        dashboardDiv.innerHTML = categoryCards;
+        dashboardDiv.innerHTML = companyCards;
         
     } catch (error) {
         loadingDiv.style.display = 'none';
