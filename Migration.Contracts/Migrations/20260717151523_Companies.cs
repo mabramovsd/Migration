@@ -23,6 +23,15 @@ namespace Migration.Contracts.Migrations
                 {
                     table.PrimaryKey("PK_Companies", x => x.Id);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Companies",
+                columns: new[] { "Id", "Name", "Coordinates" },
+                values: new object[,]
+                {
+                    { new Guid("11111111-1111-1111-1111-111111111111"), "Ферма", "POINT(42.3 68.7)" },
+                    { new Guid("22222222-2222-2222-2222-222222222222"), "Судостроительный завод", "POINT(42.71 68.46)" }
+                });
         }
 
         /// <inheritdoc />
