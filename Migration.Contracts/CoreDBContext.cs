@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Migration.Contracts.DTO;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Contracts
 {
@@ -14,12 +13,22 @@ namespace Migration.Contracts
         }
 
         public DbSet<Employee> Employees { get; set; }
+        public DbSet<Company> Companies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Something like clear cache for migration
-            modelBuilder.Entity<Employee>();
             base.OnModelCreating(modelBuilder);
+
+            // Configure Company
+            modelBuilder.Entity<Company>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                
+                // Configure Coordinates property to use geography type
+                // Coordinates stored as WKT string in geography column
+                entity.Property(c => c.Coordinates)
+                    .HasColumnType("geography");
+            });
         }
     }
 
