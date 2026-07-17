@@ -59,6 +59,7 @@ builder.Services.AddKeyedScoped<ICompanyService>("Shipbuilding", (sp, key) =>
 #endregion Company Services
 
 builder.Services.AddScoped<HRService>();
+builder.Services.AddScoped<CompanyService>();
 
 // DB context
 builder.Services.AddDbContext<CoreDBContext>(options =>
