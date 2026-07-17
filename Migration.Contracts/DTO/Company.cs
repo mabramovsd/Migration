@@ -1,3 +1,4 @@
+using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 
 namespace Migration.Contracts.DTO
@@ -19,6 +20,6 @@ namespace Migration.Contracts.DTO
         /// <summary>
         /// Coordinates as WKT string for geography type
         /// </summary>
-        public string? Coordinates { get; set; }
+        public Point? Coordinates { get; set; }
     }
 }

@@ -27,7 +27,7 @@ namespace Migration.Contracts
                 // Configure Coordinates property to use geography type
                 // Coordinates stored as WKT string in geography column
                 entity.Property(c => c.Coordinates)
-                    .HasColumnType("geography");
+                    .HasColumnType("geometry");
             });
         }
     }
@@ -37,7 +37,8 @@ namespace Migration.Contracts
         public CoreDBContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<CoreDBContext>();
-            optionsBuilder.UseSqlServer("Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer("Data Source=MSI;Initial Catalog=Migration_Core;Integrated Security=True;Trust Server Certificate=True",
+                o => o.UseNetTopologySuite());
 
             return new CoreDBContext(optionsBuilder.Options);
         }

@@ -17,7 +17,7 @@ namespace Migration.Contracts.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Coordinates = table.Column<string>(type: "geography", nullable: true)
+                    Coordinates = table.Column<string>(type: "geometry", nullable: true)
                 },
                 constraints: table =>
                 {

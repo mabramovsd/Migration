@@ -29,7 +29,7 @@ namespace Migration.Contracts.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Coordinates")
-                        .HasColumnType("geography");
+                        .HasColumnType("geometry");
 
                     b.Property<string>("Name")
                         .IsRequired()
