@@ -17,6 +17,13 @@ namespace Migration.Contracts.DTO
         public required string Name { get; set; }
 
         /// <summary>
+        /// Company Alias
+        /// </summary>
+        [Required(ErrorMessage = "Company Alias is required")]
+        [MaxLength(50, ErrorMessage = "Company Alias cannot exceed 50 characters")]
+        public required string Alias { get; set; }
+
+        /// <summary>
         /// Coordinates. Latitude
         /// </summary>
         public double? Latitude { get; set; }

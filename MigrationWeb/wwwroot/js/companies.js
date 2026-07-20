@@ -55,22 +55,25 @@ async function loadCompaniesOnMap() {
             companyImage.style.left = `${company.longitude - 5}%`;
             companyImage.style.top = `${company.latitude - 5}%`;
             
+            // Добавляем обработчик клика на картинку компании
+            companyImage.addEventListener('click', () => {
+                handleCompanyClick(company.alias);
+            });
+            
             companiesContainer.appendChild(companyImage);
         });
+        
+        // Добавляем обработчик клика на картинку острова (сброс дашборда)
+        const islandLogo = document.getElementById('island-logo');
+        if (islandLogo) {
+            islandLogo.addEventListener('click', () => {
+                handleIndexClick();
+            });
+        }
         
         console.log(`Отображено компаний на карте: ${allCompanies.length}`);
         
     } catch (error) {
         console.error('Ошибка при загрузке компаний на карту:', error);
     }
-}
-
-// Helper function to escape HTML to prevent XSS
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
 }

@@ -17,14 +17,10 @@
             <!-- Левая панель с картинкой и меню -->
             <aside class="sidebar">
                 <div class="sidebar-logo">
-                    <img src="img/Island.png" alt="Island Logo" />
+                    <img id="island-logo" src="img/Island.png" alt="Island Logo" />
                     <div id="companies-map-container"></div>
                 </div>
-                <nav class="sidebar-menu">
-                    <button onclick="location.href='#'" class="menu-btn">➕ Добавить сотрудника</button>
-                    <button onclick="location.href='#'" class="menu-btn">📋 Список сотрудников</button>
-                    <button onclick="location.href='#'" class="menu-btn">ℹ️ О системе</button>
-                </nav>
+                <nav class="sidebar-menu" id="sidebar-menu"></nav>
                 <div class="sidebar-readme">
                     <h3>О проекте</h3>
                     <p>Платформа управления персоналом</p>
@@ -58,6 +54,8 @@
         <p>© 2026 Migration System. All rights reserved.</p>
     </footer>
 
+    <script src="js/utils.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/companies.js"></script>
 </body>
