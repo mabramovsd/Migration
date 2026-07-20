@@ -27,6 +27,13 @@ namespace MigrationWeb.Controllers
             return employeeList;
         }
 
+        [HttpGet("Filter")]
+        public async Task<IEnumerable<EmployeeSummaryInfo>> Get([FromQuery] EmployeeFilter filter)
+        {
+            var employeeList = await _hrService.GetFilteredEmployees(filter);
+            return employeeList;
+        }
+
         [HttpGet("Stats/CompanyCounts")]
         public async Task<IEnumerable<CompanyCountDTO>> GetCompanyCounts()
         {

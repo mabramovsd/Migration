@@ -30,6 +30,9 @@ public class HRService
             _ => null
         };
 
+    /// <summary>
+    /// List of employees
+    /// </summary>
     public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeList()
     {
         // Core data
@@ -68,6 +71,70 @@ public class HRService
                 "Shipbuilding" => shipDataById,
                 _ => null
             };
+
+            return new EmployeeSummaryInfo
+            {
+                Id = employee.Id,
+                FullName = employee.FullName,
+                CurrentCompany = employee.CurrentCompany,
+                BirthDate = employee.BirthDate,
+                AdditionalData = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.AdditionalData : null
+            };
+        }).ToList();
+    }
+
+
+    /// <summary>
+    /// List of employees
+    /// </summary>
+    public async Task<IEnumerable<EmployeeSummaryInfo>> GetFilteredEmployees(EmployeeFilter filter)
+    {
+        //Filter by company
+        IQueryable<Company> query = _coreDBContext.Companies;
+        if (!string.IsNullOrEmpty(filter.Company))
+        {
+            query = query.Where(c => c.Alias == filter.Company);
+        }
+        var companies = await query.ToListAsync();
+        if (!companies.Any())
+        {
+            return new List<EmployeeSummaryInfo>();
+        }
+        var companyAliases = companies.Select(c => c.Alias).ToList();
+
+        // Core data
+        var employeesFromCore = await _coreDBContext.Employees
+            .Where(e => e.CurrentCompany != null && companyAliases.Contains(e.CurrentCompany))
+            .ToListAsync();
+        if (!employeesFromCore.Any())
+        {
+            return new List<EmployeeSummaryInfo>();
+        }
+
+        // Additional data
+        var additionalDataTasks = new List<(string CompanyAlias, Task<IEnumerable<EmployeeAdditionalInfo>> Data)>();
+        foreach (var ct in companyAliases)
+        {
+            var service = GetServiceForCompany(ct);
+            if (service is null)
+            {
+                _logger.LogWarning("No service registered for company type: {CompanyType}", ct);
+                continue;
+            }
+
+            additionalDataTasks.Add((ct, service.GetEmployeeListAsync()));
+        }
+
+        await Task.WhenAll(additionalDataTasks.Select(x => x.Data));
+
+        var allAdditionalDataByCompany = additionalDataTasks.ToDictionary(
+            taskTuple => taskTuple.CompanyAlias,
+            taskTuple => taskTuple.Data.Result.ToDictionary(x => x.Id)
+        );
+
+        return employeesFromCore.Select(employee =>
+        {
+            var companyDict = allAdditionalDataByCompany.TryGetValue(employee.CurrentCompany ?? string.Empty, out var dict) ? dict : null;
 
             return new EmployeeSummaryInfo
             {
