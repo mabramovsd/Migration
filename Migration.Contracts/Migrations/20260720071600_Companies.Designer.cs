@@ -12,7 +12,7 @@ using Migration.Contracts;
 namespace Migration.Contracts.Migrations
 {
     [DbContext(typeof(CoreDBContext))]
-    [Migration("20260720063514_Companies")]
+    [Migration("20260720071600_Companies")]
     partial class Companies
     {
         /// <inheritdoc />
@@ -30,6 +30,9 @@ namespace Migration.Contracts.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double?>("Latitude")
                         .HasColumnType("float");

@@ -28,6 +28,9 @@ namespace Migration.Contracts.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Image")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double?>("Latitude")
                         .HasColumnType("float");
 

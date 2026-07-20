@@ -25,5 +25,10 @@ namespace Migration.Contracts.DTO
         /// Coordinates. Longitude
         /// </summary>
         public double? Longitude { get; set; }
+
+        /// <summary>
+        /// Image address
+        /// </summary>
+        public string? Image { get; set; }
     }
 }
