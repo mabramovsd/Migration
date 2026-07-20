@@ -1,9 +1,10 @@
 // Dashboard JavaScript
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
+    handleIndexClick();
 });
 
-async function loadDashboardData() {
+// Handle index/dashboard click - loads initial company statistics
+async function handleIndexClick() {
     const loadingDiv = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
     const dashboardDiv = document.getElementById('dashboard');
@@ -28,7 +29,7 @@ async function loadDashboardData() {
         
         // Render company cards
         const companyCards = data.map(item => `
-            <div class="company-card" onclick="handleCompanyClick('${item.companyName}')">
+            <div class="company-card" onclick="handleCompanyClick('${escapeHtml(item.companyName)}')">
                 <div class="company-name">${escapeHtml(item.companyName)}</div>
                 <div class="company-count">${item.count}</div>
             </div>
@@ -44,7 +45,7 @@ async function loadDashboardData() {
     }
 }
 
-// Handle company card click
+// Handle company card click - loads profession statistics for selected company
 async function handleCompanyClick(companyName) {
     const loadingDiv = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
@@ -93,14 +94,4 @@ async function handleCompanyClick(companyName) {
         errorDiv.textContent = `Ошибка: ${error.message}`;
         console.error('Profession statistics error:', error);
     }
-}
-
-// Helper function to escape HTML to prevent XSS
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
 }
