@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Employees;
 
 namespace MigrationWeb.Services;
 

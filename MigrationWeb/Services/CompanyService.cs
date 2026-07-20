@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Companies;
 
 namespace MigrationWeb.Services;
 

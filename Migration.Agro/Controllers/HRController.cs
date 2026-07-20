@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Migration.Contracts;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Agro.Controllers;
 

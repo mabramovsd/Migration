@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 using MigrationWeb.Services;
 
 namespace MigrationWeb.Controllers

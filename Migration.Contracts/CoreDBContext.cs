@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Employees;
 
 namespace Migration.Contracts
 {

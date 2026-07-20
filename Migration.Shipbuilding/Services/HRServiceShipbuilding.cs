@@ -1,8 +1,9 @@
 using Migration.Shipbuilding.DTO;
-using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Shipbuilding.Services
 {

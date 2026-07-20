@@ -1,7 +1,8 @@
 using Migration.Agro.DTO;
-using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Agro.Services
 {
