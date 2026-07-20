@@ -1,4 +1,3 @@
-using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 
 namespace Migration.Contracts.DTO
@@ -18,8 +17,13 @@ namespace Migration.Contracts.DTO
         public required string Name { get; set; }
 
         /// <summary>
-        /// Coordinates as WKT string for geography type
+        /// Coordinates. Latitude
         /// </summary>
-        public Point? Coordinates { get; set; }
+        public double? Latitude { get; set; }
+
+        /// <summary>
+        /// Coordinates. Longitude
+        /// </summary>
+        public double? Longitude { get; set; }
     }
 }

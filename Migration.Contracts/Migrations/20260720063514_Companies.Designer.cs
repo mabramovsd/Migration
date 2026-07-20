@@ -12,7 +12,7 @@ using Migration.Contracts;
 namespace Migration.Contracts.Migrations
 {
     [DbContext(typeof(CoreDBContext))]
-    [Migration("20260717151523_Companies")]
+    [Migration("20260720063514_Companies")]
     partial class Companies
     {
         /// <inheritdoc />
@@ -31,8 +31,11 @@ namespace Migration.Contracts.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Coordinates")
-                        .HasColumnType("geography");
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()

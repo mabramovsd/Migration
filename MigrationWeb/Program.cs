@@ -20,10 +20,6 @@ controllers.AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
     options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-
-    // Options for points
-    options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
-    options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
 
 #region Company Services
@@ -67,7 +63,7 @@ builder.Services.AddScoped<CompanyService>();
 
 // DB context
 builder.Services.AddDbContext<CoreDBContext>(options =>
-    options.UseSqlServer(coreCs, o => o.UseNetTopologySuite()));
+    options.UseSqlServer(coreCs));
 
 var app = builder.Build();
 
