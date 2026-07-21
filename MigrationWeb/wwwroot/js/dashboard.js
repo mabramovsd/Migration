@@ -78,7 +78,7 @@ async function handleCompanyClick(companyName) {
         loadingDiv.style.display = 'none';
         dashboardDiv.style.display = 'block';
         
-        // Render profession cards
+        // Render profession cards in grid container
         const professionCards = professionData.map(item => `
             <div class="company-card">
                 <div class="company-name">${escapeHtml(item.professionTitle)}</div>
@@ -86,7 +86,10 @@ async function handleCompanyClick(companyName) {
             </div>
         `).join('');
         
-        dashboardDiv.innerHTML = professionCards;
+        dashboardDiv.innerHTML =
+            '<div class="dashboard-grid" display="grid">' +
+                professionCards +
+            '</div>';
 
         // Fetch employees list for the selected company
         const responseEmployees = await fetch(`/HR/Filter?Company=${encodeURIComponent(companyName)}`);
@@ -97,32 +100,34 @@ async function handleCompanyClick(companyName) {
         const employeesData = await responseEmployees.json();
         
         if (employeesData && employeesData.length > 0) {
-            // Render employees as a table
+            // Render employees as a table (outside grid container)
             const employeesTable = `
-                <h3 style="margin-top: 2rem; color: #667eea; font-size: 1.5rem;">Сотрудники компании ${escapeHtml(companyName)}</h3>
-                <table class="employees-table">
-                    <thead>
-                        <tr>
-                            <th>Имя</th>
-                            <th>Дата рождения</th>
-                            <th>Компания</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${employeesData.map(item => `
+                <div style="margin-top: 2rem;">
+                    <div style="color: #667eea; font-size: 1.2rem; font-weight: 600;">Сотрудники компании ${escapeHtml(companyName)}</div>
+                    <table class="employees-table" style="margin-top: 0.5rem;">
+                        <thead>
                             <tr>
-                                <td>${escapeHtml(item.fullName)}</td>
-                                <td>${item.birthDate ? new Date(item.birthDate).toLocaleDateString('ru-RU') : 'Не указано'}</td>
-                                <td>${escapeHtml(item.currentCompany)}</td>
+                                <th>Имя</th>
+                                <th>Дата рождения</th>
+                                <th>Компания</th>
                             </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            ${employeesData.map(item => `
+                                <tr>
+                                    <td>${escapeHtml(item.fullName)}</td>
+                                    <td>${item.birthDate ? new Date(item.birthDate).toLocaleDateString('ru-RU') : 'Не указано'}</td>
+                                    <td>${escapeHtml(item.currentCompany)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
             
-            dashboardDiv.innerHTML += '<br/>' + employeesTable;
+            dashboardDiv.innerHTML += employeesTable;
         } else {
-            dashboardDiv.innerHTML += '<br/>' + '<p style="margin-top: 2rem; color: #666;">Нет данных о сотрудниках для этой компании</p>';
+            dashboardDiv.innerHTML += '<p style="margin-top: 2rem; color: #666;">Нет данных о сотрудниках для этой компании</p>';
         }
 
     } catch (error) {
