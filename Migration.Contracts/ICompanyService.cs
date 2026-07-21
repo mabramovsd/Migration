@@ -20,6 +20,11 @@ public interface ICompanyService
     Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync();
 
     /// <summary>
+    /// Filtered list of employees
+    /// </summary>
+    Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter);
+
+    /// <summary>
     /// Fire employee from the company
     /// </summary>
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);

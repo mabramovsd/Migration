@@ -24,6 +24,12 @@ public class HRController : ControllerBase
         return await _companyService.GetEmployeeListAsync();
     }
 
+    [HttpGet("Filter")]
+    public async Task<IEnumerable<EmployeeAdditionalInfo>> Get([FromQuery] EmployeeFilter filter)
+    {
+        return await _companyService.GetFilteredEmployees(filter);
+    }
+
     [HttpPost("employees")]
     public async Task<ActionResult<Guid>> AddEmployee([FromBody] CreateEmployeeRequest request)
     {

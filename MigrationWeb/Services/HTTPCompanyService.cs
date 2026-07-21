@@ -43,6 +43,20 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
+    public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
+            return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get employees from HTTP service");
+            return Enumerable.Empty<EmployeeAdditionalInfo>();
+        }
+    }
+
     public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
     {
         try
