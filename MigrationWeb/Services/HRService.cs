@@ -122,7 +122,7 @@ public class HRService
                 continue;
             }
 
-            additionalDataTasks.Add((ct, service.GetEmployeeListAsync()));
+            additionalDataTasks.Add((ct, service.GetFilteredEmployees(filter)));
         }
 
         await Task.WhenAll(additionalDataTasks.Select(x => x.Data));
@@ -132,19 +132,25 @@ public class HRService
             taskTuple => taskTuple.Data.Result.ToDictionary(x => x.Id)
         );
 
-        return employeesFromCore.Select(employee =>
-        {
-            var companyDict = allAdditionalDataByCompany.TryGetValue(employee.CurrentCompany ?? string.Empty, out var dict) ? dict : null;
+        return employeesFromCore
+            //Filtering
+            .Where(employee =>
+            {
+                if (string.IsNullOrEmpty(employee.CurrentCompany)) return false;
 
-            return new EmployeeSummaryInfo
+                return allAdditionalDataByCompany.TryGetValue(employee.CurrentCompany, out var dict)
+                       && dict.ContainsKey(employee.Id);
+            })
+            // Этап 2: Mapping
+            .Select(employee => new EmployeeSummaryInfo
             {
                 Id = employee.Id,
                 FullName = employee.FullName,
                 CurrentCompany = employee.CurrentCompany,
                 BirthDate = employee.BirthDate,
-                AdditionalData = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.AdditionalData : null
-            };
-        }).ToList();
+                AdditionalData = allAdditionalDataByCompany[employee.CurrentCompany][employee.Id].AdditionalData
+            })
+            .ToList();
     }
 
     public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatistics()
