@@ -62,13 +62,13 @@ async function handleCompanyClick(companyName) {
         errorDiv.style.display = 'none';
 
         // Fetch profession counts for the selected company
-        const response = await fetch(`/HR/Stats/ProfessionCounts/${encodeURIComponent(companyName)}`);
+        const responseProfessions = await fetch(`/HR/Stats/ProfessionCounts/${encodeURIComponent(companyName)}`);
         
-        if (!response.ok) {
-            throw new Error(`Ошибка при загрузке статистики: ${response.status} ${response.statusText}`);
+        if (!responseProfessions.ok) {
+            throw new Error(`Ошибка при загрузке статистики: ${responseProfessions.status} ${responseProfessions.statusText}`);
         }
         
-        const professionData = await response.json();
+        const professionData = await responseProfessions.json();
         
         if (!professionData || professionData.length === 0) {
             throw new Error('Нет данных по профессиям для этой компании');
@@ -76,7 +76,7 @@ async function handleCompanyClick(companyName) {
 
         // Hide loading and show profession statistics
         loadingDiv.style.display = 'none';
-        dashboardDiv.style.display = 'grid';
+        dashboardDiv.style.display = 'block';
         
         // Render profession cards
         const professionCards = professionData.map(item => `
@@ -87,7 +87,44 @@ async function handleCompanyClick(companyName) {
         `).join('');
         
         dashboardDiv.innerHTML = professionCards;
+
+        // Fetch employees list for the selected company
+        const responseEmployees = await fetch(`/HR/Filter?Company=${encodeURIComponent(companyName)}`);
         
+        if (!responseEmployees.ok) {
+            throw new Error(`Ошибка при загрузке данных сотрудников: ${responseEmployees.status} ${responseEmployees.statusText}`);
+        }
+        const employeesData = await responseEmployees.json();
+        
+        if (employeesData && employeesData.length > 0) {
+            // Render employees as a table
+            const employeesTable = `
+                <h3 style="margin-top: 2rem; color: #667eea; font-size: 1.5rem;">Сотрудники компании ${escapeHtml(companyName)}</h3>
+                <table class="employees-table">
+                    <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Дата рождения</th>
+                            <th>Компания</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${employeesData.map(item => `
+                            <tr>
+                                <td>${escapeHtml(item.fullName)}</td>
+                                <td>${item.birthDate ? new Date(item.birthDate).toLocaleDateString('ru-RU') : 'Не указано'}</td>
+                                <td>${escapeHtml(item.currentCompany)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            dashboardDiv.innerHTML += '<br/>' + employeesTable;
+        } else {
+            dashboardDiv.innerHTML += '<br/>' + '<p style="margin-top: 2rem; color: #666;">Нет данных о сотрудниках для этой компании</p>';
+        }
+
     } catch (error) {
         loadingDiv.style.display = 'none';
         errorDiv.style.display = 'block';
