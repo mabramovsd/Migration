@@ -1,5 +1,6 @@
 using Migration.Contracts;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 using System.Text;
 using System.Text.Json;
 
@@ -33,6 +34,35 @@ public class HTTPCompanyService : ICompanyService
         try
         {
             var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
+            return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get employees from HTTP service");
+            return Enumerable.Empty<EmployeeAdditionalInfo>();
+        }
+    }
+
+    public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+    {
+        try
+        {
+            // Build query string from filter
+            var queryString = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(filter.Company))
+            {
+                queryString.Add($"Company={Uri.EscapeDataString(filter.Company)}");
+            }
+            if (!string.IsNullOrEmpty(filter.Profession))
+            {
+                queryString.Add($"Profession={Uri.EscapeDataString(filter.Profession)}");
+            }
+            
+            var requestUri = queryString.Count > 0 
+                ? $"api/v1/hr/filter?{string.Join("&", queryString)}" 
+                : "api/v1/hr/employees";
+            
+            var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>(requestUri);
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
         }
         catch (Exception ex)

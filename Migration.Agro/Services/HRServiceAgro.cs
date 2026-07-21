@@ -1,7 +1,8 @@
 using Migration.Agro.DTO;
-using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Agro.Services
 {
@@ -19,6 +20,38 @@ namespace Migration.Agro.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesAgro
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = new Dictionary<string, object>
+                    {
+                        { "HasTracktorLicense", employee.HasTracktorLicense }
+                    }
+                })
+                .ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+        {
+            if (string.IsNullOrEmpty(filter.Profession))
+            {
+                return await GetEmployeeListAsync();
+            }
+
+            //Filter by profession
+            var professions = await _dbContext.Professions
+                .Where(c => c.Title == filter.Profession)
+                .Select(p => p.Column).ToListAsync();
+            if (!professions.Any())
+            {
+                return new List<EmployeeAdditionalInfo>();
+            }
+
+            //Mapping
+            return await _dbContext.EmployeesAgro
+                .Where(emp =>
+                    emp.HasTracktorLicense && professions.Contains("HasTracktorLicense"))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,

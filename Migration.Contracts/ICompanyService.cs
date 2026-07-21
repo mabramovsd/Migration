@@ -1,4 +1,5 @@
-﻿using Migration.Contracts.DTO;
+﻿using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Contracts;
 
@@ -17,6 +18,11 @@ public interface ICompanyService
     /// Getting list of company employees
     /// </summary>
     Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync();
+
+    /// <summary>
+    /// Filtered list of employees
+    /// </summary>
+    Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter);
 
     /// <summary>
     /// Fire employee from the company

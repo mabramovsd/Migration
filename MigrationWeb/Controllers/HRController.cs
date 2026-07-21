@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Migration.Contracts.DTO;
+using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
 using MigrationWeb.Services;
 
 namespace MigrationWeb.Controllers
@@ -22,6 +24,13 @@ namespace MigrationWeb.Controllers
         public async Task<IEnumerable<EmployeeSummaryInfo>> GetAll()
         {
             var employeeList = await _hrService.GetEmployeeList();
+            return employeeList;
+        }
+
+        [HttpGet("Filter")]
+        public async Task<IEnumerable<EmployeeSummaryInfo>> Get([FromQuery] EmployeeFilter filter)
+        {
+            var employeeList = await _hrService.GetFilteredEmployees(filter);
             return employeeList;
         }
 

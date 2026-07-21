@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Migration.Contracts.DTO
+namespace Migration.Contracts.DTO.Employees
 {
     public class CreateEmployeeRequest
     {

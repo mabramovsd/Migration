@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Migration.Contracts.DTO
+namespace Migration.Contracts.DTO.Professions
 {
     public class ProfessionCountDTO
     {

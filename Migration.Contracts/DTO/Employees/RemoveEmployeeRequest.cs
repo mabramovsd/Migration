@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Migration.Contracts.DTO;
+namespace Migration.Contracts.DTO.Employees;
 
 /// <summary>
 /// Request DTO for removing an employee.

@@ -1,8 +1,11 @@
 using Migration.Shipbuilding.DTO;
-using Migration.Contracts.DTO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
+using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Companies;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Shipbuilding.Services
 {
@@ -20,6 +23,41 @@ namespace Migration.Shipbuilding.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesShipbuilding
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = new Dictionary<string, object>
+                    {
+                        { "CanDesignShip", employee.CanDesignShip },
+                        { "CanCarpentry", employee.CanCarpentry },
+                        { "CanWeld", employee.CanWeld },
+                    }
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+        {
+            if (string.IsNullOrEmpty(filter.Profession))
+            {
+                return await GetEmployeeListAsync();
+            }
+
+            //Filter by profession
+            var professions = await _dbContext.Professions
+                .Where(c => c.Title == filter.Profession)
+                .Select(p => p.Column).ToListAsync();
+            if (!professions.Any())
+            {
+                return new List<EmployeeAdditionalInfo>();
+            }
+
+            //Mapping
+            return await _dbContext.EmployeesShipbuilding
+                .Where(emp =>
+                    emp.CanCarpentry && professions.Contains("CanCarpentry") ||
+                    emp.CanDesignShip && professions.Contains("CanDesignShip") ||
+                    emp.CanWeld && professions.Contains("CanWeld"))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
