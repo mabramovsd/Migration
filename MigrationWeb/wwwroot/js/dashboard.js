@@ -179,3 +179,154 @@ async function handleProfessionClick(companyName, professionName) {
         console.error('Profession click error:', error);
     }
 }
+
+// Handle menu actions (from menu.js)
+async function handleMenuAction(action) {
+    const dashboardDiv = document.getElementById('dashboard');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    try {
+        // Сначала сбрасываем дашборд в начальное состояние
+        loadingDiv.style.display = 'block';
+        loadingDiv.textContent = 'Загрузка...';
+        errorDiv.style.display = 'none';
+        dashboardDiv.style.display = 'none';
+        
+        // Ждем небольшую задержку для перерисовки
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (action === 'addEmployee') {
+            // Show loading
+            loadingDiv.textContent = 'Загрузка формы добавления сотрудника...';
+
+            // Fetch companies for dropdown
+            const responseCompanies = await fetch('/Company/All');
+            
+            if (!responseCompanies.ok) {
+                throw new Error(`Ошибка при загрузке компаний: ${responseCompanies.status} ${responseCompanies.statusText}`);
+            }
+            
+            const companies = await responseCompanies.json();
+            
+            // Hide loading and show form
+            loadingDiv.style.display = 'none';
+            dashboardDiv.style.display = 'block';
+            
+            // Render form for adding employee
+            dashboardDiv.innerHTML = renderAddEmployeeForm(companies);
+            
+            // Attach form submit handler after rendering
+            setTimeout(function() {
+                const form = document.getElementById('addEmployeeForm');
+                if (form) {
+                    form.addEventListener('submit', handleAddEmployeeFormSubmit);
+                }
+            }, 0);
+        } else if (action === 'listEmployees') {
+            // TODO: Implement list employees functionality
+            console.log('List employees - not implemented yet');
+        } else if (action === 'aboutSystem') {
+            // TODO: Implement about system functionality
+            console.log('About system - not implemented yet');
+        }
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = `Ошибка: ${error.message}`;
+        console.error('Menu action error:', error);
+    }
+}
+
+// Render form for adding new employee
+function renderAddEmployeeForm(companies) {
+    // Generate company options for dropdown
+    const companyOptions = companies.map(company => 
+        `<option value="${escapeHtml(company.id)}">${escapeHtml(company.name)}</option>`
+    ).join('');
+    
+    return `
+        <div style="margin-top: 2rem;">
+            <div class="card-header" style="margin-bottom: 1rem;">
+                <h2>➕ Добавить сотрудника</h2>
+            </div>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <form id="addEmployeeForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label for="employeeName" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Имя сотрудника:</label>
+                        <input type="text" id="employeeName" name="employeeName" required 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                    
+                    <div>
+                        <label for="employeeBirthDate" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Дата рождения:</label>
+                        <input type="datetime-local" id="employeeBirthDate" name="employeeBirthDate" required 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                    
+                    <div>
+                        <label for="employeeCompany" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Компания:</label>
+                        <select id="employeeCompany" name="employeeCompany" required 
+                                style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                            <option value="">Выберите компанию</option>
+                            ${companyOptions}
+                        </select>
+                    </div>
+                    
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s;">
+                        ➕ Создать сотрудника
+                    </button>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+// Function to handle form submission
+async function handleAddEmployeeFormSubmit(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('employeeName').value.trim();
+    const birthDate = document.getElementById('employeeBirthDate').value;
+    const companyId = document.getElementById('employeeCompany').value;
+    
+    if (!name || !birthDate || !companyId) {
+        alert('Пожалуйста, заполните все поля');
+        return;
+    }
+    
+    // TODO: Implement actual employee creation logic
+    console.log('Creating employee:', { name, birthDate, companyId });
+    
+    // Example API call (to be implemented later):
+    /*
+    try {
+        const response = await fetch('/HR/Create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                fullName: name,
+                birthDate: birthDate,
+                currentCompanyId: companyId
+            })
+        });
+        
+        if (response.ok) {
+            alert('Сотрудник успешно создан!');
+            handleIndexClick(); // Return to dashboard
+        } else {
+            const error = await response.json();
+            alert(`Ошибка при создании сотрудника: ${error.message}`);
+        }
+    } catch (error) {
+        alert(`Ошибка при создании сотрудника: ${error.message}`);
+    }
+    */
+}
+
+// Export functions for use in other modules
+window.handleMenuAction = handleMenuAction;
+window.renderAddEmployeeForm = renderAddEmployeeForm;
+window.handleAddEmployeeFormSubmit = handleAddEmployeeFormSubmit;
