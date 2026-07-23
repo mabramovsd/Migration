@@ -39,13 +39,25 @@ function renderEmployeesTable(employeesData, title) {
 /**
  * Renders form for adding new employee
  * @param {Array} companies - Array of company objects
+ * @param {Array} professions - Array of profession objects
  * @returns {string} - HTML string for the form
  */
-function renderAddEmployeeForm(companies) {
+function renderAddEmployeeForm(companies, professions) {
     // Generate company options for dropdown
     const companyOptions = companies.map(company => 
-        `<option value="${escapeHtml(company.id)}">${escapeHtml(company.name)}</option>`
+        `<option value="${escapeHtml(company.alias)}">${escapeHtml(company.name)}</option>`
     ).join('');
+    
+    // Store all professions in data attribute for JS to use
+    const professionsJson = JSON.stringify(professions || []);
+    
+    // Generate profession checkboxes container (initially empty, will be populated by JS)
+    const professionCheckboxesHtml = `
+        <div id="professionCheckboxes" data-professions="${escapeHtml(professionsJson)}" style="margin-top: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Выберите профессии:</label>
+            <p style="color: #666; font-size: 0.9rem;">Сначала выберите компанию выше</p>
+        </div>
+    `;
     
     return `
         <div style="margin-top: 2rem;">
@@ -74,6 +86,8 @@ function renderAddEmployeeForm(companies) {
                             ${companyOptions}
                         </select>
                     </div>
+                    
+                    ${professionCheckboxesHtml}
                     
                     <button type="submit" style="padding: 0.75rem 1.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s;">
                         ➕ Создать сотрудника

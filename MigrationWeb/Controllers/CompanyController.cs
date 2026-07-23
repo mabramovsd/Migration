@@ -22,15 +22,13 @@ namespace MigrationWeb.Controllers
         [HttpGet("All")]
         public async Task<IEnumerable<Company>> GetAll()
         {
-            var companies = await _companyService.GetCompanyList();
-            return companies;
+            return await _companyService.GetCompanyList();
         }
 
         [HttpGet("Professions")]
         public async Task<IEnumerable<ProfessionDTO>> GetProfessions()
         {
-            var professions = await _companyService.GetAllProfessions();
-            return professions;
+            return await _companyService.GetAllProfessions();
         }
     }
 }
