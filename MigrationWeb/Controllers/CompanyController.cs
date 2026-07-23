@@ -26,7 +26,7 @@ namespace MigrationWeb.Controllers
             return companies;
         }
 
-        [HttpGet("professions")]
+        [HttpGet("Professions")]
         public async Task<IEnumerable<ProfessionDTO>> GetProfessions()
         {
             var professions = await _companyService.GetAllProfessions();

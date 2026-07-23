@@ -143,6 +143,7 @@ namespace Migration.Agro.Services
             var professions = await _dbContext.Professions
                 .Select(p => new ProfessionDTO
                 {
+                    Company = "Agro",
                     Title = p.Title,
                     Column = p.Column
                 })

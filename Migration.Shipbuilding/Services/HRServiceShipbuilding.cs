@@ -165,6 +165,7 @@ namespace Migration.Shipbuilding.Services
             var professions = await _dbContext.Professions
                 .Select(p => new ProfessionDTO
                 {
+                    Company = "Shipbuilding",
                     Title = p.Title,
                     Column = p.Column
                 })

@@ -8,6 +8,13 @@ namespace Migration.Contracts.DTO.Professions
     public class ProfessionDTO
     {
         /// <summary>
+        /// Company Alias
+        /// </summary>
+        [Required(ErrorMessage = "Company Alias is required")]
+        [MaxLength(50, ErrorMessage = "Company Alias cannot exceed 50 characters")]
+        public required string Company { get; set; }
+
+        /// <summary>
         /// Profession title
         /// </summary>
         [Required(ErrorMessage = "Profession Title is required")]
