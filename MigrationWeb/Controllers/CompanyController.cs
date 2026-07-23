@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Professions;
 using MigrationWeb.Services;
 
 namespace MigrationWeb.Controllers
@@ -23,6 +24,13 @@ namespace MigrationWeb.Controllers
         {
             var companies = await _companyService.GetCompanyList();
             return companies;
+        }
+
+        [HttpGet("professions")]
+        public async Task<IEnumerable<ProfessionDTO>> GetProfessions()
+        {
+            var professions = await _companyService.GetAllProfessions();
+            return professions;
         }
     }
 }

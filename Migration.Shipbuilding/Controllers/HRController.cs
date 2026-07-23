@@ -44,10 +44,4 @@ public class HRController : ControllerBase
         var result = await _companyService.RemoveEmployeeAsync(request);
         return Ok(result);
     }
-
-    [HttpGet("count-professions")]
-    public async Task<IEnumerable<ProfessionCountDTO>> GetCountByProfession()
-    {
-        return await _companyService.GetProfessionsStatsAsync();
-    }
 }
