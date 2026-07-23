@@ -73,6 +73,16 @@ async function handleMenuAction(action) {
     }
 }
 
+// Simple GUID generator
+function Guid() {}
+Guid.newGuid = function() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    }).toUpperCase();
+};
+
 // Handle company change - update profession checkboxes
 function handleCompanyChange(event) {
     const selectedCompany = event.target.value;
@@ -85,8 +95,8 @@ function handleCompanyChange(event) {
     // Get all professions from data attribute
     const allProfessions = JSON.parse(professionCheckboxesDiv.dataset.professions || '[]');
     
-    // Filter professions by selected company
-    const companyProfessions = allProfessions.filter(p => p.company === selectedCompany && p.title != 'Все');
+    // Filter professions by selected company (exclude "All" option)
+    const companyProfessions = allProfessions.filter(p => p.company === selectedCompany && p.title.toLowerCase() !== 'все');
     
     // Render checkboxes for this company's professions
     if (companyProfessions.length > 0) {
@@ -121,37 +131,45 @@ async function handleAddEmployeeFormSubmit(event) {
     const birthDate = document.getElementById('employeeBirthDate').value;
     const companyId = document.getElementById('employeeCompany').value;
     
-    // Get selected professions
-    const selectedProfessions = Array.from(document.querySelectorAll('input[name="professions"]:checked'))
-        .map(cb => cb.value);
-    
     if (!name || !birthDate || !companyId) {
         alert('Пожалуйста, заполните все поля');
         return;
     }
     
-    if (selectedProfessions.length === 0) {
-        alert('Пожалуйста, выберите хотя бы одну профессию');
-        return;
-    }
+    // Get all professions from data attribute
+    const professionCheckboxesDiv = document.getElementById('professionCheckboxes');
+    const allProfessions = JSON.parse(professionCheckboxesDiv.dataset.professions || '[]');
     
-    // TODO: Implement actual employee creation logic
-    console.log('Creating employee:', { name, birthDate, companyId, professions: selectedProfessions });
+    // Filter professions by selected company
+    const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
     
-    // Example API call (to be implemented later):
-    /*
+    // Build AdditionalData: all professions with true/false based on checkbox
+    const additionalData = {};
+    companyProfessions.forEach(profession => {
+        const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
+        additionalData[profession.column] = isChecked ? "true" : "false";
+    });
+    
+    // Build CreateEmployeeRequest model
+    const request = {
+        Event: "AddEmployee",
+        CoreData: {
+            Id: Guid.newGuid(),
+            BirthDate: birthDate,
+            FullName: name,
+            CurrentCompany: companyId,
+            IsDeleted: false
+        },
+        AdditionalData: additionalData
+    };
+    
     try {
         const response = await fetch('/HR/Create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                fullName: name,
-                birthDate: birthDate,
-                currentCompanyId: companyId,
-                professions: selectedProfessions
-            })
+            body: JSON.stringify(request)
         });
         
         if (response.ok) {
@@ -164,10 +182,10 @@ async function handleAddEmployeeFormSubmit(event) {
     } catch (error) {
         alert(`Ошибка при создании сотрудника: ${error.message}`);
     }
-    */
 }
 
 // Export functions for use in other modules
 window.handleMenuAction = handleMenuAction;
 window.handleAddEmployeeFormSubmit = handleAddEmployeeFormSubmit;
 window.handleCompanyChange = handleCompanyChange;
+window.Guid = Guid;
