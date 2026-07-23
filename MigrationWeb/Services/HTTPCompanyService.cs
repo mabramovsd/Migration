@@ -121,17 +121,31 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
-    public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+    public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/hr/count-professions");
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/professions/stats");
             return result ?? Enumerable.Empty<ProfessionCountDTO>();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get professions from HTTP service");
+            _logger.LogError(ex, "Failed to get professions stats from HTTP service");
             return Enumerable.Empty<ProfessionCountDTO>();
+        }
+    }
+
+    public async Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionDTO>>("api/v1/professions");
+            return result ?? Enumerable.Empty<ProfessionDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get professions from HTTP service");
+            return Enumerable.Empty<ProfessionDTO>();
         }
     }
 

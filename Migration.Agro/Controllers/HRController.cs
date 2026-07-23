@@ -48,6 +48,6 @@ public class HRController : ControllerBase
     [HttpGet("count-professions")]
     public async Task<IEnumerable<ProfessionCountDTO>> GetCountByProfession()
     {
-        return await _companyService.GetProfessionListAsync();
+        return await _companyService.GetProfessionsStatsAsync();
     }
 }

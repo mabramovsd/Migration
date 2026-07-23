@@ -50,7 +50,7 @@ namespace MigrationWeb.Controllers
                 return Enumerable.Empty<ProfessionCountDTO>();
             }
             
-            return await service.GetProfessionListAsync();
+            return await service.GetProfessionsStatsAsync();
         }
 
         [HttpPost("Create")]
