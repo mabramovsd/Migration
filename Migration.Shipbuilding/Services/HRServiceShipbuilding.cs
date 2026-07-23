@@ -137,7 +137,7 @@ namespace Migration.Shipbuilding.Services
             }
         }
 
-        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
             var allEmployees = await _dbContext.EmployeesShipbuilding
                 .Where(e => !e.IsDeleted)
@@ -158,6 +158,20 @@ namespace Migration.Shipbuilding.Services
             }).ToList();
 
             return data;
+        }
+
+        public async Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
+        {
+            var professions = await _dbContext.Professions
+                .Select(p => new ProfessionDTO
+                {
+                    Company = "Shipbuilding",
+                    Title = p.Title,
+                    Column = p.Column
+                })
+                .ToListAsync();
+
+            return professions;
         }
     }
 }

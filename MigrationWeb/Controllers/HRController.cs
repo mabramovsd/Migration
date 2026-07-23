@@ -23,22 +23,19 @@ namespace MigrationWeb.Controllers
         [HttpGet("All")]
         public async Task<IEnumerable<EmployeeSummaryInfo>> GetAll()
         {
-            var employeeList = await _hrService.GetEmployeeList();
-            return employeeList;
+            return await _hrService.GetEmployeeList();
         }
 
         [HttpGet("Filter")]
         public async Task<IEnumerable<EmployeeSummaryInfo>> Get([FromQuery] EmployeeFilter filter)
         {
-            var employeeList = await _hrService.GetFilteredEmployees(filter);
-            return employeeList;
+            return await _hrService.GetFilteredEmployees(filter);
         }
 
         [HttpGet("Stats/CompanyCounts")]
         public async Task<IEnumerable<CompanyCountDTO>> GetCompanyCounts()
         {
-            var stats = await _hrService.GetEmployeeCompanyStatistics();
-            return stats;
+            return await _hrService.GetEmployeeCompanyStatistics();
         }
 
         [HttpGet("Stats/ProfessionCounts/{companyName}")]
@@ -50,7 +47,7 @@ namespace MigrationWeb.Controllers
                 return Enumerable.Empty<ProfessionCountDTO>();
             }
             
-            return await service.GetProfessionListAsync();
+            return await service.GetProfessionsStatsAsync();
         }
 
         [HttpPost("Create")]

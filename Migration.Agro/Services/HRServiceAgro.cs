@@ -117,7 +117,7 @@ namespace Migration.Agro.Services
             }
         }
 
-        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync()
+        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
             var allEmployees = await _dbContext.EmployeesAgro
                 .Where(e => !e.IsDeleted)
@@ -136,6 +136,20 @@ namespace Migration.Agro.Services
             }).ToList();
 
             return data;
+        }
+
+        public async Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
+        {
+            var professions = await _dbContext.Professions
+                .Select(p => new ProfessionDTO
+                {
+                    Company = "Agro",
+                    Title = p.Title,
+                    Column = p.Column
+                })
+                .ToListAsync();
+
+            return professions;
         }
     }
 }

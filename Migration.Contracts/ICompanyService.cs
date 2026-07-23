@@ -30,7 +30,12 @@ public interface ICompanyService
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
 
     /// <summary>
-    /// Getting list of professions
+    /// Getting list of professions with stats (count of employees)
     /// </summary>
-    Task<IEnumerable<ProfessionCountDTO>> GetProfessionListAsync();
+    Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync();
+
+    /// <summary>
+    /// Getting list of all available professions
+    /// </summary>
+    Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync();
 }

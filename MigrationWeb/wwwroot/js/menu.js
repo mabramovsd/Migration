@@ -1,8 +1,8 @@
 // Menu items for the application
 const menuItems = [
-    { icon: '➕', text: 'Добавить сотрудника', href: '#' },
-    { icon: '📋', text: 'Список сотрудников', href: '#' },
-    { icon: 'ℹ️', text: 'О системе', href: '#' }
+    { icon: '➕', text: 'Добавить сотрудника', href: '#', action: 'addEmployee' },
+    { icon: '📋', text: 'Список сотрудников', href: '#', action: 'listEmployees' },
+    { icon: 'ℹ️', text: 'О системе', href: '#', action: 'aboutSystem' }
 ];
 
 // Initialize menu items with click handlers
@@ -14,9 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
             button.className = 'menu-btn';
             button.innerHTML = `${item.icon} ${item.text}`;
             button.onclick = function() {
-                // Вызываем handleIndexClick для сброса дашборда
-                if (typeof handleIndexClick === 'function') {
-                    handleIndexClick();
+                if (typeof handleMenuAction === 'function') {
+                    handleMenuAction(item.action);
                 }
             };
             menuContainer.appendChild(button);
