@@ -1,6 +1,7 @@
 using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Resources;
 using System.Text;
 using System.Text.Json;
 
@@ -146,6 +147,20 @@ public class HTTPCompanyService : ICompanyService
         {
             _logger.LogError(ex, "Failed to get professions from HTTP service");
             return Enumerable.Empty<ProfessionDTO>();
+        }
+    }
+
+    public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<ResourceDTO>>("api/v1/resources");
+            return result ?? Enumerable.Empty<ResourceDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get resources from HTTP service");
+            return Enumerable.Empty<ResourceDTO>();
         }
     }
 

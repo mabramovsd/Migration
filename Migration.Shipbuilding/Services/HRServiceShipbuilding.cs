@@ -5,6 +5,7 @@ using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Companies;
+using Migration.Contracts.DTO.Resources;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Shipbuilding.Services
@@ -172,6 +173,21 @@ namespace Migration.Shipbuilding.Services
                 .ToListAsync();
 
             return professions;
+        }
+
+        public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+        {
+            var resources = await _dbContext.ResourcesShipbuilding
+                .Select(r => new ResourceDTO
+                {
+                    Company = "Shipbuilding",
+                    Title = r.Title,
+                    Count = r.Count,
+                    Unit = r.Unit
+                })
+                .ToListAsync();
+
+            return resources;
         }
     }
 }

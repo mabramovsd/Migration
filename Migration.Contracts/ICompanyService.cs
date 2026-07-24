@@ -1,5 +1,6 @@
-﻿using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Resources;
 
 namespace Migration.Contracts;
 
@@ -38,4 +39,9 @@ public interface ICompanyService
     /// Getting list of all available professions
     /// </summary>
     Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync();
+
+    /// <summary>
+    /// Getting list of all available resources
+    /// </summary>
+    Task<IEnumerable<ResourceDTO>> GetResourcesAsync();
 }
