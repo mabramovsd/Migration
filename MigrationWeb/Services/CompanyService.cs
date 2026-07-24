@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Resources;
 
 namespace MigrationWeb.Services;
 
@@ -10,6 +11,7 @@ public class CompanyService
     private readonly CoreDBContext _coreDBContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CompanyService> _logger;
+    private readonly string[] _microservices = { "Agro", "Shipbuilding" };
 
     public CompanyService(
         CoreDBContext coreDBContext,
@@ -30,9 +32,7 @@ public class CompanyService
     {
         var professions = new List<ProfessionDTO>();
         
-        var microservices = new[] { "Agro", "Shipbuilding" };
-        
-        foreach (var microservice in microservices)
+        foreach (var microservice in _microservices)
         {
             try
             {
@@ -50,5 +50,33 @@ public class CompanyService
         }
         
         return professions;
+    }
+
+
+    /// <summary>
+    /// Get all resources from both companies
+    /// </summary>
+    public async Task<IEnumerable<ResourceDTO>> GetAllResources()
+    {
+        var resources = new List<ResourceDTO>();
+        
+        foreach (var microservice in _microservices)
+        {
+            try
+            {
+                var companyService = _serviceProvider.GetKeyedService<ICompanyService>(microservice);
+                if (companyService != null)
+                {
+                    var microserviceResources = await companyService.GetResourcesAsync();
+                    resources.AddRange(microserviceResources);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get resources from microservice {Microservice}", microservice);
+            }
+        }
+        
+        return resources;
     }
 }
