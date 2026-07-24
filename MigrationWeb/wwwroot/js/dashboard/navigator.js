@@ -99,6 +99,17 @@ async function handleCompanyClick(companyName) {
         
         // Use the helper function to render employees table
         dashboardDiv.innerHTML += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
+        
+        // Fetch resources list for the selected company
+        const responseResources = await fetch(`/Company/Resources`);
+        
+        if (!responseResources.ok) {
+            throw new Error(`Ошибка при загрузке данных ресурсов: ${responseResources.status} ${responseResources.statusText}`);
+        }
+        const resourcesData = await responseResources.json();
+        
+        // Use the helper function to render resources table
+        dashboardDiv.innerHTML += renderResourcesTable(resourcesData, `Ресурсы компании ${escapeHtml(companyName)}`);
 
     } catch (error) {
         loadingDiv.style.display = 'none';
@@ -138,6 +149,17 @@ async function handleProfessionClick(companyName, professionName) {
         
         // Use the helper function to render employees table (only table, no buttons)
         dashboardDiv.innerHTML = renderEmployeesTable(employeesData, `Сотрудники профессии ${escapeHtml(professionName)} в компании ${escapeHtml(companyName)}`);
+        
+        // Fetch resources list for the selected company
+        const responseResources = await fetch(`/Company/Resources`);
+        
+        if (!responseResources.ok) {
+            throw new Error(`Ошибка при загрузке данных ресурсов: ${responseResources.status} ${responseResources.statusText}`);
+        }
+        const resourcesData = await responseResources.json();
+        
+        // Use the helper function to render resources table
+        dashboardDiv.innerHTML += renderResourcesTable(resourcesData, `Ресурсы компании ${escapeHtml(companyName)}`);
 
     } catch (error) {
         loadingDiv.style.display = 'none';

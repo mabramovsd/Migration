@@ -98,6 +98,43 @@ function renderAddEmployeeForm(companies, professions) {
     `;
 }
 
+/**
+ * Renders resources table from data
+ * @param {Array} resourcesData - Array of resource objects
+ * @param {string} title - Table title
+ * @returns {string} - HTML string for the table
+ */
+function renderResourcesTable(resourcesData, title) {
+    if (!resourcesData || resourcesData.length === 0) {
+        return '<p style="margin-top: 2rem; color: #666;">Нет данных о ресурсах</p>';
+    }
+    
+    return `
+        <div style="margin-top: 2rem;">
+            <div style="color: #667eea; font-size: 1.2rem; font-weight: 600;">${title}</div>
+            <table class="resources-table" style="margin-top: 0.5rem;">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Количество</th>
+                        <th>Единица измерения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${resourcesData.map(item => `
+                        <tr>
+                            <td>${escapeHtml(item.title)}</td>
+                            <td>${item.count !== null && item.count !== undefined ? item.count : '0'}</td>
+                            <td>${escapeHtml(item.unit)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
 // Export functions for use in other modules
 window.renderEmployeesTable = renderEmployeesTable;
 window.renderAddEmployeeForm = renderAddEmployeeForm;
+window.renderResourcesTable = renderResourcesTable;
