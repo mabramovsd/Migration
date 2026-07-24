@@ -52,7 +52,6 @@ public class CompanyService
         return professions;
     }
 
-
     /// <summary>
     /// Get all resources from both companies
     /// </summary>
@@ -78,5 +77,32 @@ public class CompanyService
         }
         
         return resources;
+    }
+
+    /// <summary>
+    /// Get resources for a specific company
+    /// </summary>
+    public async Task<IEnumerable<ResourceDTO>?> GetResourcesForCompany(string companyName)
+    {
+        if (string.IsNullOrWhiteSpace(companyName))
+        {
+            return null;
+        }
+
+        var service = _serviceProvider.GetKeyedService<ICompanyService>(companyName);
+        if (service == null)
+        {
+            return Enumerable.Empty<ResourceDTO>();
+        }
+
+        try
+        {
+            return await service.GetResourcesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get resources from microservice {Microservice}", companyName);
+            return Enumerable.Empty<ResourceDTO>();
+        }
     }
 }

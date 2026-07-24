@@ -116,7 +116,7 @@ async function handleCompanyClick(companyName) {
         dashboardDiv.innerHTML += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
         
         // Fetch resources list for the selected company
-        const responseResources = await fetch(`/Company/Resources`);
+        const responseResources = await fetch(`/Company/Resources/${encodeURIComponent(companyName)}`);
         
         if (!responseResources.ok) {
             throw new Error(`Ошибка при загрузке данных ресурсов: ${responseResources.status} ${responseResources.statusText}`);

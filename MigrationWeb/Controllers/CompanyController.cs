@@ -37,5 +37,12 @@ namespace MigrationWeb.Controllers
         {
             return await _companyService.GetAllResources();
         }
+
+        [HttpGet("Resources/{companyName}")]
+        public async Task<IEnumerable<ResourceDTO>> GetResourcesForCompany(string companyName)
+        {
+            var resources = await _companyService.GetResourcesForCompany(companyName);
+            return resources ?? Enumerable.Empty<ResourceDTO>();
+        }
     }
 }
