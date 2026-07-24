@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Resources;
 
 namespace Migration.Agro.Services
 {
@@ -150,6 +151,21 @@ namespace Migration.Agro.Services
                 .ToListAsync();
 
             return professions;
+        }
+
+        public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+        {
+            var resources = await _dbContext.ResourcesAgro
+                .Select(r => new ResourceDTO
+                {
+                    Company = "Agro",
+                    Title = r.Title,
+                    Count = r.Count,
+                    Unit = r.Unit
+                })
+                .ToListAsync();
+
+            return resources;
         }
     }
 }

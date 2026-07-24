@@ -141,7 +141,7 @@ public class HRService
                 return allAdditionalDataByCompany.TryGetValue(employee.CurrentCompany, out var dict)
                        && dict.ContainsKey(employee.Id);
             })
-            // Этап 2: Mapping
+            // Mapping
             .Select(employee => new EmployeeSummaryInfo
             {
                 Id = employee.Id,
