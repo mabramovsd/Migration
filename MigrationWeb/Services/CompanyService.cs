@@ -23,6 +23,14 @@ public class CompanyService
         _logger = logger;
     }
 
+    private ICompanyService? GetServiceForCompany(string? companyName) =>
+        companyName?.ToLowerInvariant() switch
+        {
+            "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
+            "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            _ => null
+        };
+
     public async Task<IEnumerable<Company>> GetCompanyList()
     {
         return await _coreDBContext.Companies.ToListAsync();
@@ -36,7 +44,7 @@ public class CompanyService
         {
             try
             {
-                var companyService = _serviceProvider.GetKeyedService<ICompanyService>(microservice);
+                var companyService = GetServiceForCompany(microservice);
                 if (companyService != null)
                 {
                     var microserviceProfessions = await companyService.GetProfessionsAsync();
@@ -63,7 +71,7 @@ public class CompanyService
         {
             try
             {
-                var companyService = _serviceProvider.GetKeyedService<ICompanyService>(microservice);
+                var companyService = GetServiceForCompany(microservice);
                 if (companyService != null)
                 {
                     var microserviceResources = await companyService.GetResourcesAsync();
@@ -89,7 +97,7 @@ public class CompanyService
             return null;
         }
 
-        var service = _serviceProvider.GetKeyedService<ICompanyService>(companyName);
+        var service = GetServiceForCompany(companyName);
         if (service == null)
         {
             return Enumerable.Empty<ResourceDTO>();
