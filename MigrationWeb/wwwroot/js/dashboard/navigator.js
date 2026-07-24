@@ -22,9 +22,9 @@ async function handleIndexClick() {
 
         // Hide loading and show dashboard
         loadingDiv.style.display = 'none';
-        dashboardDiv.style.display = 'grid';
+        dashboardDiv.style.display = 'block';
         
-        // Render company cards
+        // Render company cards in grid container
         const companyCards = data.map(item => `
             <div class="company-card" onclick="handleCompanyClick('${escapeHtml(item.companyName)}')">
                 <div class="company-name">${escapeHtml(item.companyName)}</div>
@@ -32,8 +32,23 @@ async function handleIndexClick() {
             </div>
         `).join('');
         
-        dashboardDiv.innerHTML = companyCards;
+        dashboardDiv.innerHTML = `
+            <div class="dashboard-grid" style="display: grid;">
+                ${companyCards}
+            </div>
+        `;
         
+        // Fetch resources list from all companies
+        const responseResources = await fetch('/Company/Resources');
+        
+        if (!responseResources.ok) {
+            throw new Error(`Ошибка при загрузке данных ресурсов: ${responseResources.status} ${responseResources.statusText}`);
+        }
+        const resourcesData = await responseResources.json();
+        
+        // Use the helper function to render resources table
+        dashboardDiv.innerHTML += renderResourcesTable(resourcesData, `Ресурсы всех компаний`);
+
     } catch (error) {
         loadingDiv.style.display = 'none';
         errorDiv.style.display = 'block';
@@ -149,17 +164,6 @@ async function handleProfessionClick(companyName, professionName) {
         
         // Use the helper function to render employees table (only table, no buttons)
         dashboardDiv.innerHTML = renderEmployeesTable(employeesData, `Сотрудники профессии ${escapeHtml(professionName)} в компании ${escapeHtml(companyName)}`);
-        
-        // Fetch resources list for the selected company
-        const responseResources = await fetch(`/Company/Resources`);
-        
-        if (!responseResources.ok) {
-            throw new Error(`Ошибка при загрузке данных ресурсов: ${responseResources.status} ${responseResources.statusText}`);
-        }
-        const resourcesData = await responseResources.json();
-        
-        // Use the helper function to render resources table
-        dashboardDiv.innerHTML += renderResourcesTable(resourcesData, `Ресурсы компании ${escapeHtml(companyName)}`);
 
     } catch (error) {
         loadingDiv.style.display = 'none';
