@@ -6,23 +6,23 @@ namespace Migration.Contracts.DTO.Employees;
 /// Request DTO for removing an employee.
 /// Allows soft delete, hard delete, and context (e.g., reason, auditing).
 /// </summary>
-public class RemoveEmployeeRequest
+public record RemoveEmployeeRequest
 {
     /// <summary>
     /// Employee ID to remove.
     /// </summary>
     [Required(ErrorMessage = "Employee ID is required")]
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
     /// <summary>
     /// Whether to soft-delete (mark IsDeleted = true) or hard-delete (physically remove).
     /// Default: false = hard delete for now.
     /// </summary>
-    public bool SoftDelete { get; set; } = false;
+    public bool SoftDelete { get; init; } = false;
 
     /// <summary>
     /// Optional: reason or metadata for audit trail.
     /// </summary>
     [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
-    public string? Reason { get; set; }
+    public string? Reason { get; init; }
 }
