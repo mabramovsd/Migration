@@ -1,7 +1,9 @@
 namespace Migration.Contracts;
 
-public class ServiceUrls
+public record ServiceUrls
 {
-    public string? Agro { get; set; }
-    public string? Shipbuilding { get; set; }
+    public string? Agro { get; init; }
+    public string? Shipbuilding { get; init; }
+    public string? School { get; init; }
+    public string? NurseryHome { get; init; }
 }

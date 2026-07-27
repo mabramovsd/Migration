@@ -27,6 +27,8 @@ public class HRService
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
             "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            "school" => _serviceProvider.GetKeyedService<ICompanyService>("School"),
+            "nurseryhome" => _serviceProvider.GetKeyedService<ICompanyService>("NurseryHome"),
             _ => null
         };
 
@@ -62,6 +64,8 @@ public class HRService
         //Some formatting for code simplifying
         var agroDataById = tasks.Count > 0 ? tasks[0].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
         var shipDataById = tasks.Count > 1 ? tasks[1].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
+        var schoolDataById = tasks.Count > 2 ? tasks[2].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
+        var nurseryHomeDataById = tasks.Count > 3 ? tasks[3].Result.ToDictionary(x => x.Id) : new Dictionary<Guid, EmployeeAdditionalInfo>();
 
         return employeesFromCore.Select(employee =>
         {
@@ -69,6 +73,8 @@ public class HRService
             {
                 "Agro" => agroDataById,
                 "Shipbuilding" => shipDataById,
+                "School" => schoolDataById,
+                "NurseryHome" => nurseryHomeDataById,
                 _ => null
             };
 

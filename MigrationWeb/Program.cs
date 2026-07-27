@@ -42,6 +42,18 @@ builder.Services.AddHttpClient("Shipbuilding", client =>
     client.BaseAddress = new Uri(urls?.Shipbuilding ?? "http://localhost:5001");
 });
 
+builder.Services.AddHttpClient("School", client =>
+{
+    var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    client.BaseAddress = new Uri(urls?.School ?? "http://localhost:5003");
+});
+
+builder.Services.AddHttpClient("NurseryHome", client =>
+{
+    var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
+    client.BaseAddress = new Uri(urls?.NurseryHome ?? "http://localhost:5004");
+});
+
 // keyed registration for company services
 builder.Services.AddKeyedScoped<ICompanyService>("Agro", (sp, key) =>
 {
@@ -53,6 +65,20 @@ builder.Services.AddKeyedScoped<ICompanyService>("Agro", (sp, key) =>
 builder.Services.AddKeyedScoped<ICompanyService>("Shipbuilding", (sp, key) =>
 {
     var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("Shipbuilding");
+    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
+    return new HTTPCompanyService(httpClient, logger);
+});
+
+builder.Services.AddKeyedScoped<ICompanyService>("School", (sp, key) =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("School");
+    var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
+    return new HTTPCompanyService(httpClient, logger);
+});
+
+builder.Services.AddKeyedScoped<ICompanyService>("NurseryHome", (sp, key) =>
+{
+    var httpClient = sp.GetRequiredService<IHttpClientFactory>().CreateClient("NurseryHome");
     var logger = sp.GetRequiredService<ILogger<HTTPCompanyService>>();
     return new HTTPCompanyService(httpClient, logger);
 });
