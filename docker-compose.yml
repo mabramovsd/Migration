@@ -55,6 +55,42 @@ services:
     networks:
       - default
 
+  # School Service
+  school:
+    build:
+      context: .
+      dockerfile: Migration.School/Dockerfile
+    container_name: petproject_school
+    depends_on:
+      mssql:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5003
+      - ConnectionStrings__SchoolDb=Server=mssql,1433;Database=Migration_School;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "5003:5003"
+    networks:
+      - default
+
+  # NurseryHome Service
+  nurseryhome:
+    build:
+      context: .
+      dockerfile: Migration.NurseryHome/Dockerfile
+    container_name: petproject_nurseryhome
+    depends_on:
+      mssql:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5004
+      - ConnectionStrings__NurseryHomeDb=Server=mssql,1433;Database=Migration_NurseryHome;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
+    ports:
+      - "5004:5004"
+    networks:
+      - default
+
   # Web API
   webapi:
     build:
@@ -65,11 +101,15 @@ services:
       - mssql
       - agro
       - shipbuilding
+      - school
+      - nurseryhome
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__CoreDb=Server=mssql,1433;Database=Migration_Core;User Id=SA;Password=Your_strong_P@ssw0rd123;Trust Server Certificate=True
       - ServiceUrls__Agro=http://agro:5002
       - ServiceUrls__Shipbuilding=http://shipbuilding:5001
+      - ServiceUrls__School=http://school:5003
+      - ServiceUrls__NurseryHome=http://nurseryhome:5004
     ports:
       - "8080:8080"
       - "8081:8081"
