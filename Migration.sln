@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.Contracts", "Migr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.Agro", "Migration.Agro\Migration.Agro.csproj", "{E5CACD86-8059-47B0-8CC1-4AE540B778EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migration.Shipbuilding", "Migration.Shipbuilding\Migration.Shipbuilding.csproj", "{4A67EC1D-8E03-4766-A225-FB4E12155755}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.Shipbuilding", "Migration.Shipbuilding\Migration.Shipbuilding.csproj", "{4A67EC1D-8E03-4766-A225-FB4E12155755}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Migration.MigrationTools", "Migration.MigrationTools\Migration.MigrationTools.csproj", "{91388989-DCB0-4502-AFC6-27E8A01EEE6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.MigrationTools", "Migration.MigrationTools\Migration.MigrationTools.csproj", "{91388989-DCB0-4502-AFC6-27E8A01EEE6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.School", "Migration.School\Migration.School.csproj", "{3633B229-7CBB-4339-A74C-FF7955B0C34F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{91388989-DCB0-4502-AFC6-27E8A01EEE6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{91388989-DCB0-4502-AFC6-27E8A01EEE6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{91388989-DCB0-4502-AFC6-27E8A01EEE6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
