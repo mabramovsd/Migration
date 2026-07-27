@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.MigrationTools", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.School", "Migration.School\Migration.School.csproj", "{3633B229-7CBB-4339-A74C-FF7955B0C34F}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.NurseryHome", "Migration.NurseryHome\Migration.NurseryHome.csproj", "{85E78CF4-A1FA-4458-95F9-923D4E4785B6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3633B229-7CBB-4339-A74C-FF7955B0C34F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85E78CF4-A1FA-4458-95F9-923D4E4785B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85E78CF4-A1FA-4458-95F9-923D4E4785B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85E78CF4-A1FA-4458-95F9-923D4E4785B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85E78CF4-A1FA-4458-95F9-923D4E4785B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

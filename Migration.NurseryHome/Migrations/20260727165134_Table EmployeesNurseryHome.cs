@@ -3,16 +3,16 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Migration.School.Migrations
+namespace Migration.NurseryHome.Migrations
 {
     /// <inheritdoc />
-    public partial class TableEmployeesSchool : Microsoft.EntityFrameworkCore.Migrations.Migration
+    public partial class TableEmployeesNurseryHome : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "EmployeesSchool",
+                name: "EmployeesNurseryHome",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -20,17 +20,17 @@ namespace Migration.School.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmployeesSchool", x => x.Id);
+                    table.PrimaryKey("PK_EmployeesNurseryHome", x => x.Id);
                 });
 
-            // Seed initial data for School
+            // Seed initial data for Nursery Home
             migrationBuilder.InsertData(
-                table: "EmployeesSchool",
+                table: "EmployeesNurseryHome",
                 columns: new[] { "Id", "IsDeleted" },
                 values: new object[,]
                 {
-                    { new Guid("01010101-0101-0101-0101-010101010101"), false },
-                    { new Guid("02020202-0202-0202-0202-020202020202"), false }
+                    { new Guid("10101010-1010-1010-1010-101010101010"), false },
+                    { new Guid("20202020-2020-2020-2020-202020202020"), false }
                 });
         }
 
@@ -38,7 +38,7 @@ namespace Migration.School.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "EmployeesSchool");
+                name: "EmployeesNurseryHome");
         }
     }
 }
