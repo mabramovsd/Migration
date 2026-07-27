@@ -57,7 +57,7 @@ async function loadCompaniesOnMap() {
             
             // Добавляем обработчик клика на картинку компании
             companyImage.addEventListener('click', () => {
-                handleCompanyClick(company.alias);
+                handleCompanyClick(company.alias, companyImage.src);
             });
             
             companiesContainer.appendChild(companyImage);

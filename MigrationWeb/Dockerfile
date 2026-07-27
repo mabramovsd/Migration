@@ -13,6 +13,8 @@ COPY ["MigrationWeb/MigrationWeb.csproj", "MigrationWeb/"]
 COPY ["Migration.Agro/Migration.Agro.csproj", "Migration.Agro/"]
 COPY ["Migration.Contracts/Migration.Contracts.csproj", "Migration.Contracts/"]
 COPY ["Migration.Shipbuilding/Migration.Shipbuilding.csproj", "Migration.Shipbuilding/"]
+COPY ["Migration.School/Migration.School.csproj", "Migration.School/"]
+COPY ["Migration.NurseryHome/Migration.NurseryHome.csproj", "Migration.NurseryHome/"]
 RUN dotnet restore "MigrationWeb/MigrationWeb.csproj"
 COPY . .
 WORKDIR "/src/MigrationWeb"

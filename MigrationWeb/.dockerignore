@@ -9,6 +9,8 @@
 !Migration.Contracts/*.csproj
 !Migration.Agro/*.csproj
 !Migration.Shipbuilding/*.csproj
+!Migration.School/*.csproj
+!Migration.NurseryHome/*.csproj
 
 # Exclude everything else
 *
@@ -16,6 +18,8 @@
 !Migration.Contracts/
 !Migration.Agro/
 !Migration.Shipbuilding/
+!Migration.School/
+!Migration.NurseryHome/
 
 # Re-include only the necessary files in MigrationWeb
 !MigrationWeb/Dockerfile
@@ -35,6 +39,8 @@
 # Re-include agro and shipbuilding models (if needed by HTTP clients)
 !Migration.Agro/Models/
 !Migration.Shipbuilding/Models/
+!Migration.NurseryHome/Models/
+!Migration.School/Models/
 
 # Exclude obj and bin directories
 obj/
