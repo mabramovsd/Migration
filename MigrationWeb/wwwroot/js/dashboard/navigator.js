@@ -44,7 +44,7 @@ async function handleIndexClick() {
                 companyImageMap[company.alias.toLowerCase()] = company.image ? 'img/' + company.image : null;
             }
         });
-        debugger;
+
         const companyCards = data.map(item => {
             const imageUrl = companyImageMap[item.companyName] || 'img/' + item.companyName + '.png';
             return `<div class="company-card" onclick="handleCompanyClick('${escapeHtml(item.companyName)}', '${escapeHtml(imageUrl)}')">
@@ -158,18 +158,18 @@ async function handleCompanyClick(companyName, imageUrl) {
             if (hasResources) {
                 htmlContent += renderResourcesTable(resourcesData, `Ресурсы компании ${escapeHtml(companyName)}`);
             }
-
-            // Fetch employees list for the selected company
-            const responseEmployees = await fetch(`/HR/Filter?Company=${encodeURIComponent(companyName)}`);
-            
-            if (!responseEmployees.ok) {
-                throw new Error(`Ошибка при загрузке данных сотрудников: ${responseEmployees.status} ${responseEmployees.statusText}`);
-            }
-            const employeesData = await responseEmployees.json();
-            
-            htmlContent += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
         }
 
+        // Fetch employees list for the selected company
+        const responseEmployees = await fetch(`/HR/Filter?Company=${encodeURIComponent(companyName)}`);
+        
+        if (!responseEmployees.ok) {
+            throw new Error(`Ошибка при загрузке данных сотрудников: ${responseEmployees.status} ${responseEmployees.statusText}`);
+        }
+        const employeesData = await responseEmployees.json();
+        
+        htmlContent += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
+    
         dashboardDiv.innerHTML = htmlContent;
 
     } catch (error) {
