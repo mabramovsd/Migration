@@ -44,7 +44,7 @@ async function handleIndexClick() {
                 companyImageMap[company.alias.toLowerCase()] = company.image ? 'img/' + company.image : null;
             }
         });
-        debugger;
+
         const companyCards = data.map(item => {
             const imageUrl = companyImageMap[item.companyName] || 'img/' + item.companyName + '.png';
             return `<div class="company-card" onclick="handleCompanyClick('${escapeHtml(item.companyName)}', '${escapeHtml(imageUrl)}')">
