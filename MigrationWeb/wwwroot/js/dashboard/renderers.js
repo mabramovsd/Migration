@@ -134,7 +134,71 @@ function renderResourcesTable(resourcesData, title) {
     `;
 }
 
+/**
+ * Renders about system page with service health statuses
+ * @param {Array} services - Array of ServiceHealthStatus
+ * @returns {string} - HTML string for the about page
+ */
+function renderAboutSystem(services) {
+    if (!services || services.length === 0) {
+        return '<p style="margin-top: 2rem; color: #666;">Не удалось загрузить данные о сервисах</p>';
+    }
+
+    const statusBadge = (isAvailable) => 
+        isAvailable 
+            ? '<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: #d4edda; color: #155724; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">● Доступен</span>'
+            : '<span style="display: inline-block; padding: 0.25rem 0.75rem; background-color: #f8d7da; color: #721c24; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">● Недоступен</span>';
+
+    const versionInfo = (version) => {
+        if (!version) return '';
+        try {
+            const data = JSON.parse(version);
+            return `<span style="color: #666; font-size: 0.85rem;">v${data.apiVersion || data.assemblyVersion || 'unknown'}</span>`;
+        } catch {
+            return `<span style="color: #666; font-size: 0.85rem;">${version.substring(0, 50)}...</span>`;
+        }
+    };
+
+    const errorInfo = (error) => error ? `<div style="color: #dc3545; font-size: 0.85rem; margin-top: 0.25rem;">${escapeHtml(error)}</div>` : '';
+
+    return `
+        <div style="margin-top: 2rem;">
+            <div class="card-header" style="margin-bottom: 1rem;">
+                <h2>ℹ️ О системе</h2>
+            </div>
+            
+            <div style="max-width: 800px;">
+                <p style="color: #555; margin-bottom: 1.5rem;">HR-платформа для управления персоналом. Версия 1.0.0</p>
+                
+                <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 0.75rem;">Статус сервисов</h3>
+                <table class="employees-table" style="margin-top: 0.5rem;">
+                    <thead>
+                        <tr>
+                            <th style="width: 200px;">Сервис</th>
+                            <th style="width: 150px;">Статус</th>
+                            <th>Версия / Примечание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${services.map(s => `
+                            <tr>
+                                <td><strong>${escapeHtml(s.serviceName)}</strong></td>
+                                <td>${statusBadge(s.isAvailable)}</td>
+                                <td>
+                                    ${versionInfo(s.version)}
+                                    ${errorInfo(s.error)}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
 // Export functions for use in other modules
 window.renderEmployeesTable = renderEmployeesTable;
 window.renderAddEmployeeForm = renderAddEmployeeForm;
 window.renderResourcesTable = renderResourcesTable;
+window.renderAboutSystem = renderAboutSystem;

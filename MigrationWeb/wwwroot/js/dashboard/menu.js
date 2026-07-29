@@ -62,8 +62,20 @@ async function handleMenuAction(action) {
             // TODO: Implement list employees functionality
             console.log('List employees - not implemented yet');
         } else if (action === 'aboutSystem') {
-            // TODO: Implement about system functionality
-            console.log('About system - not implemented yet');
+            loadingDiv.textContent = 'Загрузка статуса сервисов...';
+
+            const response = await fetch('/api/health/status');
+            
+            if (!response.ok) {
+                throw new Error(`Ошибка при загрузке статуса: ${response.status} ${response.statusText}`);
+            }
+            
+            const services = await response.json();
+            
+            loadingDiv.style.display = 'none';
+            dashboardDiv.style.display = 'block';
+            
+            dashboardDiv.innerHTML = renderAboutSystem(services);
         }
     } catch (error) {
         loadingDiv.style.display = 'none';
