@@ -86,6 +86,7 @@ builder.Services.AddKeyedScoped<ICompanyService>("NurseryHome", (sp, key) =>
 
 builder.Services.AddScoped<HRService>();
 builder.Services.AddScoped<CompanyService>();
+builder.Services.AddScoped<ServiceHealthChecker>();
 
 // DB context
 builder.Services.AddDbContext<CoreDBContext>(options =>
@@ -93,9 +94,37 @@ builder.Services.AddDbContext<CoreDBContext>(options =>
 
 var app = builder.Build();
 
-// Apply migrations automatically
+// Run health checks at startup
 if (app.Environment.IsDevelopment())
 {
+    try
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var healthChecker = scope.ServiceProvider.GetRequiredService<ServiceHealthChecker>();
+            var results = await healthChecker.CheckAllServicesAsync();
+
+            foreach (var result in results)
+            {
+                if (result.IsAvailable)
+                {
+                    app.Services.GetRequiredService<ILogger<Program>>()
+                        .LogInformation("Service {ServiceName} is available", result.ServiceName);
+                }
+                else
+                {
+                    app.Services.GetRequiredService<ILogger<Program>>()
+                        .LogWarning("Service {ServiceName} is NOT available: {Error}", result.ServiceName, result.Error);
+                }
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Health check failed: {ex.Message}");
+    }
+
+    // Apply migrations automatically
     try
     {
         using (var scope = app.Services.CreateScope())
