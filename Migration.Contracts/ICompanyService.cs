@@ -44,4 +44,14 @@ public interface ICompanyService
     /// Getting list of all available resources
     /// </summary>
     Task<IEnumerable<ResourceDTO>> GetResourcesAsync();
+
+    /// <summary>
+    /// Getting production norms (profession -> resource relationship)
+    /// </summary>
+    Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync();
+
+    /// <summary>
+    /// Getting forecast for production over a period
+    /// </summary>
+    Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days);
 }
