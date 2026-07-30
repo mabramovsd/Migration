@@ -189,5 +189,15 @@ namespace Migration.Shipbuilding.Services
 
             return resources;
         }
+
+        public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
+        }
+
+        public Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days)
+        {
+            return Task.FromResult<IEnumerable<ProfessionResourceForecastDTO>>(Array.Empty<ProfessionResourceForecastDTO>());
+        }
     }
 }

@@ -95,5 +95,15 @@ namespace Migration.School.Services
         {
             return new List<ResourceDTO>();
         }
+
+        public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
+        }
+
+        public Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days)
+        {
+            return Task.FromResult<IEnumerable<ProfessionResourceForecastDTO>>(Array.Empty<ProfessionResourceForecastDTO>());
+        }
     }
 }
