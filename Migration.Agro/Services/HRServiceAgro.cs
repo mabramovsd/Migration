@@ -9,6 +9,8 @@ namespace Migration.Agro.Services
 {
     public class HRServiceAgro : ICompanyService
     {
+        private const string ServiceName = "Agro";
+
         private readonly AgroDBContext _dbContext;
         private readonly ILogger<HRServiceAgro> _logger;
 
@@ -85,7 +87,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add agro employee: {ErrorMessage}", ex.Message);
+                _logger.LogError(ex, "Failed to add Agro employee: {ErrorMessage}", ex.Message);
             }
 
             return request.CoreData.Id;
@@ -144,7 +146,7 @@ namespace Migration.Agro.Services
             var professions = await _dbContext.Professions
                 .Select(p => new ProfessionDTO
                 {
-                    Company = "Agro",
+                    Company = ServiceName,
                     Title = p.Title,
                     Column = p.Column
                 })
@@ -158,7 +160,7 @@ namespace Migration.Agro.Services
             var resources = await _dbContext.ResourcesAgro
                 .Select(r => new ResourceDTO
                 {
-                    Company = "Agro",
+                    Company = ServiceName,
                     Title = r.Title,
                     Count = r.Count,
                     Unit = r.Unit
@@ -168,9 +170,28 @@ namespace Migration.Agro.Services
             return resources;
         }
 
-        public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
         {
-            return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Select(n => new 
+                { 
+                    n.Hours, 
+                    n.QuantityProduced, 
+                    Profession = n.Profession!.Title, 
+                    Resource = n.Resource!.Title 
+                })
+                .ToListAsync();
+
+            return norms.Select(n => new ProfessionResourceNormDTO
+            {
+                Company = ServiceName,
+                Profession = n.Profession,
+                Resource = n.Resource,
+                Hours = n.Hours,
+                QuantityProduced = n.QuantityProduced
+            });
         }
 
         public Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days)

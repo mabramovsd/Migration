@@ -30,11 +30,13 @@ namespace Migration.Agro
                 entity.HasOne<Profession>()
                     .WithMany()
                     .HasForeignKey(e => e.ProfessionId)
+                    .IsRequired()
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<ResourceAgro>()
                     .WithMany()
                     .HasForeignKey(e => e.ResourceId)
+                    .IsRequired()
                     .OnDelete(DeleteBehavior.Restrict);
             });
         }

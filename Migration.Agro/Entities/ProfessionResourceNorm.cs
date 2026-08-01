@@ -10,5 +10,8 @@ namespace Migration.Agro.Entities
         public Guid ResourceId { get; set; }
         public int Hours { get; set; }
         public int QuantityProduced { get; set; }
+
+        public Profession? Profession { get; set; }
+        public ResourceAgro? Resource { get; set; }
     }
 }
