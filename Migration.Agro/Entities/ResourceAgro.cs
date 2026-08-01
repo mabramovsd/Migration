@@ -1,4 +1,4 @@
-namespace Migration.Agro.DTO
+namespace Migration.Agro.Entities
 {
     public class ResourceAgro
     {

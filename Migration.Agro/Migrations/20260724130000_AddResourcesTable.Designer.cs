@@ -25,7 +25,7 @@ namespace Migration.Agro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Agro.DTO.ResourceAgro", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.ResourceAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

@@ -1,4 +1,4 @@
-using Migration.Agro.DTO;
+using Migration.Agro.Entities;
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;

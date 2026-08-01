@@ -25,7 +25,7 @@ namespace Migration.Agro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Agro.DTO.EmployeeAgro", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.EmployeeAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -57,7 +57,7 @@ namespace Migration.Agro.Migrations
                     b.ToTable("EmployeesAgro");
                 });
 
-            modelBuilder.Entity("Migration.Agro.DTO.Profession", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -76,7 +76,7 @@ namespace Migration.Agro.Migrations
                     b.ToTable("Professions");
                 });
 
-            modelBuilder.Entity("Migration.Agro.DTO.ResourceAgro", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.ResourceAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

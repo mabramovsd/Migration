@@ -12,8 +12,8 @@ using Migration.Agro;
 namespace Migration.Agro.Migrations
 {
     [DbContext(typeof(AgroDBContext))]
-    [Migration("20260801114332_AddNewProfessionsColumns")]
-    partial class AddNewProfessionsColumns
+    [Migration("20260801121026_AddProfessionResourceNormsTable")]
+    partial class AddProfessionResourceNormsTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,6 +76,33 @@ namespace Migration.Agro.Migrations
                     b.ToTable("Professions");
                 });
 
+            modelBuilder.Entity("Migration.Agro.Entities.ProfessionResourceNorm", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Hours")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuantityProduced")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId");
+
+                    b.HasIndex("ResourceId");
+
+                    b.ToTable("ProfessionResourceNorms");
+                });
+
             modelBuilder.Entity("Migration.Agro.Entities.ResourceAgro", b =>
                 {
                     b.Property<Guid>("Id")
@@ -96,6 +123,21 @@ namespace Migration.Agro.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ResourcesAgro");
+                });
+
+            modelBuilder.Entity("Migration.Agro.Entities.ProfessionResourceNorm", b =>
+                {
+                    b.HasOne("Migration.Agro.Entities.Profession", null)
+                        .WithMany()
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Migration.Agro.Entities.ResourceAgro", null)
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

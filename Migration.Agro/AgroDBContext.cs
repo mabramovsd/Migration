@@ -1,6 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Migration.Agro.DTO;
+using Migration.Agro.Entities;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Agro
@@ -16,10 +16,27 @@ namespace Migration.Agro
         public DbSet<EmployeeAgro> EmployeesAgro { get; set; }
         public DbSet<Profession> Professions { get; set; }
         public DbSet<ResourceAgro> ResourcesAgro { get; set; }
+        public DbSet<ProfessionResourceNorm> ProfessionResourceNorms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // ProfessionResourceNorm FK relationships
+            modelBuilder.Entity<ProfessionResourceNorm>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne<Profession>()
+                    .WithMany()
+                    .HasForeignKey(e => e.ProfessionId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<ResourceAgro>()
+                    .WithMany()
+                    .HasForeignKey(e => e.ResourceId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 
