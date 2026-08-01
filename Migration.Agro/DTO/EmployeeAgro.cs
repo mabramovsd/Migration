@@ -1,4 +1,4 @@
-﻿namespace Migration.Agro.DTO
+namespace Migration.Agro.DTO
 {
     public class EmployeeAgro
     {
@@ -16,5 +16,30 @@
         /// Has license to drive tracktor:)
         /// </summary>
         public bool HasTracktorLicense { get; set; }
+
+        /// <summary>
+        /// Is a milker
+        /// </summary>
+        public bool IsMilker { get; set; }
+
+        /// <summary>
+        /// Is a cattleman
+        /// </summary>
+        public bool IsCattleman { get; set; }
+
+        /// <summary>
+        /// Is a poultry farmer
+        /// </summary>
+        public bool IsPoultryFarmer { get; set; }
+
+        /// <summary>
+        /// Is a miller
+        /// </summary>
+        public bool IsMiller { get; set; }
+
+        /// <summary>
+        /// Is a vegetable grower
+        /// </summary>
+        public bool IsVegetableGrower { get; set; }
     }
 }
