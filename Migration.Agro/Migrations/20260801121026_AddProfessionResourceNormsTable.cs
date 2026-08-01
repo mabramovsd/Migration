@@ -52,7 +52,8 @@ namespace Migration.Agro.Migrations
             // PoultryFarmer (a1a1a1a1-a1a1-0123-abcd-aa1234567894) → Eggs (22222222-2222-2222-2222-222222222222): 30 eggs per 1 hour
             // VegetableGrower (a1a1a1a1-a1a1-0123-abcd-aa1234567896) → Potato (11111111-1111-1111-1111-111111111111): 10 hours for 100kg
             // TractorDriver (a1a1a1a1-a1a1-0123-abcd-aa1234567891) → Potato (11111111-1111-1111-1111-111111111111): 1 hour for 100kg
-            // VegetableGrower (a1a1a1a1-a1a1-0123-abcd-aa1234567896) → Potato (11111111-1111-1111-1111-111111111111): 20 hours for 100kg
+            // VegetableGrower (a1a1a1a1-a1a1-0123-abcd-aa1234567896) → Carrot (44444444-4444-4444-4444-444444444444): 20 hours for 100kg
+            // TractorDriver (a1a1a1a1-a1a1-0123-abcd-aa1234567891) → Carrot (44444444-4444-4444-4444-444444444444): 1 hour for 100kg
 
             migrationBuilder.InsertData(
                 table: "ProfessionResourceNorms",
@@ -62,7 +63,8 @@ namespace Migration.Agro.Migrations
                     { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567891"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567894"), Guid.Parse("22222222-2222-2222-2222-222222222222"), 1, 30 },
                     { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567892"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567896"), Guid.Parse("11111111-1111-1111-1111-111111111111"), 10, 100 },
                     { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567893"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567891"), Guid.Parse("11111111-1111-1111-1111-111111111111"), 1, 100 },
-                    { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567894"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567896"), Guid.Parse("11111111-1111-1111-1111-111111111111"), 20, 100 },
+                    { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567894"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567896"), Guid.Parse("44444444-4444-4444-4444-444444444444"), 20, 100 },
+                    { new Guid("b1b1b1b1-b1b1-0123-abcd-aa1234567895"), Guid.Parse("a1a1a1a1-a1a1-0123-abcd-aa1234567891"), Guid.Parse("44444444-4444-4444-4444-444444444444"), 1, 100 },
                 });
         }
 

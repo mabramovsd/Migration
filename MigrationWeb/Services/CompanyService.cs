@@ -113,4 +113,32 @@ public class CompanyService
             return Enumerable.Empty<ResourceDTO>();
         }
     }
+
+
+    /// <summary>
+    /// Get norms for a specific company
+    /// </summary>
+    public async Task<IEnumerable<ProfessionResourceNormDTO>?> GetNormsForCompany(string companyName)
+    {
+        if (string.IsNullOrWhiteSpace(companyName))
+        {
+            return null;
+        }
+
+        var service = GetServiceForCompany(companyName);
+        if (service == null)
+        {
+            return Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+
+        try
+        {
+            return await service.GetProfessionResourceNormsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get norms from microservice {Microservice}", companyName);
+            return Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+    }
 }

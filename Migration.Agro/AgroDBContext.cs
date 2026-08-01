@@ -27,13 +27,13 @@ namespace Migration.Agro
             {
                 entity.HasKey(e => e.Id);
 
-                entity.HasOne<Profession>()
+                entity.HasOne<Profession>(e => e.Profession)
                     .WithMany()
                     .HasForeignKey(e => e.ProfessionId)
                     .IsRequired()
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne<ResourceAgro>()
+                entity.HasOne<ResourceAgro>(e => e.Resource)
                     .WithMany()
                     .HasForeignKey(e => e.ResourceId)
                     .IsRequired()
