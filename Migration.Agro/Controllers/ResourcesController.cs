@@ -22,4 +22,10 @@ public class ResourcesController : ControllerBase
     {
         return await _companyService.GetResourcesAsync();
     }
+
+    [HttpGet("Forecast/{days}")]
+    public async Task<IEnumerable<ResourceForecastDTO>> GetForecast(int days)
+    {
+        return await _companyService.GetResourceForecastAsync(days);
+    }
 }

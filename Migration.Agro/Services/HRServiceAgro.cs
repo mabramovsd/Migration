@@ -4,12 +4,15 @@ using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
+using System.Linq.Expressions;
+using System.Diagnostics.Metrics;
 
 namespace Migration.Agro.Services
 {
     public class HRServiceAgro : ICompanyService
     {
         private const string ServiceName = "Agro";
+        private const decimal WORK_HOURS_PER_DAY = 5;
 
         private readonly AgroDBContext _dbContext;
         private readonly ILogger<HRServiceAgro> _logger;
@@ -194,9 +197,96 @@ namespace Migration.Agro.Services
             });
         }
 
-        public Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days)
+        public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
         {
-            return Task.FromResult<IEnumerable<ProfessionResourceForecastDTO>>(Array.Empty<ProfessionResourceForecastDTO>());
+            // All resources
+            var resourcesMap = await _dbContext.ResourcesAgro
+                .ToDictionaryAsync(r => r.Title, r => r);
+            if (resourcesMap.Count == 0) return [];
+
+            // All norms
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Where(n => n.Resource != null && n.Profession != null)
+                .Select(n => new
+                {
+                    ProfessionColumn = n.Profession!.Column,
+                    ResourceTitle = n.Resource!.Title,
+                    n.Hours,
+                    n.QuantityProduced
+                })
+                .ToListAsync();
+            if (norms.Count == 0) return [];
+
+            // Employee counts (ToDo: N+1 cycle)
+            var professionColumns = norms.Select(n => n.ProfessionColumn).Distinct().ToList();
+            var employeeCounts = new Dictionary<string, int>();
+            foreach (var column in professionColumns)
+            {
+                Expression<Func<EmployeeAgro, bool>> predicate = column switch
+                {
+                    "HasTracktorLicense" => e => e.HasTracktorLicense,
+                    "IsMilker" => e => e.IsMilker,
+                    "IsCattleman" => e => e.IsCattleman,
+                    "IsPoultryFarmer" => e => e.IsPoultryFarmer,
+                    "IsMiller" => e => e.IsMiller,
+                    "IsVegetableGrower" => e => e.IsVegetableGrower,
+                    _ => e => false // Unknown column
+                };
+
+                var count = await _dbContext.EmployeesAgro
+                    .Where(e => !e.IsDeleted)
+                    .CountAsync(predicate);
+
+                employeeCounts[column] = count;
+            }
+
+            // Grouping norms by resource
+            var normsByResource = norms.GroupBy(n => n.ResourceTitle)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Calculate forecast
+            var forecast = new List<ResourceForecastDTO>();
+
+            foreach (var resourceTitle in resourcesMap.Keys)
+            {
+                var resource = resourcesMap[resourceTitle];
+
+                // Limit for resource-profession
+                var producedAmount = 0m;
+                if (normsByResource.ContainsKey(resourceTitle))
+                {
+                    var limits = new List<decimal>();
+
+                    foreach (var norm in normsByResource[resourceTitle])
+                    {
+                        // How many hours we have for profession-product pair
+                        var employeesCount = employeeCounts[norm.ProfessionColumn];
+                        var productsForProfession = norms.Count(n => n.ProfessionColumn == norm.ProfessionColumn);
+                        var totalHoursPerDay = employeesCount * WORK_HOURS_PER_DAY / productsForProfession;
+
+                        // How many units we can produce
+                        var portionsPerDay = (decimal)totalHoursPerDay / norm.Hours * norm.QuantityProduced;
+                        limits.Add(portionsPerDay);
+                    }
+
+                    producedAmount = limits.Min() * days;
+                }
+
+                forecast.Add(new ResourceForecastDTO
+                {
+                    Company = ServiceName,
+                    Resource = resourceTitle,
+                    CurrentAmount = resource.Count,
+                    Unit = resource.Unit,
+                    Days = days,
+                    ProducedAmount = producedAmount,
+                    TotalAmount = resource.Count + producedAmount
+                });
+            }
+
+            return forecast;
         }
     }
 }

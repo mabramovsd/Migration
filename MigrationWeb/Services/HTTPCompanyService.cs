@@ -178,17 +178,17 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
-    public async Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days)
+    public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ProfessionResourceForecastDTO>>($"api/v1/professions/forecast?days={days}");
-            return result ?? Enumerable.Empty<ProfessionResourceForecastDTO>();
+            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v1/resources/forecast?days={days}");
+            return result ?? Enumerable.Empty<ResourceForecastDTO>();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get profession resource forecast from HTTP service");
-            return Enumerable.Empty<ProfessionResourceForecastDTO>();
+            return Enumerable.Empty<ResourceForecastDTO>();
         }
     }
 

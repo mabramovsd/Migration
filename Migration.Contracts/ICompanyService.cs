@@ -53,5 +53,5 @@ public interface ICompanyService
     /// <summary>
     /// Getting forecast for production over a period
     /// </summary>
-    Task<IEnumerable<ProfessionResourceForecastDTO>> GetProfessionResourceForecastAsync(int days);
+    Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days);
 }
