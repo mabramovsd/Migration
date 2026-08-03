@@ -23,7 +23,7 @@ namespace Migration.Shipbuilding.Migrations
                     table.PrimaryKey("PK_Professions", x => x.Id);
                 });
 
-            //Seed (вместо raw SQL)
+            //Seed
             migrationBuilder.InsertData(
                 table: "Professions",
                 columns: new[] { "Id", "Title", "Column" },

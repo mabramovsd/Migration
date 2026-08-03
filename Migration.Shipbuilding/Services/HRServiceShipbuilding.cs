@@ -27,12 +27,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "CanDesignShip", employee.CanDesignShip },
-                        { "CanCarpentry", employee.CanCarpentry },
-                        { "CanWeld", employee.CanWeld },
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -58,16 +53,14 @@ namespace Migration.Shipbuilding.Services
                 .Where(emp =>
                     emp.CanCarpentry && professions.Contains("CanCarpentry") ||
                     emp.CanDesignShip && professions.Contains("CanDesignShip") ||
-                    emp.CanWeld && professions.Contains("CanWeld"))
+                    emp.CanWeld && professions.Contains("CanWeld") ||
+                    emp.CanShipyard && professions.Contains("CanShipyard") ||
+                    emp.CanRig && professions.Contains("CanRig") ||
+                    emp.CanPaint && professions.Contains("CanPaint"))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "CanDesignShip", employee.CanDesignShip },
-                        { "CanCarpentry", employee.CanCarpentry },
-                        { "CanWeld", employee.CanWeld },
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -199,5 +192,44 @@ namespace Migration.Shipbuilding.Services
         {
             return Task.FromResult<IEnumerable<ResourceForecastDTO>>(Array.Empty<ResourceForecastDTO>());
         }
+
+
+
+        #region Helpers
+
+        private static Dictionary<string, object> CreateAdditionalData(EmployeeShipbuilding employee)
+        {
+            return new Dictionary<string, object>
+            {
+                { "CanDesignShip", employee.CanDesignShip },
+                { "CanCarpentry", employee.CanCarpentry },
+                { "CanWeld", employee.CanWeld },
+                { "CanShipyard", employee.CanShipyard },
+                { "CanPaint", employee.CanPaint },
+                { "CanRig", employee.CanRig }
+            };
+        }
+
+        private static bool ParseBool(Dictionary<string, object> data, string key)
+        {
+            if (!data.TryGetValue(key, out var value)) return false;
+            return value.ToString() == "true";
+        }
+
+        private static bool CountByColumn(EmployeeShipbuilding e, string column)
+        {
+            return column switch
+            {
+                "CanDesignShip" => e.CanDesignShip,
+                "CanCarpentry" => e.CanCarpentry,
+                "CanWeld" => e.CanWeld,
+                "CanPaint" => e.CanPaint,
+                "CanRig" => e.CanRig,
+                "CanShipyard" => e.CanShipyard,
+                _ => false
+            };
+        }
+
+        #endregion
     }
 }
