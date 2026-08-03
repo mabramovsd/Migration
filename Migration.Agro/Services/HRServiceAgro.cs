@@ -42,7 +42,7 @@ namespace Migration.Agro.Services
                 return await GetEmployeeListAsync();
             }
 
-            //Filter by profession
+            // Filter by profession
             var professions = await _dbContext.Professions
                 .Where(c => c.Title == filter.Profession)
                 .Select(p => p.Column).ToListAsync();
@@ -51,9 +51,17 @@ namespace Migration.Agro.Services
                 return new List<EmployeeAdditionalInfo>();
             }
 
-            //Mapping
+            // Build SQL-translatable expression
+            Expression<Func<EmployeeAgro, bool>> filterExpr = emp =>
+                (professions.Contains("HasTracktorLicense") && emp.HasTracktorLicense) ||
+                (professions.Contains("IsVegetableGrower") && emp.IsVegetableGrower) ||
+                (professions.Contains("IsMilker") && emp.IsMilker) ||
+                (professions.Contains("IsCattleman") && emp.IsCattleman) ||
+                (professions.Contains("IsPoultryFarmer") && emp.IsPoultryFarmer) ||
+                (professions.Contains("IsMiller") && emp.IsMiller);
+
             return await _dbContext.EmployeesAgro
-                .Where(emp => MatchFilter(emp, professions))
+                .Where(filterExpr)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
@@ -66,7 +74,7 @@ namespace Migration.Agro.Services
         {
             try
             {
-                //Parsing fields
+                // Parsing fields
                 var employee = new EmployeeAgro
                 {
                     Id = request.CoreData.Id,
@@ -78,7 +86,7 @@ namespace Migration.Agro.Services
                     IsMiller = ParseBool(request.AdditionalData, "IsMiller")
                 };
 
-                //Saving to DB
+                // Saving to DB
                 await _dbContext.EmployeesAgro.AddAsync(employee);
                 await _dbContext.SaveChangesAsync();
             }
@@ -305,16 +313,6 @@ namespace Migration.Agro.Services
                 "IsMiller" => e.IsMiller,
                 _ => false
             };
-        }
-
-        private static bool MatchFilter(EmployeeAgro emp, List<string> professions)
-        {
-            foreach (var column in professions)
-            {
-                if (CountByColumn(emp, column))
-                    return true;
-            }
-            return false;
         }
 
         #endregion
