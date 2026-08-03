@@ -29,10 +29,7 @@ namespace Migration.Agro.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "HasTracktorLicense", employee.HasTracktorLicense }
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -56,15 +53,11 @@ namespace Migration.Agro.Services
 
             //Mapping
             return await _dbContext.EmployeesAgro
-                .Where(emp =>
-                    emp.HasTracktorLicense && professions.Contains("HasTracktorLicense"))
+                .Where(emp => MatchFilter(emp, professions))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "HasTracktorLicense", employee.HasTracktorLicense }
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -74,18 +67,19 @@ namespace Migration.Agro.Services
             try
             {
                 //Parsing fields
-                var hasTracktorLicense = false;
-                if (request.AdditionalData.TryGetValue("HasTracktorLicense", out var hasTracktorLicenseObj))
-                {
-                    hasTracktorLicense = hasTracktorLicenseObj.ToString() == "true";
-                }
-
-                //Saving to DB
-                await _dbContext.EmployeesAgro.AddAsync(new EmployeeAgro
+                var employee = new EmployeeAgro
                 {
                     Id = request.CoreData.Id,
-                    HasTracktorLicense = hasTracktorLicense
-                });
+                    HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense"),
+                    IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower"),
+                    IsMilker = ParseBool(request.AdditionalData, "IsMilker"),
+                    IsCattleman = ParseBool(request.AdditionalData, "IsCattleman"),
+                    IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer"),
+                    IsMiller = ParseBool(request.AdditionalData, "IsMiller")
+                };
+
+                //Saving to DB
+                await _dbContext.EmployeesAgro.AddAsync(employee);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -136,8 +130,8 @@ namespace Migration.Agro.Services
                 Id = p.Id,
                 ProfessionTitle = p.Title,
                 Count = allEmployees.Count(e =>
-                    (p.Column == "All") ||
-                    (p.Column == "HasTracktorLicense" && e.HasTracktorLicense)
+                    p.Column == "All" ||
+                    CountByColumn(e, p.Column)
                 )
             }).ToList();
 
@@ -224,20 +218,9 @@ namespace Migration.Agro.Services
             var employeeCounts = new Dictionary<string, int>();
             foreach (var column in professionColumns)
             {
-                Expression<Func<EmployeeAgro, bool>> predicate = column switch
-                {
-                    "HasTracktorLicense" => e => e.HasTracktorLicense,
-                    "IsMilker" => e => e.IsMilker,
-                    "IsCattleman" => e => e.IsCattleman,
-                    "IsPoultryFarmer" => e => e.IsPoultryFarmer,
-                    "IsMiller" => e => e.IsMiller,
-                    "IsVegetableGrower" => e => e.IsVegetableGrower,
-                    _ => e => false // Unknown column
-                };
-
                 var count = await _dbContext.EmployeesAgro
                     .Where(e => !e.IsDeleted)
-                    .CountAsync(predicate);
+                    .CountAsync(e => CountByColumn(e, column));
 
                 employeeCounts[column] = count;
             }
@@ -288,5 +271,52 @@ namespace Migration.Agro.Services
 
             return forecast;
         }
+
+        #region Helpers
+
+        private static Dictionary<string, object> CreateAdditionalData(EmployeeAgro employee)
+        {
+            return new Dictionary<string, object>
+            {
+                { "HasTracktorLicense", employee.HasTracktorLicense },
+                { "IsVegetableGrower", employee.IsVegetableGrower },
+                { "IsMilker", employee.IsMilker },
+                { "IsCattleman", employee.IsCattleman },
+                { "IsPoultryFarmer", employee.IsPoultryFarmer },
+                { "IsMiller", employee.IsMiller }
+            };
+        }
+
+        private static bool ParseBool(Dictionary<string, object> data, string key)
+        {
+            if (!data.TryGetValue(key, out var value)) return false;
+            return value.ToString() == "true";
+        }
+
+        private static bool CountByColumn(EmployeeAgro e, string column)
+        {
+            return column switch
+            {
+                "HasTracktorLicense" => e.HasTracktorLicense,
+                "IsVegetableGrower" => e.IsVegetableGrower,
+                "IsMilker" => e.IsMilker,
+                "IsCattleman" => e.IsCattleman,
+                "IsPoultryFarmer" => e.IsPoultryFarmer,
+                "IsMiller" => e.IsMiller,
+                _ => false
+            };
+        }
+
+        private static bool MatchFilter(EmployeeAgro emp, List<string> professions)
+        {
+            foreach (var column in professions)
+            {
+                if (CountByColumn(emp, column))
+                    return true;
+            }
+            return false;
+        }
+
+        #endregion
     }
 }
