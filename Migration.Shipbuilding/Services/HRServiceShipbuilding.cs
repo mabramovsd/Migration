@@ -1,4 +1,4 @@
-using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;

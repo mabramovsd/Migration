@@ -1,4 +1,4 @@
-﻿namespace Migration.Shipbuilding.DTO
+﻿namespace Migration.Shipbuilding.Entities
 {
     public class Profession
     {

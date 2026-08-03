@@ -22,7 +22,7 @@ namespace Migration.Shipbuilding.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.EmployeeShipbuilding", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace Migration.Shipbuilding.Migrations
                     b.ToTable("EmployeesShipbuilding");
                 });
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.Profession", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,7 +73,7 @@ namespace Migration.Shipbuilding.Migrations
                     b.ToTable("Professions");
                 });
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.ResourceShipbuilding", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ResourceShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()

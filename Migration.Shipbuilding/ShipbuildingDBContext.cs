@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.Entities;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Shipbuilding

@@ -25,7 +25,7 @@ namespace Migration.Shipbuilding.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.ResourceShipbuilding", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ResourceShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
