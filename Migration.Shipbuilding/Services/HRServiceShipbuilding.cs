@@ -42,23 +42,21 @@ namespace Migration.Shipbuilding.Services
             }
 
             //Filter by profession
-            var professions = await _dbContext.Professions
-                .Where(c => c.Title == filter.Profession)
-                .Select(p => p.Column).ToListAsync();
-            if (!professions.Any())
+            var employeeIds = await _dbContext.EmployeeProfessions
+                .Where(x =>
+                    (x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                    && x.Profession.Title == filter.Profession
+                )
+                .Select(x => x.EmployeeId)
+                .ToListAsync();
+            if (!employeeIds.Any())
             {
                 return new List<EmployeeAdditionalInfo>();
             }
 
             //Mapping
             return await _dbContext.EmployeesShipbuilding
-                .Where(emp =>
-                    emp.CanCarpentry && professions.Contains("CanCarpentry") ||
-                    emp.CanDesignShip && professions.Contains("CanDesignShip") ||
-                    emp.CanWeld && professions.Contains("CanWeld") ||
-                    emp.CanShipyard && professions.Contains("CanShipyard") ||
-                    emp.CanRig && professions.Contains("CanRig") ||
-                    emp.CanPaint && professions.Contains("CanPaint"))
+                .Where(emp => employeeIds.Contains(emp.Id))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
@@ -71,31 +69,20 @@ namespace Migration.Shipbuilding.Services
         {
             try
             {
-                //Parsing fields
-                var canCarpentry = false;
-                if (request.AdditionalData.TryGetValue("CanCarpentry", out var canCarpentryObj))
-                {
-                    canCarpentry = canCarpentryObj.ToString() == "true";
-                }
-                var canWeld = false;
-                if (request.AdditionalData.TryGetValue("CanWeld", out var canWeldObj))
-                {
-                    canWeld = canWeldObj.ToString() == "true";
-                }
-                var canDesignShip = false;
-                if (request.AdditionalData.TryGetValue("CanDesignShip", out var canDesignObj))
-                {
-                    canDesignShip = canDesignObj.ToString() == "true";
-                }
-
-                //Saving to DB
-                await _dbContext.EmployeesShipbuilding.AddAsync(new EmployeeShipbuilding
+                // Parsing fields
+                var employee = new EmployeeShipbuilding
                 {
                     Id = request.CoreData.Id,
-                    CanCarpentry = canCarpentry,
-                    CanDesignShip = canDesignShip,
-                    CanWeld = canWeld,
-                });
+                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
+                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
+                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
+                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
+                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
+                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
+                };
+
+                //Saving to DB
+                await _dbContext.EmployeesShipbuilding.AddAsync(employee);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -135,22 +122,19 @@ namespace Migration.Shipbuilding.Services
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
-            var allEmployees = await _dbContext.EmployeesShipbuilding
-                .Where(e => !e.IsDeleted)
-                .ToListAsync();
-
             var professions = await _dbContext.Professions.ToListAsync();
+
+            var table = _dbContext.EmployeeProfessions
+                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                .GroupBy(x => x.Profession.Title)
+                .ToDictionary(x => x.Key, x => x.Count());
+            table.Add("Все", _dbContext.EmployeesShipbuilding.Count());
 
             var data = professions.Select(p => new ProfessionCountDTO
             {
                 Id = p.Id,
                 ProfessionTitle = p.Title,
-                Count = allEmployees.Count(e =>
-                    (p.Column == "All") ||
-                    (p.Column == "CanCarpentry" && e.CanCarpentry) ||
-                    (p.Column == "CanDesignShip" && e.CanDesignShip) ||
-                    (p.Column == "CanWeld" && e.CanWeld)
-                )
+                Count = table.ContainsKey(p.Title) ? table[p.Title] : 0
             }).ToList();
 
             return data;
