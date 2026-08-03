@@ -21,6 +21,7 @@ namespace Migration.School.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesSchool
+                .Where(emp => !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id

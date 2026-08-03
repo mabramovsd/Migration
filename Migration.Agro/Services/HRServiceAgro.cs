@@ -26,6 +26,7 @@ namespace Migration.Agro.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesAgro
+                .Where(emp => !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
@@ -53,12 +54,14 @@ namespace Migration.Agro.Services
 
             // Build SQL-translatable expression
             Expression<Func<EmployeeAgro, bool>> filterExpr = emp =>
-                (professions.Contains("HasTracktorLicense") && emp.HasTracktorLicense) ||
-                (professions.Contains("IsVegetableGrower") && emp.IsVegetableGrower) ||
-                (professions.Contains("IsMilker") && emp.IsMilker) ||
-                (professions.Contains("IsCattleman") && emp.IsCattleman) ||
-                (professions.Contains("IsPoultryFarmer") && emp.IsPoultryFarmer) ||
-                (professions.Contains("IsMiller") && emp.IsMiller);
+                !emp.IsDeleted && (
+                    (professions.Contains("HasTracktorLicense") && emp.HasTracktorLicense) ||
+                    (professions.Contains("IsVegetableGrower") && emp.IsVegetableGrower) ||
+                    (professions.Contains("IsMilker") && emp.IsMilker) ||
+                    (professions.Contains("IsCattleman") && emp.IsCattleman) ||
+                    (professions.Contains("IsPoultryFarmer") && emp.IsPoultryFarmer) ||
+                    (professions.Contains("IsMiller") && emp.IsMiller)
+                );
 
             return await _dbContext.EmployeesAgro
                 .Where(filterExpr)

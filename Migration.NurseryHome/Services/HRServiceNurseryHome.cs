@@ -21,6 +21,7 @@ namespace Migration.NurseryHome.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesNurseryHome
+                .Where(emp => !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id
