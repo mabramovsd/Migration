@@ -1,4 +1,4 @@
-using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Migration.Contracts;
@@ -12,6 +12,8 @@ namespace Migration.Shipbuilding.Services
 {
     public class HRServiceShipbuilding : ICompanyService
     {
+        private const string ServiceName = "Shipbuilding";
+        private const decimal WORK_HOURS_PER_DAY = 5;
         private readonly ShipbuildingDBContext _dbContext;
         private readonly ILogger<HRServiceShipbuilding> _logger;
 
@@ -27,12 +29,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "CanDesignShip", employee.CanDesignShip },
-                        { "CanCarpentry", employee.CanCarpentry },
-                        { "CanWeld", employee.CanWeld },
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -45,29 +42,25 @@ namespace Migration.Shipbuilding.Services
             }
 
             //Filter by profession
-            var professions = await _dbContext.Professions
-                .Where(c => c.Title == filter.Profession)
-                .Select(p => p.Column).ToListAsync();
-            if (!professions.Any())
+            var employeeIds = await _dbContext.EmployeeProfessions
+                .Where(x =>
+                    (x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                    && x.Profession.Title == filter.Profession
+                )
+                .Select(x => x.EmployeeId)
+                .ToListAsync();
+            if (!employeeIds.Any())
             {
                 return new List<EmployeeAdditionalInfo>();
             }
 
             //Mapping
             return await _dbContext.EmployeesShipbuilding
-                .Where(emp =>
-                    emp.CanCarpentry && professions.Contains("CanCarpentry") ||
-                    emp.CanDesignShip && professions.Contains("CanDesignShip") ||
-                    emp.CanWeld && professions.Contains("CanWeld"))
+                .Where(emp => employeeIds.Contains(emp.Id))
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = new Dictionary<string, object>
-                    {
-                        { "CanDesignShip", employee.CanDesignShip },
-                        { "CanCarpentry", employee.CanCarpentry },
-                        { "CanWeld", employee.CanWeld },
-                    }
+                    AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -76,31 +69,20 @@ namespace Migration.Shipbuilding.Services
         {
             try
             {
-                //Parsing fields
-                var canCarpentry = false;
-                if (request.AdditionalData.TryGetValue("CanCarpentry", out var canCarpentryObj))
-                {
-                    canCarpentry = canCarpentryObj.ToString() == "true";
-                }
-                var canWeld = false;
-                if (request.AdditionalData.TryGetValue("CanWeld", out var canWeldObj))
-                {
-                    canWeld = canWeldObj.ToString() == "true";
-                }
-                var canDesignShip = false;
-                if (request.AdditionalData.TryGetValue("CanDesignShip", out var canDesignObj))
-                {
-                    canDesignShip = canDesignObj.ToString() == "true";
-                }
-
-                //Saving to DB
-                await _dbContext.EmployeesShipbuilding.AddAsync(new EmployeeShipbuilding
+                // Parsing fields
+                var employee = new EmployeeShipbuilding
                 {
                     Id = request.CoreData.Id,
-                    CanCarpentry = canCarpentry,
-                    CanDesignShip = canDesignShip,
-                    CanWeld = canWeld,
-                });
+                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
+                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
+                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
+                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
+                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
+                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
+                };
+
+                //Saving to DB
+                await _dbContext.EmployeesShipbuilding.AddAsync(employee);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -140,22 +122,19 @@ namespace Migration.Shipbuilding.Services
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
-            var allEmployees = await _dbContext.EmployeesShipbuilding
-                .Where(e => !e.IsDeleted)
-                .ToListAsync();
-
             var professions = await _dbContext.Professions.ToListAsync();
+
+            var employeeCounts = _dbContext.EmployeeProfessions
+                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                .GroupBy(x => x.Profession.Title)
+                .ToDictionary(x => x.Key, x => x.Count());
+            employeeCounts.Add("Все", _dbContext.EmployeesShipbuilding.Count());
 
             var data = professions.Select(p => new ProfessionCountDTO
             {
                 Id = p.Id,
                 ProfessionTitle = p.Title,
-                Count = allEmployees.Count(e =>
-                    (p.Column == "All") ||
-                    (p.Column == "CanCarpentry" && e.CanCarpentry) ||
-                    (p.Column == "CanDesignShip" && e.CanDesignShip) ||
-                    (p.Column == "CanWeld" && e.CanWeld)
-                )
+                Count = employeeCounts.ContainsKey(p.Title) ? employeeCounts[p.Title] : 0
             }).ToList();
 
             return data;
@@ -166,7 +145,7 @@ namespace Migration.Shipbuilding.Services
             var professions = await _dbContext.Professions
                 .Select(p => new ProfessionDTO
                 {
-                    Company = "Shipbuilding",
+                    Company = ServiceName,
                     Title = p.Title,
                     Column = p.Column
                 })
@@ -180,7 +159,7 @@ namespace Migration.Shipbuilding.Services
             var resources = await _dbContext.ResourcesShipbuilding
                 .Select(r => new ResourceDTO
                 {
-                    Company = "Shipbuilding",
+                    Company = ServiceName,
                     Title = r.Title,
                     Count = r.Count,
                     Unit = r.Unit
@@ -189,5 +168,141 @@ namespace Migration.Shipbuilding.Services
 
             return resources;
         }
+
+        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Select(n => new
+                {
+                    n.Hours,
+                    n.QuantityProduced,
+                    Profession = n.Profession!.Title,
+                    Resource = n.Resource!.Title
+                })
+                .ToListAsync();
+
+            return norms.Select(n => new ProfessionResourceNormDTO
+            {
+                Company = ServiceName,
+                Profession = n.Profession,
+                Resource = n.Resource,
+                Hours = n.Hours,
+                QuantityProduced = n.QuantityProduced
+            });
+        }
+
+        public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
+        {
+            // All resources
+            var resourcesMap = await _dbContext.ResourcesShipbuilding
+                .ToDictionaryAsync(r => r.Title, r => r);
+            if (resourcesMap.Count == 0) return [];
+
+            // All norms
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Where(n => n.Resource != null && n.Profession != null)
+                .Select(n => new
+                {
+                    ProfessionTitle = n.Profession!.Title,
+                    ResourceTitle = n.Resource!.Title,
+                    n.Hours,
+                    n.QuantityProduced
+                })
+                .ToListAsync();
+            if (norms.Count == 0) return [];
+
+            // Employee counts
+            var employeeCounts = _dbContext.EmployeeProfessions
+                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                .GroupBy(x => x.Profession.Title)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            // Grouping norms by resource
+            var normsByResource = norms.GroupBy(n => n.ResourceTitle)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Calculate forecast
+            var forecast = new List<ResourceForecastDTO>();
+
+            foreach (var resourceTitle in resourcesMap.Keys)
+            {
+                var resource = resourcesMap[resourceTitle];
+
+                // Limit for resource-profession
+                var producedAmount = 0m;
+                if (normsByResource.ContainsKey(resourceTitle))
+                {
+                    var limits = new List<decimal>();
+
+                    foreach (var norm in normsByResource[resourceTitle])
+                    {
+                        // How many hours we have for profession-product pair
+                        var employeesCount = employeeCounts.ContainsKey(norm.ProfessionTitle) ? employeeCounts[norm.ProfessionTitle] : 0;
+                        var productsForProfession = norms.Count(n => n.ProfessionTitle == norm.ProfessionTitle);
+                        var totalHoursPerDay = employeesCount * WORK_HOURS_PER_DAY / productsForProfession;
+
+                        // How many units we can produce
+                        var portionsPerDay = (decimal)totalHoursPerDay / norm.Hours * norm.QuantityProduced;
+                        limits.Add(portionsPerDay);
+                    }
+
+                    producedAmount = limits.Min() * days;
+                }
+
+                forecast.Add(new ResourceForecastDTO
+                {
+                    Company = ServiceName,
+                    Resource = resourceTitle,
+                    CurrentAmount = resource.Count,
+                    Unit = resource.Unit,
+                    Days = days,
+                    ProducedAmount = producedAmount,
+                    TotalAmount = resource.Count + producedAmount
+                });
+            }
+
+            return forecast;
+        }
+
+        #region Helpers
+
+        private static Dictionary<string, object> CreateAdditionalData(EmployeeShipbuilding employee)
+        {
+            return new Dictionary<string, object>
+            {
+                { "CanDesignShip", employee.CanDesignShip },
+                { "CanCarpentry", employee.CanCarpentry },
+                { "CanWeld", employee.CanWeld },
+                { "CanShipyard", employee.CanShipyard },
+                { "CanPaint", employee.CanPaint },
+                { "CanRig", employee.CanRig }
+            };
+        }
+
+        private static bool ParseBool(Dictionary<string, object> data, string key)
+        {
+            if (!data.TryGetValue(key, out var value)) return false;
+            return value.ToString() == "true";
+        }
+
+        private static bool CountByColumn(EmployeeShipbuilding e, string column)
+        {
+            return column switch
+            {
+                "CanDesignShip" => e.CanDesignShip,
+                "CanCarpentry" => e.CanCarpentry,
+                "CanWeld" => e.CanWeld,
+                "CanPaint" => e.CanPaint,
+                "CanRig" => e.CanRig,
+                "CanShipyard" => e.CanShipyard,
+                _ => false
+            };
+        }
+
+        #endregion
     }
 }

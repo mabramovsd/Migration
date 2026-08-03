@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Migration.Shipbuilding;
+using Migration.Agro;
 
 #nullable disable
 
-namespace Migration.Shipbuilding.Migrations
+namespace Migration.Agro.Migrations
 {
-    [DbContext(typeof(ShipbuildingDBContext))]
-    [Migration("20260715081612_Professions")]
-    partial class Professions
+    [DbContext(typeof(AgroDBContext))]
+    [Migration("20260801114332_AddNewProfessionsColumns")]
+    partial class AddNewProfessionsColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,30 +25,39 @@ namespace Migration.Shipbuilding.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeShipbuilding", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.EmployeeAgro", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("CanCarpentry")
+                    b.Property<bool>("HasTracktorLicense")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("CanDesignShip")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("CanWeld")
+                    b.Property<bool>("IsCattleman")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMilker")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMiller")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPoultryFarmer")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVegetableGrower")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
-                    b.ToTable("EmployeesShipbuilding");
+                    b.ToTable("EmployeesAgro");
                 });
 
-            modelBuilder.Entity("Migration.Shipbuilding.Entities.Profession", b =>
+            modelBuilder.Entity("Migration.Agro.Entities.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -65,6 +74,28 @@ namespace Migration.Shipbuilding.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Professions");
+                });
+
+            modelBuilder.Entity("Migration.Agro.Entities.ResourceAgro", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Count")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResourcesAgro");
                 });
 #pragma warning restore 612, 618
         }

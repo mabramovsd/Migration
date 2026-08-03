@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Migration.Shipbuilding.DTO;
+using Migration.Shipbuilding.Entities;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Migration.Shipbuilding
@@ -16,10 +16,30 @@ namespace Migration.Shipbuilding
         public DbSet<EmployeeShipbuilding> EmployeesShipbuilding { get; set; }
         public DbSet<Profession> Professions { get; set; }
         public DbSet<ResourceShipbuilding> ResourcesShipbuilding { get; set; }
+        public DbSet<ProfessionResourceNorm> ProfessionResourceNorms { get; set; }
+        public DbSet<EmployeeProfession> EmployeeProfessions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // ProfessionResourceNorm FK relationships
+            modelBuilder.Entity<ProfessionResourceNorm>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne<Profession>(e => e.Profession)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProfessionId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<ResourceShipbuilding>(e => e.Resource)
+                    .WithMany()
+                    .HasForeignKey(e => e.ResourceId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 

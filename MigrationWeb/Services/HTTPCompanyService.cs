@@ -164,6 +164,34 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
+    public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionResourceNormDTO>>("api/v1/professions/norms");
+            return result ?? Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get profession resource norms from HTTP service");
+            return Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+    }
+
+    public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v1/resources/forecast?days={days}");
+            return result ?? Enumerable.Empty<ResourceForecastDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get profession resource forecast from HTTP service");
+            return Enumerable.Empty<ResourceForecastDTO>();
+        }
+    }
+
     private async Task<T?> GetFromJsonAsync<T>(string requestUri)
     {
         using var response = await _httpClient.GetAsync(requestUri);

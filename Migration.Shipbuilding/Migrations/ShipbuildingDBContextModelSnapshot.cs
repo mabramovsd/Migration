@@ -22,7 +22,32 @@ namespace Migration.Shipbuilding.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.EmployeeShipbuilding", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeProfession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("FireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId");
+
+                    b.ToTable("EmployeeProfessions");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,6 +57,15 @@ namespace Migration.Shipbuilding.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("CanDesignShip")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanPaint")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRig")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanShipyard")
                         .HasColumnType("bit");
 
                     b.Property<bool>("CanWeld")
@@ -45,7 +79,7 @@ namespace Migration.Shipbuilding.Migrations
                     b.ToTable("EmployeesShipbuilding");
                 });
 
-            modelBuilder.Entity("Migration.Shipbuilding.DTO.Profession", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,6 +96,85 @@ namespace Migration.Shipbuilding.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Professions");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ProfessionResourceNorm", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Hours")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("QuantityProduced")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId");
+
+                    b.HasIndex("ResourceId");
+
+                    b.ToTable("ProfessionResourceNorms");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ResourceShipbuilding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Count")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResourcesShipbuilding");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeProfession", b =>
+                {
+                    b.HasOne("Migration.Shipbuilding.Entities.Profession", "Profession")
+                        .WithMany()
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profession");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ProfessionResourceNorm", b =>
+                {
+                    b.HasOne("Migration.Shipbuilding.Entities.Profession", "Profession")
+                        .WithMany()
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Migration.Shipbuilding.Entities.ResourceShipbuilding", "Resource")
+                        .WithMany()
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Profession");
+
+                    b.Navigation("Resource");
                 });
 #pragma warning restore 612, 618
         }

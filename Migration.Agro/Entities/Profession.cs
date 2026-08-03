@@ -1,4 +1,4 @@
-﻿namespace Migration.Shipbuilding.DTO
+namespace Migration.Agro.Entities
 {
     public class Profession
     {
@@ -13,7 +13,7 @@
         public required string Title { get; set; }
 
         /// <summary>
-        /// Column in table <see cref="EmployeeShipbuilding"/>
+        /// Column in table <see cref="EmployeeAgro"/>
         /// </summary>
         public required string Column { get; set; }
     }

@@ -29,4 +29,10 @@ public class ProfessionsController : ControllerBase
     {
         return await _companyService.GetProfessionsAsync();
     }
+
+    [HttpGet("Norms")]
+    public async Task<IEnumerable<ProfessionResourceNormDTO>> GetNorms()
+    {
+        return await _companyService.GetProfessionResourceNormsAsync();
+    }
 }

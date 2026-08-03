@@ -95,5 +95,15 @@ namespace Migration.NurseryHome.Services
         {
             return new List<ResourceDTO>();
         }
+
+        public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
+        }
+
+        public Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
+        {
+            return Task.FromResult<IEnumerable<ResourceForecastDTO>>(Array.Empty<ResourceForecastDTO>());
+        }
     }
 }

@@ -12,8 +12,8 @@ using Migration.Shipbuilding;
 namespace Migration.Shipbuilding.Migrations
 {
     [DbContext(typeof(ShipbuildingDBContext))]
-    [Migration("20260715081612_Professions")]
-    partial class Professions
+    [Migration("20260803092113_NewProfessions")]
+    partial class NewProfessions
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,15 @@ namespace Migration.Shipbuilding.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("CanDesignShip")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanPaint")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRig")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanShipyard")
                         .HasColumnType("bit");
 
                     b.Property<bool>("CanWeld")
@@ -65,6 +74,28 @@ namespace Migration.Shipbuilding.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Professions");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ResourceShipbuilding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Count")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ResourcesShipbuilding");
                 });
 #pragma warning restore 612, 618
         }

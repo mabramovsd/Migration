@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Migration.Agro;
+using Migration.Shipbuilding;
 
 #nullable disable
 
-namespace Migration.Agro.Migrations
+namespace Migration.Shipbuilding.Migrations
 {
-    [DbContext(typeof(AgroDBContext))]
-    partial class AgroDBContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(ShipbuildingDBContext))]
+    [Migration("20260803104358_Table EmployeeProfessions")]
+    partial class TableEmployeeProfessions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,39 +25,64 @@ namespace Migration.Agro.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Migration.Agro.Entities.EmployeeAgro", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeProfession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("HasTracktorLicense")
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("FireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId");
+
+                    b.ToTable("EmployeeProfessions");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeShipbuilding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("CanCarpentry")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsCattleman")
+                    b.Property<bool>("CanDesignShip")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanPaint")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRig")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanShipyard")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanWeld")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsMilker")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsMiller")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPoultryFarmer")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsVegetableGrower")
-                        .HasColumnType("bit");
-
                     b.HasKey("Id");
 
-                    b.ToTable("EmployeesAgro");
+                    b.ToTable("EmployeesShipbuilding");
                 });
 
-            modelBuilder.Entity("Migration.Agro.Entities.Profession", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.Profession", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -73,7 +101,7 @@ namespace Migration.Agro.Migrations
                     b.ToTable("Professions");
                 });
 
-            modelBuilder.Entity("Migration.Agro.Entities.ProfessionResourceNorm", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ProfessionResourceNorm", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,7 +128,7 @@ namespace Migration.Agro.Migrations
                     b.ToTable("ProfessionResourceNorms");
                 });
 
-            modelBuilder.Entity("Migration.Agro.Entities.ResourceAgro", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ResourceShipbuilding", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -119,22 +147,37 @@ namespace Migration.Agro.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ResourcesAgro");
+                    b.ToTable("ResourcesShipbuilding");
                 });
 
-            modelBuilder.Entity("Migration.Agro.Entities.ProfessionResourceNorm", b =>
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.EmployeeProfession", b =>
                 {
-                    b.HasOne("Migration.Agro.Entities.Profession", null)
+                    b.HasOne("Migration.Shipbuilding.Entities.Profession", "Profession")
+                        .WithMany()
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Profession");
+                });
+
+            modelBuilder.Entity("Migration.Shipbuilding.Entities.ProfessionResourceNorm", b =>
+                {
+                    b.HasOne("Migration.Shipbuilding.Entities.Profession", "Profession")
                         .WithMany()
                         .HasForeignKey("ProfessionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Migration.Agro.Entities.ResourceAgro", null)
+                    b.HasOne("Migration.Shipbuilding.Entities.ResourceShipbuilding", "Resource")
                         .WithMany()
                         .HasForeignKey("ResourceId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Profession");
+
+                    b.Navigation("Resource");
                 });
 #pragma warning restore 612, 618
         }

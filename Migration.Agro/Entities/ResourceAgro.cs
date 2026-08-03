@@ -1,6 +1,6 @@
-namespace Migration.Shipbuilding.DTO
+namespace Migration.Agro.Entities
 {
-    public class ResourceShipbuilding
+    public class ResourceAgro
     {
         /// <summary>
         /// Resource Identifier (unique)

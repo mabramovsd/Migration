@@ -1,4 +1,4 @@
-﻿namespace Migration.Shipbuilding.DTO
+﻿namespace Migration.Shipbuilding.Entities
 {
     public class EmployeeShipbuilding
     {
@@ -22,5 +22,17 @@
         /// Can weld
         /// </summary>
         public bool CanWeld { get; set; }
+        /// <summary>
+        /// Can shipyard
+        /// </summary>
+        public bool CanShipyard { get; set; }
+        /// <summary>
+        /// Can paint
+        /// </summary>
+        public bool CanPaint { get; set; }
+        /// <summary>
+        /// Can rig
+        /// </summary>
+        public bool CanRig { get; set; }
     }
 }

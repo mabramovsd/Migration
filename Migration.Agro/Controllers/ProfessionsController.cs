@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
+using Migration.Contracts.DTO.Resources;
 
 namespace Migration.Agro.Controllers;
 
@@ -28,5 +29,11 @@ public class ProfessionsController : ControllerBase
     public async Task<IEnumerable<ProfessionDTO>> GetProfessions()
     {
         return await _companyService.GetProfessionsAsync();
+    }
+
+    [HttpGet("Norms")]
+    public async Task<IEnumerable<ProfessionResourceNormDTO>> GetNorms()
+    {
+        return await _companyService.GetProfessionResourceNormsAsync();
     }
 }
