@@ -124,17 +124,17 @@ namespace Migration.Shipbuilding.Services
         {
             var professions = await _dbContext.Professions.ToListAsync();
 
-            var table = _dbContext.EmployeeProfessions
+            var employeeCounts = _dbContext.EmployeeProfessions
                 .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
                 .GroupBy(x => x.Profession.Title)
                 .ToDictionary(x => x.Key, x => x.Count());
-            table.Add("Все", _dbContext.EmployeesShipbuilding.Count());
+            employeeCounts.Add("Все", _dbContext.EmployeesShipbuilding.Count());
 
             var data = professions.Select(p => new ProfessionCountDTO
             {
                 Id = p.Id,
                 ProfessionTitle = p.Title,
-                Count = table.ContainsKey(p.Title) ? table[p.Title] : 0
+                Count = employeeCounts.ContainsKey(p.Title) ? employeeCounts[p.Title] : 0
             }).ToList();
 
             return data;
@@ -193,12 +193,80 @@ namespace Migration.Shipbuilding.Services
             });
         }
 
-        public Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
+        public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
         {
-            return Task.FromResult<IEnumerable<ResourceForecastDTO>>(Array.Empty<ResourceForecastDTO>());
+            // All resources
+            var resourcesMap = await _dbContext.ResourcesShipbuilding
+                .ToDictionaryAsync(r => r.Title, r => r);
+            if (resourcesMap.Count == 0) return [];
+
+            // All norms
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Where(n => n.Resource != null && n.Profession != null)
+                .Select(n => new
+                {
+                    ProfessionTitle = n.Profession!.Title,
+                    ResourceTitle = n.Resource!.Title,
+                    n.Hours,
+                    n.QuantityProduced
+                })
+                .ToListAsync();
+            if (norms.Count == 0) return [];
+
+            // Employee counts
+            var employeeCounts = _dbContext.EmployeeProfessions
+                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
+                .GroupBy(x => x.Profession.Title)
+                .ToDictionary(x => x.Key, x => x.Count());
+
+            // Grouping norms by resource
+            var normsByResource = norms.GroupBy(n => n.ResourceTitle)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Calculate forecast
+            var forecast = new List<ResourceForecastDTO>();
+
+            foreach (var resourceTitle in resourcesMap.Keys)
+            {
+                var resource = resourcesMap[resourceTitle];
+
+                // Limit for resource-profession
+                var producedAmount = 0m;
+                if (normsByResource.ContainsKey(resourceTitle))
+                {
+                    var limits = new List<decimal>();
+
+                    foreach (var norm in normsByResource[resourceTitle])
+                    {
+                        // How many hours we have for profession-product pair
+                        var employeesCount = employeeCounts.ContainsKey(norm.ProfessionTitle) ? employeeCounts[norm.ProfessionTitle] : 0;
+                        var productsForProfession = norms.Count(n => n.ProfessionTitle == norm.ProfessionTitle);
+                        var totalHoursPerDay = employeesCount * WORK_HOURS_PER_DAY / productsForProfession;
+
+                        // How many units we can produce
+                        var portionsPerDay = (decimal)totalHoursPerDay / norm.Hours * norm.QuantityProduced;
+                        limits.Add(portionsPerDay);
+                    }
+
+                    producedAmount = limits.Min() * days;
+                }
+
+                forecast.Add(new ResourceForecastDTO
+                {
+                    Company = ServiceName,
+                    Resource = resourceTitle,
+                    CurrentAmount = resource.Count,
+                    Unit = resource.Unit,
+                    Days = days,
+                    ProducedAmount = producedAmount,
+                    TotalAmount = resource.Count + producedAmount
+                });
+            }
+
+            return forecast;
         }
-
-
 
         #region Helpers
 
