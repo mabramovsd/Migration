@@ -12,6 +12,8 @@ namespace Migration.Shipbuilding.Services
 {
     public class HRServiceShipbuilding : ICompanyService
     {
+        private const string ServiceName = "Shipbuilding";
+        private const decimal WORK_HOURS_PER_DAY = 5;
         private readonly ShipbuildingDBContext _dbContext;
         private readonly ILogger<HRServiceShipbuilding> _logger;
 
@@ -159,7 +161,7 @@ namespace Migration.Shipbuilding.Services
             var professions = await _dbContext.Professions
                 .Select(p => new ProfessionDTO
                 {
-                    Company = "Shipbuilding",
+                    Company = ServiceName,
                     Title = p.Title,
                     Column = p.Column
                 })
@@ -173,7 +175,7 @@ namespace Migration.Shipbuilding.Services
             var resources = await _dbContext.ResourcesShipbuilding
                 .Select(r => new ResourceDTO
                 {
-                    Company = "Shipbuilding",
+                    Company = ServiceName,
                     Title = r.Title,
                     Count = r.Count,
                     Unit = r.Unit
@@ -183,9 +185,28 @@ namespace Migration.Shipbuilding.Services
             return resources;
         }
 
-        public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
         {
-            return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Select(n => new
+                {
+                    n.Hours,
+                    n.QuantityProduced,
+                    Profession = n.Profession!.Title,
+                    Resource = n.Resource!.Title
+                })
+                .ToListAsync();
+
+            return norms.Select(n => new ProfessionResourceNormDTO
+            {
+                Company = ServiceName,
+                Profession = n.Profession,
+                Resource = n.Resource,
+                Hours = n.Hours,
+                QuantityProduced = n.QuantityProduced
+            });
         }
 
         public Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
