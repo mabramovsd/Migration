@@ -26,6 +26,7 @@ namespace Migration.Shipbuilding.Services
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesShipbuilding
+                .Where(emp => !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
@@ -56,7 +57,7 @@ namespace Migration.Shipbuilding.Services
 
             //Mapping
             return await _dbContext.EmployeesShipbuilding
-                .Where(emp => employeeIds.Contains(emp.Id))
+                .Where(emp => employeeIds.Contains(emp.Id) && !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,

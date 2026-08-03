@@ -163,6 +163,7 @@ public class HRService
     {
         //Employees grouped by company
         var data = await _coreDBContext.Employees
+            .Where(emp => !emp.IsDeleted)
             .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
             .Select(g => new
             {
@@ -248,11 +249,11 @@ public class HRService
             {
                 _coreDBContext.Employees.Remove(employee);
                 await _coreDBContext.SaveChangesAsync();
+            }
 
-                if (service != null)
-                {
-                    await service.RemoveEmployeeAsync(request);
-                }
+            if (service != null)
+            {
+                await service.RemoveEmployeeAsync(request);
             }
 
             return true;

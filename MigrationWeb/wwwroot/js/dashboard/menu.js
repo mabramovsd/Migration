@@ -196,20 +196,45 @@ async function handleAddEmployeeFormSubmit(event) {
     }
 }
 
-// Edit employee
-function handleEditEmployee(id) {
-    alert(id);
+// Handle edit employee - stub
+function handleEditEmployee(employeeId) {
+    alert('Редактирование сотрудника: ' + employeeId);
 }
 
-// Delete employee
-function handleDeleteEmployee(id) {
-    alert(id);
+// Handle delete employee - confirm and call API
+async function handleDeleteEmployee(employeeId) {
+    if (!confirm('Вы уверены, что хотите удалить сотрудника?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/HR/Delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: employeeId,
+                softDelete: true
+            })
+        });
+
+        if (response.ok) {
+            alert('Сотрудник успешно удалён');
+            handleIndexClick(); // Refresh dashboard
+        } else {
+            const error = await response.json();
+            alert('Ошибка при удалении сотрудника: ' + (error.message || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Ошибка при удалении сотрудника: ' + error.message);
+    }
 }
 
 // Export functions for use in other modules
 window.handleMenuAction = handleMenuAction;
 window.handleAddEmployeeFormSubmit = handleAddEmployeeFormSubmit;
 window.handleCompanyChange = handleCompanyChange;
-window.handleDeleteEmployee = handleDeleteEmployee;
 window.handleEditEmployee = handleEditEmployee;
+window.handleDeleteEmployee = handleDeleteEmployee;
 window.Guid = Guid;
