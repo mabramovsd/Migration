@@ -196,8 +196,20 @@ async function handleAddEmployeeFormSubmit(event) {
     }
 }
 
+// Edit employee
+function handleEditEmployee(id) {
+    alert(id);
+}
+
+// Delete employee
+function handleDeleteEmployee(id) {
+    alert(id);
+}
+
 // Export functions for use in other modules
 window.handleMenuAction = handleMenuAction;
 window.handleAddEmployeeFormSubmit = handleAddEmployeeFormSubmit;
 window.handleCompanyChange = handleCompanyChange;
+window.handleDeleteEmployee = handleDeleteEmployee;
+window.handleEditEmployee = handleEditEmployee;
 window.Guid = Guid;

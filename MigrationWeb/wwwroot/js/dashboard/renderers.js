@@ -20,6 +20,7 @@ function renderEmployeesTable(employeesData, title) {
                         <th>Имя</th>
                         <th>Дата рождения</th>
                         <th>Компания</th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,10 @@ function renderEmployeesTable(employeesData, title) {
                             <td>${escapeHtml(item.fullName)}</td>
                             <td>${item.birthDate ? new Date(item.birthDate).toLocaleDateString('ru-RU') : 'Не указано'}</td>
                             <td>${escapeHtml(item.currentCompany)}</td>
+                            <td>
+                                <button onclick="handleEditEmployee('${item.id}')" style="padding: 0.35rem 0.75rem; margin-right: 0.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">✏️ Редактировать</button>
+                                <button onclick="handleDeleteEmployee('${item.id}')" style="padding: 0.35rem 0.75rem; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">🗑️ Удалить</button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
