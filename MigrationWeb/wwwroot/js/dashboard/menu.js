@@ -196,9 +196,137 @@ async function handleAddEmployeeFormSubmit(event) {
     }
 }
 
-// Handle edit employee - stub
-function handleEditEmployee(employeeId) {
-    alert('Редактирование сотрудника: ' + employeeId);
+// Handle edit employee - loads employee data and shows edit form
+async function handleEditEmployee(employeeId) {
+    const dashboardDiv = document.getElementById('dashboard');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+
+    try {
+        loadingDiv.style.display = 'block';
+        loadingDiv.textContent = 'Загрузка данных сотрудника...';
+        errorDiv.style.display = 'none';
+
+        // Fetch employee data
+        const responseEmployee = await fetch(`/HR/GetById?employeeId=${employeeId}`);
+        if (!responseEmployee.ok) {
+            throw new Error(`Ошибка при загрузке сотрудника: ${responseEmployee.status}`);
+        }
+        const employeeData = await responseEmployee.json();
+
+        // Fetch companies and professions
+        const [responseCompanies, responseProfessions] = await Promise.all([
+            fetch('/Company/All'),
+            fetch('/Company/Professions')
+        ]);
+
+        if (!responseCompanies.ok) {
+            throw new Error(`Ошибка при загрузке компаний: ${responseCompanies.status}`);
+        }
+        if (!responseProfessions.ok) {
+            throw new Error(`Ошибка при загрузке профессий: ${responseProfessions.status}`);
+        }
+
+        const companies = await responseCompanies.json();
+        const professions = await responseProfessions.json();
+
+        // Store employee ID for the submit handler
+        window._editingEmployeeId = employeeId;
+
+        loadingDiv.style.display = 'none';
+        dashboardDiv.style.display = 'block';
+
+        // Render edit form
+        dashboardDiv.innerHTML = renderEditEmployeeForm(companies, professions, employeeData);
+
+        // Attach form submit handler
+        setTimeout(function () {
+            const form = document.getElementById('editEmployeeForm');
+            if (form) {
+                form.addEventListener('submit', handleEditEmployeeFormSubmit);
+            }
+
+            // Attach company change handler for profession checkboxes
+            const companySelect = document.getElementById('employeeCompany');
+            if (companySelect) {
+                companySelect.addEventListener('change', handleCompanyChange);
+            }
+        }, 0);
+    } catch (error) {
+        loadingDiv.style.display = 'none';
+        errorDiv.style.display = 'block';
+        errorDiv.textContent = `Ошибка: ${error.message}`;
+        console.error('Edit employee error:', error);
+    }
+}
+
+// Function to handle edit form submission
+async function handleEditEmployeeFormSubmit(event) {
+    event.preventDefault();
+    
+    const name = document.getElementById('employeeName').value.trim();
+    const birthDate = document.getElementById('employeeBirthDate').value;
+    const companyId = document.getElementById('employeeCompany').value;
+    
+    if (!name || !birthDate || !companyId) {
+        alert('Пожалуйста, заполните все поля');
+        return;
+    }
+    
+    // Get employee ID from the page (we need to store it somewhere)
+    // For now, we'll use a global variable set by handleEditEmployee
+    if (!window._editingEmployeeId) {
+        alert('Ошибка: не указан ID редактируемого сотрудника');
+        return;
+    }
+    
+    // Get all professions from data attribute
+    const professionCheckboxesDiv = document.getElementById('professionCheckboxes');
+    const allProfessions = JSON.parse(professionCheckboxesDiv.dataset.professions || '[]');
+    
+    // Filter professions by selected company
+    const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
+    
+    // Build AdditionalData: all professions with true/false based on checkbox
+    const additionalData = {};
+    companyProfessions.forEach(profession => {
+        const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
+        additionalData[profession.column] = isChecked ? "true" : "false";
+    });
+    
+    // Build UpdateEmployeeRequest model
+    const request = {
+        Event: "EditEmployee",
+        CoreData: {
+            Id: window._editingEmployeeId,
+            BirthDate: birthDate,
+            FullName: name,
+            CurrentCompany: companyId,
+            IsDeleted: false
+        },
+        AdditionalData: additionalData
+    };
+    
+    try {
+        const response = await fetch('/HR/Update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(request)
+        });
+        
+        if (response.ok) {
+            alert('Сотрудник успешно обновлён!');
+            window._editingEmployeeId = null; // Clear the global variable
+            handleIndexClick(); // Return to dashboard
+        } else {
+            const error = await response.json();
+            alert(`Ошибка при обновлении сотрудника: ${error.message}`);
+        }
+    } catch (error) {
+        alert(`Ошибка при обновлении сотрудника: ${error.message}`);
+    }
 }
 
 // Handle delete employee - confirm and call API
@@ -236,5 +364,6 @@ window.handleMenuAction = handleMenuAction;
 window.handleAddEmployeeFormSubmit = handleAddEmployeeFormSubmit;
 window.handleCompanyChange = handleCompanyChange;
 window.handleEditEmployee = handleEditEmployee;
+window.handleEditEmployeeFormSubmit = handleEditEmployeeFormSubmit;
 window.handleDeleteEmployee = handleDeleteEmployee;
 window.Guid = Guid;
