@@ -30,6 +30,47 @@ public class HTTPCompanyService : ICompanyService
         };
     }
 
+    #region Employees
+
+    public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+    {
+        try
+        {
+            var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
+            using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync("api/v1/hr/employees", content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var deserializedContent = JsonSerializer.Deserialize<Guid>(responseContent, _jsonOptions);
+                return deserializedContent != default ? deserializedContent : Guid.Empty;
+            }
+
+            _logger.LogError("Failed to add employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
+            return Guid.Empty;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add employee via HTTP service");
+            return Guid.Empty;
+        }
+    }
+
+    public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId)
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<EmployeeAdditionalInfo?>($"api/v1/hr/employees/{employeeId}");
+            return result ?? null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get employees from HTTP service");
+            return null;
+        }
+    }
+
     public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
     {
         try
@@ -58,11 +99,11 @@ public class HTTPCompanyService : ICompanyService
             {
                 queryString.Add($"Profession={Uri.EscapeDataString(filter.Profession)}");
             }
-            
-            var requestUri = queryString.Count > 0 
-                ? $"api/v1/hr/filter?{string.Join("&", queryString)}" 
+
+            var requestUri = queryString.Count > 0
+                ? $"api/v1/hr/filter?{string.Join("&", queryString)}"
                 : "api/v1/hr/employees";
-            
+
             var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>(requestUri);
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
         }
@@ -73,45 +114,20 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
-    public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
-    {
-        try
-        {
-            var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
-            using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-            
-            var response = await _httpClient.PostAsync("api/v1/hr/employees", content);
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var deserializedContent = JsonSerializer.Deserialize<Guid>(responseContent, _jsonOptions);
-                return deserializedContent != default ? deserializedContent : Guid.Empty;
-            }
-            
-            _logger.LogError("Failed to add employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
-            return Guid.Empty;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to add employee via HTTP service");
-            return Guid.Empty;
-        }
-    }
-
     public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
     {
         try
         {
             var url = $"api/v1/hr/employees/{request.Id}?softDelete={request.SoftDelete}";
             var response = await _httpClient.DeleteAsync(url);
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var deserializedContent = JsonSerializer.Deserialize<bool>(responseContent, _jsonOptions);
                 return deserializedContent;
             }
-            
+
             _logger.LogError("Failed to remove employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
             return false;
         }
@@ -121,6 +137,10 @@ public class HTTPCompanyService : ICompanyService
             return false;
         }
     }
+
+    #endregion Employees
+
+    #region Professions
 
     public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
     {
@@ -150,20 +170,6 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
-    public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
-    {
-        try
-        {
-            var result = await GetFromJsonAsync<IEnumerable<ResourceDTO>>("api/v1/resources");
-            return result ?? Enumerable.Empty<ResourceDTO>();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to get resources from HTTP service");
-            return Enumerable.Empty<ResourceDTO>();
-        }
-    }
-
     public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
     {
         try
@@ -175,6 +181,24 @@ public class HTTPCompanyService : ICompanyService
         {
             _logger.LogError(ex, "Failed to get profession resource norms from HTTP service");
             return Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+    }
+
+    #endregion Professions
+
+    #region Resources
+
+    public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+    {
+        try
+        {
+            var result = await GetFromJsonAsync<IEnumerable<ResourceDTO>>("api/v1/resources");
+            return result ?? Enumerable.Empty<ResourceDTO>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get resources from HTTP service");
+            return Enumerable.Empty<ResourceDTO>();
         }
     }
 
@@ -191,6 +215,8 @@ public class HTTPCompanyService : ICompanyService
             return Enumerable.Empty<ResourceForecastDTO>();
         }
     }
+
+    #endregion Resources
 
     private async Task<T?> GetFromJsonAsync<T>(string requestUri)
     {

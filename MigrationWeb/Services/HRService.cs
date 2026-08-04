@@ -32,10 +32,82 @@ public class HRService
             _ => null
         };
 
+    #region Employees
+
+    public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+    {
+        var employeeId = Guid.NewGuid();
+        request.CoreData.Id = employeeId;
+
+        var companyName = request.CoreData.CurrentCompany ?? string.Empty;
+
+        var service = GetServiceForCompany(companyName);
+        if (service is null)
+        {
+            _logger.LogError("No service registered for company: {Company}", companyName);
+            throw new InvalidOperationException($"Unknown company type: {companyName}");
+        }
+
+        try
+        {
+            // Core part
+            await _coreDBContext.Employees.AddAsync(new Employee
+            {
+                Id = employeeId,
+                FullName = request.CoreData.FullName,
+                CurrentCompany = companyName,
+                BirthDate = request.CoreData.BirthDate,
+            });
+            await _coreDBContext.SaveChangesAsync();
+
+            // Special part
+            await service.AddEmployeeAsync(request);
+
+            return employeeId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to add employee {EmployeeId} to company {Company}", employeeId, companyName);
+            throw;
+        }
+    }
+
+    public async Task<EmployeeSummaryInfo?> GetEmployeeByIdAsync(Guid employeeId)
+    {
+        // Core data
+        var employeeFromCore = await _coreDBContext.Employees.FindAsync(employeeId);
+        if (employeeFromCore == null || employeeFromCore.IsDeleted)
+        {
+            return null;
+        }
+
+        // Additional data
+        EmployeeAdditionalInfo? employeeAdditionalInfo = null;
+        var service = GetServiceForCompany(employeeFromCore.CurrentCompany);
+        if (service is null)
+        {
+            _logger.LogWarning("No service registered for company type: {CompanyType}", employeeFromCore.CurrentCompany);
+        }
+        else
+        {
+            employeeAdditionalInfo = await service.GetEmployeeByIdAsync(employeeId);
+        }
+
+        //Some formatting for code simplifying
+        return new EmployeeSummaryInfo
+        {
+            Id = employeeFromCore.Id,
+            FullName = employeeFromCore.FullName,
+            CurrentCompany = employeeFromCore.CurrentCompany,
+            BirthDate = employeeFromCore.BirthDate,
+            AdditionalData = employeeAdditionalInfo != null ? employeeAdditionalInfo.AdditionalData : null
+        };
+    }
+
     /// <summary>
     /// List of employees
     /// </summary>
-    public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeList()
+    public async Task<IEnumerable<EmployeeSummaryInfo>> GetEmployeeListAsync()
     {
         // Core data
         var employeesFromCore = await _coreDBContext.Employees.ToListAsync();
@@ -89,11 +161,10 @@ public class HRService
         }).ToList();
     }
 
-
     /// <summary>
     /// List of employees
     /// </summary>
-    public async Task<IEnumerable<EmployeeSummaryInfo>> GetFilteredEmployees(EmployeeFilter filter)
+    public async Task<IEnumerable<EmployeeSummaryInfo>> GetFilteredEmployeesAsync(EmployeeFilter filter)
     {
         //Filter by company
         IQueryable<Company> query = _coreDBContext.Companies;
@@ -159,71 +230,6 @@ public class HRService
             .ToList();
     }
 
-    public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatistics()
-    {
-        //Employees grouped by company
-        var data = await _coreDBContext.Employees
-            .Where(emp => !emp.IsDeleted)
-            .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
-            .Select(g => new
-            {
-                Company = g.Key,
-                Count = g.Count()
-            })
-            .ToListAsync();
-
-        int totalCount = data.Sum(x => x.Count);
-
-        // Adding company 'All' as first line
-        var finalResult = data.Select(x => new CompanyCountDTO
-        {
-            CompanyName = x.Company,
-            Count = x.Count
-        }).ToList();
-
-        finalResult.Insert(0, new CompanyCountDTO { CompanyName = "All", Count = totalCount });
-
-        return finalResult;
-    }
-
-    public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
-    {
-        var employeeId = Guid.NewGuid();
-        request.CoreData.Id = employeeId;
-
-        var companyName = request.CoreData.CurrentCompany ?? string.Empty;
-
-        var service = GetServiceForCompany(companyName);
-        if (service is null)
-        {
-            _logger.LogError("No service registered for company: {Company}", companyName);
-            throw new InvalidOperationException($"Unknown company type: {companyName}");
-        }
-
-        try
-        {
-            // Core part
-            await _coreDBContext.Employees.AddAsync(new Employee
-            {
-                Id = employeeId,
-                FullName = request.CoreData.FullName,
-                CurrentCompany = companyName,
-                BirthDate = request.CoreData.BirthDate,
-            });
-            await _coreDBContext.SaveChangesAsync();
-
-            // Special part
-            await service.AddEmployeeAsync(request);
-
-            return employeeId;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to add employee {EmployeeId} to company {Company}", employeeId, companyName);
-            throw;
-        }
-    }
-
     public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
     {
         var employee = await _coreDBContext.Employees.FindAsync(request.Id);
@@ -263,5 +269,34 @@ public class HRService
             _logger.LogError(ex, "Failed to remove employee {EmployeeId}", request.Id);
             return false;
         }
+    }
+
+    #endregion Employees
+
+    public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatisticsAsync()
+    {
+        //Employees grouped by company
+        var data = await _coreDBContext.Employees
+            .Where(emp => !emp.IsDeleted)
+            .GroupBy(e => e.CurrentCompany == null ? "Unknown" : e.CurrentCompany.ToLower())
+            .Select(g => new
+            {
+                Company = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
+
+        int totalCount = data.Sum(x => x.Count);
+
+        // Adding company 'All' as first line
+        var finalResult = data.Select(x => new CompanyCountDTO
+        {
+            CompanyName = x.Company,
+            Count = x.Count
+        }).ToList();
+
+        finalResult.Insert(0, new CompanyCountDTO { CompanyName = "All", Count = totalCount });
+
+        return finalResult;
     }
 }

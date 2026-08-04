@@ -5,7 +5,6 @@ using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
 using System.Linq.Expressions;
-using System.Diagnostics.Metrics;
 
 namespace Migration.Agro.Services
 {
@@ -23,6 +22,52 @@ namespace Migration.Agro.Services
             _logger = logger;
         }
 
+        #region Employees
+
+        public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+        {
+            try
+            {
+                // Parsing fields
+                var employee = new EmployeeAgro
+                {
+                    Id = request.CoreData.Id,
+                    HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense"),
+                    IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower"),
+                    IsMilker = ParseBool(request.AdditionalData, "IsMilker"),
+                    IsCattleman = ParseBool(request.AdditionalData, "IsCattleman"),
+                    IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer"),
+                    IsMiller = ParseBool(request.AdditionalData, "IsMiller")
+                };
+
+                // Saving to DB
+                await _dbContext.EmployeesAgro.AddAsync(employee);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add Agro employee: {ErrorMessage}", ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
+        public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId)
+        {
+            var entity = await _dbContext.EmployeesAgro.FindAsync(employeeId);
+
+            if (entity == null || entity.IsDeleted)
+            {
+                return null;
+            }
+
+            return new EmployeeAdditionalInfo
+            {
+                Id = entity.Id,
+                AdditionalData = CreateAdditionalData(entity)
+            };
+        }
+
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesAgro
@@ -34,7 +79,6 @@ namespace Migration.Agro.Services
                 })
                 .ToListAsync();
         }
-
 
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
         {
@@ -73,34 +117,6 @@ namespace Migration.Agro.Services
                 .ToListAsync();
         }
 
-        public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
-        {
-            try
-            {
-                // Parsing fields
-                var employee = new EmployeeAgro
-                {
-                    Id = request.CoreData.Id,
-                    HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense"),
-                    IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower"),
-                    IsMilker = ParseBool(request.AdditionalData, "IsMilker"),
-                    IsCattleman = ParseBool(request.AdditionalData, "IsCattleman"),
-                    IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer"),
-                    IsMiller = ParseBool(request.AdditionalData, "IsMiller")
-                };
-
-                // Saving to DB
-                await _dbContext.EmployeesAgro.AddAsync(employee);
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add Agro employee: {ErrorMessage}", ex.Message);
-            }
-
-            return request.CoreData.Id;
-        }
-
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
         {
             var entity = await _dbContext.EmployeesAgro.FindAsync(request.Id);
@@ -127,6 +143,10 @@ namespace Migration.Agro.Services
                 return false;
             }
         }
+
+        #endregion Employees
+
+        #region Professions
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
@@ -163,6 +183,34 @@ namespace Migration.Agro.Services
             return professions;
         }
 
+        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Select(n => new
+                {
+                    n.Hours,
+                    n.QuantityProduced,
+                    Profession = n.Profession!.Title,
+                    Resource = n.Resource!.Title
+                })
+                .ToListAsync();
+
+            return norms.Select(n => new ProfessionResourceNormDTO
+            {
+                Company = ServiceName,
+                Profession = n.Profession,
+                Resource = n.Resource,
+                Hours = n.Hours,
+                QuantityProduced = n.QuantityProduced
+            });
+        }
+
+        #endregion Professions
+
+        #region Resources
+
         public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
         {
             var resources = await _dbContext.ResourcesAgro
@@ -176,30 +224,6 @@ namespace Migration.Agro.Services
                 .ToListAsync();
 
             return resources;
-        }
-
-        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
-        {
-            var norms = await _dbContext.ProfessionResourceNorms
-                .Include(n => n.Profession)
-                .Include(n => n.Resource)
-                .Select(n => new 
-                { 
-                    n.Hours, 
-                    n.QuantityProduced, 
-                    Profession = n.Profession!.Title, 
-                    Resource = n.Resource!.Title 
-                })
-                .ToListAsync();
-
-            return norms.Select(n => new ProfessionResourceNormDTO
-            {
-                Company = ServiceName,
-                Profession = n.Profession,
-                Resource = n.Resource,
-                Hours = n.Hours,
-                QuantityProduced = n.QuantityProduced
-            });
         }
 
         public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
@@ -282,6 +306,8 @@ namespace Migration.Agro.Services
 
             return forecast;
         }
+
+        #endregion Resources
 
         #region Helpers
 

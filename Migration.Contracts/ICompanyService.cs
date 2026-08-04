@@ -10,11 +10,18 @@ namespace Migration.Contracts;
 /// </summary>
 public interface ICompanyService
 {
+    #region Employees
+
     /// <summary>
     /// Hire employee to the company
     /// </summary>
     Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request);
-    
+
+    /// <summary>
+    /// Getting employee info by id
+    /// </summary>
+    Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId);
+
     /// <summary>
     /// Getting list of company employees
     /// </summary>
@@ -30,6 +37,10 @@ public interface ICompanyService
     /// </summary>
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
 
+    #endregion Employees
+
+    #region Professions
+
     /// <summary>
     /// Getting list of professions with stats (count of employees)
     /// </summary>
@@ -41,17 +52,23 @@ public interface ICompanyService
     Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync();
 
     /// <summary>
+    /// Getting production norms (profession -> resource relationship)
+    /// </summary>
+    Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync();
+
+    #endregion Professions
+
+    #region Resources
+
+    /// <summary>
     /// Getting list of all available resources
     /// </summary>
     Task<IEnumerable<ResourceDTO>> GetResourcesAsync();
 
     /// <summary>
-    /// Getting production norms (profession -> resource relationship)
-    /// </summary>
-    Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync();
-
-    /// <summary>
     /// Getting forecast for production over a period
     /// </summary>
     Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days);
+
+    #endregion Resources
 }

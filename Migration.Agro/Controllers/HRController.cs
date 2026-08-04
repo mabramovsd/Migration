@@ -18,6 +18,19 @@ public class HRController : ControllerBase
         _logger = logger;
     }
 
+    [HttpPost("employees")]
+    public async Task<ActionResult<Guid>> AddEmployee([FromBody] CreateEmployeeRequest request)
+    {
+        var id = await _companyService.AddEmployeeAsync(request);
+        return Ok(id);
+    }
+
+    [HttpGet("employees/{id}")]
+    public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid id)
+    {
+        return await _companyService.GetEmployeeByIdAsync(id);
+    }
+
     [HttpGet("employees")]
     public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployees()
     {
@@ -28,13 +41,6 @@ public class HRController : ControllerBase
     public async Task<IEnumerable<EmployeeAdditionalInfo>> Get([FromQuery] EmployeeFilter filter)
     {
         return await _companyService.GetFilteredEmployees(filter);
-    }
-
-    [HttpPost("employees")]
-    public async Task<ActionResult<Guid>> AddEmployee([FromBody] CreateEmployeeRequest request)
-    {
-        var id = await _companyService.AddEmployeeAsync(request);
-        return Ok(id);
     }
 
     [HttpDelete("employees/{id}")]
