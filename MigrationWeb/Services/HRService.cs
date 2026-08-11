@@ -271,6 +271,62 @@ public class HRService
         }
     }
 
+    public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+    {
+        var employee = await _coreDBContext.Employees.FindAsync(request.CoreData.Id);
+        if (employee == null) return Guid.Empty;
+
+        var companyName = employee.CurrentCompany ?? string.Empty;
+
+        var oldService = GetServiceForCompany(companyName);
+        if (oldService == null)
+        {
+            _logger.LogWarning("No service registered for company '{Company}' of employee {EmployeeId}", companyName, request.CoreData.Id);
+        }
+
+        try
+        {
+            // Core part
+            employee.IsDeleted = request.CoreData.IsDeleted;
+            employee.FullName = request.CoreData.FullName;
+            employee.CurrentCompany = request.CoreData.CurrentCompany;
+            employee.BirthDate = request.CoreData.BirthDate;
+            await _coreDBContext.SaveChangesAsync();
+
+            // Special part
+            // Same company
+            if (companyName == employee.CurrentCompany)
+            {
+                await oldService.UpdateEmployeeAsync(request);
+            }
+            else
+            {
+                RemoveEmployeeRequest removeEmployeeRequest = new RemoveEmployeeRequest()
+                { 
+                    Id = request.CoreData.Id, 
+                    SoftDelete = true
+                };
+                await oldService.RemoveEmployeeAsync(removeEmployeeRequest);
+
+                var newService = GetServiceForCompany(request.CoreData.CurrentCompany);
+                if (newService == null)
+                {
+                    _logger.LogWarning("No service registered for company '{Company}' of employee {EmployeeId}", companyName, request.CoreData.Id);
+                }
+
+                await newService.AddEmployeeAsync(request);
+            }
+
+            return request.CoreData.Id;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update employee {EmployeeId}", request.CoreData.Id);
+            throw;
+        }
+
+    }
+
     #endregion Employees
 
     public async Task<IEnumerable<CompanyCountDTO>> GetEmployeeCompanyStatisticsAsync()

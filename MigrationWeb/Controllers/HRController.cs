@@ -23,7 +23,7 @@ namespace MigrationWeb.Controllers
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)
         {
             Guid userId = await _hrService.AddEmployeeAsync(request);
-            return Ok(new { message = "File successfully saved", userId });
+            return Ok(new { message = "Employee successfully created", userId });
         }
 
         [HttpGet("GetById")]
@@ -58,6 +58,13 @@ namespace MigrationWeb.Controllers
                 ? "Employee marked as deleted (soft delete)"
                 : "Employee was successfullt removed"
             });
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> Update([FromBody] CreateEmployeeRequest request)
+        {
+            Guid userId = await _hrService.UpdateEmployeeAsync(request);
+            return Ok(new { message = "Employee successfully updated", userId });
         }
 
         [HttpGet("Stats/CompanyCounts")]
