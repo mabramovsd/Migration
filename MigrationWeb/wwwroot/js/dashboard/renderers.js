@@ -20,6 +20,7 @@ function renderEmployeesTable(employeesData, title) {
                         <th>Имя</th>
                         <th>Дата рождения</th>
                         <th>Компания</th>
+                        <th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,6 +29,10 @@ function renderEmployeesTable(employeesData, title) {
                             <td>${escapeHtml(item.fullName)}</td>
                             <td>${item.birthDate ? new Date(item.birthDate).toLocaleDateString('ru-RU') : 'Не указано'}</td>
                             <td>${escapeHtml(item.currentCompany)}</td>
+                            <td>
+                                <button onclick="handleEditEmployee('${item.id}')" style="padding: 0.35rem 0.75rem; margin-right: 0.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">✏️ Редактировать</button>
+                                <button onclick="handleDeleteEmployee('${item.id}')" style="padding: 0.35rem 0.75rem; background-color: #dc3545; color: white; border: none; border-radius: 4px; font-size: 0.85rem; cursor: pointer;">🗑️ Удалить</button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -91,6 +96,81 @@ function renderAddEmployeeForm(companies, professions) {
                     
                     <button type="submit" style="padding: 0.75rem 1.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s;">
                         ➕ Создать сотрудника
+                    </button>
+                </form>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * Renders form for editing existing employee
+ * @param {Array} companies - Array of company objects
+ * @param {Array} professions - Array of profession objects
+ * @param {Object} employeeData - Employee data to pre-fill the form
+ * @returns {string} - HTML string for the form
+ */
+function renderEditEmployeeForm(companies, professions, employeeData) {
+    // Generate company options for dropdown with current company selected
+    const companyOptions = companies.map(company => 
+        `<option value="${escapeHtml(company.alias)}" ${company.alias === employeeData.currentCompany ? 'selected' : ''}>${escapeHtml(company.name)}</option>`
+    ).join('');
+    
+    // Store all professions in data attribute for JS to use
+    const professionsJson = JSON.stringify(professions || []);
+    
+    // Generate profession checkboxes container (initially empty, will be populated by JS)
+    const professionCheckboxesHtml = `
+        <div id="professionCheckboxes" data-professions="${escapeHtml(professionsJson)}" style="margin-top: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Выберите профессии:</label>
+            <p style="color: #666; font-size: 0.9rem;">Сначала выберите компанию выше</p>
+        </div>
+    `;
+    
+    // Format birthDate for datetime-local input (expected format: yyyy-MM-ddTHH:mm)
+    let birthDateValue = '';
+    if (employeeData.birthDate) {
+        const date = new Date(employeeData.birthDate);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        birthDateValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    return `
+        <div style="margin-top: 2rem;">
+            <div class="card-header" style="margin-bottom: 1rem;">
+                <h2>✏️ Редактировать сотрудника</h2>
+            </div>
+            <div style="max-width: 600px; margin: 0 auto;">
+                <form id="editEmployeeForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label for="employeeName" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Имя сотрудника:</label>
+                        <input type="text" id="employeeName" name="employeeName" value="${escapeHtml(employeeData.fullName)}" required 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                    
+                    <div>
+                        <label for="employeeBirthDate" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Дата рождения:</label>
+                        <input type="datetime-local" id="employeeBirthDate" name="employeeBirthDate" value="${birthDateValue}" required 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                    </div>
+                    
+                    <div>
+                        <label for="employeeCompany" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Компания:</label>
+                        <select id="employeeCompany" name="employeeCompany" required 
+                                style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; box-sizing: border-box;">
+                            <option value="">Выберите компанию</option>
+                            ${companyOptions}
+                        </select>
+                    </div>
+                    
+                    ${professionCheckboxesHtml}
+                    
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer; transition: background-color 0.2s;">
+                        ✏️ Сохранить изменения
                     </button>
                 </form>
             </div>
@@ -200,5 +280,6 @@ function renderAboutSystem(services) {
 // Export functions for use in other modules
 window.renderEmployeesTable = renderEmployeesTable;
 window.renderAddEmployeeForm = renderAddEmployeeForm;
+window.renderEditEmployeeForm = renderEditEmployeeForm;
 window.renderResourcesTable = renderResourcesTable;
 window.renderAboutSystem = renderAboutSystem;

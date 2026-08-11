@@ -18,21 +18,7 @@ namespace Migration.School.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
-        {
-            return await _dbContext.EmployeesSchool
-                .Select(employee => new EmployeeAdditionalInfo
-                {
-                    Id = employee.Id
-                })
-                .ToListAsync();
-        }
-
-
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
-        {
-            return await GetEmployeeListAsync();
-        }
+        #region Employees
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
         {
@@ -53,6 +39,39 @@ namespace Migration.School.Services
 
             return request.CoreData.Id;
         }
+
+        public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId)
+        {
+            var entity = await _dbContext.EmployeesSchool.FindAsync(employeeId);
+
+            if (entity == null || entity.IsDeleted)
+            {
+                return null;
+            }
+
+            return new EmployeeAdditionalInfo
+            {
+                Id = entity.Id
+            };
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
+        {
+            return await _dbContext.EmployeesSchool
+                .Where(emp => !emp.IsDeleted)
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id
+                })
+                .ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+        {
+            return await GetEmployeeListAsync();
+        }
+
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
         {
@@ -81,19 +100,36 @@ namespace Migration.School.Services
             }
         }
 
-        public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
         {
-            return new List<ProfessionCountDTO>();
+            var entity = await _dbContext.EmployeesSchool.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[School] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
         }
 
-        public async Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
+        #endregion Employees
+
+        #region Professions
+
+        public Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
-            return new List<ProfessionDTO>();
+            return Task.FromResult<IEnumerable<ProfessionCountDTO>>(Array.Empty<ProfessionCountDTO>());
         }
 
-        public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+        public Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
         {
-            return new List<ResourceDTO>();
+            return Task.FromResult<IEnumerable<ProfessionDTO>>(Array.Empty<ProfessionDTO>());
         }
 
         public Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
@@ -101,9 +137,20 @@ namespace Migration.School.Services
             return Task.FromResult<IEnumerable<ProfessionResourceNormDTO>>(Array.Empty<ProfessionResourceNormDTO>());
         }
 
+        #endregion Professions
+
+        #region Resources
+
+        public Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+        {
+            return Task.FromResult<IEnumerable<ResourceDTO>>(Array.Empty<ResourceDTO>());
+        }
+
         public Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
         {
             return Task.FromResult<IEnumerable<ResourceForecastDTO>>(Array.Empty<ResourceForecastDTO>());
         }
+
+        #endregion Resources
     }
 }

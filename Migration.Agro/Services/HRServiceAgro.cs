@@ -5,7 +5,6 @@ using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
 using System.Linq.Expressions;
-using System.Diagnostics.Metrics;
 
 namespace Migration.Agro.Services
 {
@@ -23,52 +22,7 @@ namespace Migration.Agro.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
-        {
-            return await _dbContext.EmployeesAgro
-                .Select(employee => new EmployeeAdditionalInfo
-                {
-                    Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
-                })
-                .ToListAsync();
-        }
-
-
-        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
-        {
-            if (string.IsNullOrEmpty(filter.Profession))
-            {
-                return await GetEmployeeListAsync();
-            }
-
-            // Filter by profession
-            var professions = await _dbContext.Professions
-                .Where(c => c.Title == filter.Profession)
-                .Select(p => p.Column).ToListAsync();
-            if (!professions.Any())
-            {
-                return new List<EmployeeAdditionalInfo>();
-            }
-
-            // Build SQL-translatable expression
-            Expression<Func<EmployeeAgro, bool>> filterExpr = emp =>
-                (professions.Contains("HasTracktorLicense") && emp.HasTracktorLicense) ||
-                (professions.Contains("IsVegetableGrower") && emp.IsVegetableGrower) ||
-                (professions.Contains("IsMilker") && emp.IsMilker) ||
-                (professions.Contains("IsCattleman") && emp.IsCattleman) ||
-                (professions.Contains("IsPoultryFarmer") && emp.IsPoultryFarmer) ||
-                (professions.Contains("IsMiller") && emp.IsMiller);
-
-            return await _dbContext.EmployeesAgro
-                .Where(filterExpr)
-                .Select(employee => new EmployeeAdditionalInfo
-                {
-                    Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
-                })
-                .ToListAsync();
-        }
+        #region Employees
 
         public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
         {
@@ -98,6 +52,71 @@ namespace Migration.Agro.Services
             return request.CoreData.Id;
         }
 
+        public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId)
+        {
+            var entity = await _dbContext.EmployeesAgro.FindAsync(employeeId);
+
+            if (entity == null || entity.IsDeleted)
+            {
+                return null;
+            }
+
+            return new EmployeeAdditionalInfo
+            {
+                Id = entity.Id,
+                AdditionalData = CreateAdditionalData(entity)
+            };
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
+        {
+            return await _dbContext.EmployeesAgro
+                .Where(emp => !emp.IsDeleted)
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = CreateAdditionalData(employee)
+                })
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<EmployeeAdditionalInfo>> GetFilteredEmployees(EmployeeFilter filter)
+        {
+            if (string.IsNullOrEmpty(filter.Profession))
+            {
+                return await GetEmployeeListAsync();
+            }
+
+            // Filter by profession
+            var professions = await _dbContext.Professions
+                .Where(c => c.Title == filter.Profession)
+                .Select(p => p.Column).ToListAsync();
+            if (!professions.Any())
+            {
+                return new List<EmployeeAdditionalInfo>();
+            }
+
+            // Build SQL-translatable expression
+            Expression<Func<EmployeeAgro, bool>> filterExpr = emp =>
+                !emp.IsDeleted && (
+                    (professions.Contains("HasTracktorLicense") && emp.HasTracktorLicense) ||
+                    (professions.Contains("IsVegetableGrower") && emp.IsVegetableGrower) ||
+                    (professions.Contains("IsMilker") && emp.IsMilker) ||
+                    (professions.Contains("IsCattleman") && emp.IsCattleman) ||
+                    (professions.Contains("IsPoultryFarmer") && emp.IsPoultryFarmer) ||
+                    (professions.Contains("IsMiller") && emp.IsMiller)
+                );
+
+            return await _dbContext.EmployeesAgro
+                .Where(filterExpr)
+                .Select(employee => new EmployeeAdditionalInfo
+                {
+                    Id = employee.Id,
+                    AdditionalData = CreateAdditionalData(employee)
+                })
+                .ToListAsync();
+        }
+
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
         {
             var entity = await _dbContext.EmployeesAgro.FindAsync(request.Id);
@@ -124,6 +143,34 @@ namespace Migration.Agro.Services
                 return false;
             }
         }
+
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+        {
+            var entity = await _dbContext.EmployeesAgro.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                entity.HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense");
+                entity.IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower");
+                entity.IsMilker = ParseBool(request.AdditionalData, "IsMilker");
+                entity.IsCattleman = ParseBool(request.AdditionalData, "IsCattleman");
+                entity.IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer");
+                entity.IsMiller = ParseBool(request.AdditionalData, "IsMiller");
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
+        #endregion Employees
+
+        #region Professions
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
@@ -160,6 +207,34 @@ namespace Migration.Agro.Services
             return professions;
         }
 
+        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
+        {
+            var norms = await _dbContext.ProfessionResourceNorms
+                .Include(n => n.Profession)
+                .Include(n => n.Resource)
+                .Select(n => new
+                {
+                    n.Hours,
+                    n.QuantityProduced,
+                    Profession = n.Profession!.Title,
+                    Resource = n.Resource!.Title
+                })
+                .ToListAsync();
+
+            return norms.Select(n => new ProfessionResourceNormDTO
+            {
+                Company = ServiceName,
+                Profession = n.Profession,
+                Resource = n.Resource,
+                Hours = n.Hours,
+                QuantityProduced = n.QuantityProduced
+            });
+        }
+
+        #endregion Professions
+
+        #region Resources
+
         public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
         {
             var resources = await _dbContext.ResourcesAgro
@@ -173,30 +248,6 @@ namespace Migration.Agro.Services
                 .ToListAsync();
 
             return resources;
-        }
-
-        public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
-        {
-            var norms = await _dbContext.ProfessionResourceNorms
-                .Include(n => n.Profession)
-                .Include(n => n.Resource)
-                .Select(n => new 
-                { 
-                    n.Hours, 
-                    n.QuantityProduced, 
-                    Profession = n.Profession!.Title, 
-                    Resource = n.Resource!.Title 
-                })
-                .ToListAsync();
-
-            return norms.Select(n => new ProfessionResourceNormDTO
-            {
-                Company = ServiceName,
-                Profession = n.Profession,
-                Resource = n.Resource,
-                Hours = n.Hours,
-                QuantityProduced = n.QuantityProduced
-            });
         }
 
         public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
@@ -279,6 +330,8 @@ namespace Migration.Agro.Services
 
             return forecast;
         }
+
+        #endregion Resources
 
         #region Helpers
 

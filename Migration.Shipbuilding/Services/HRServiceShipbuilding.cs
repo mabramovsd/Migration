@@ -7,6 +7,7 @@ using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Resources;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Linq.Expressions;
 
 namespace Migration.Shipbuilding.Services
 {
@@ -23,9 +24,56 @@ namespace Migration.Shipbuilding.Services
             _logger = logger;
         }
 
+        #region Employees
+
+        public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
+        {
+            try
+            {
+                // Parsing fields
+                var employee = new EmployeeShipbuilding
+                {
+                    Id = request.CoreData.Id,
+                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
+                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
+                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
+                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
+                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
+                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
+                };
+
+                //Saving to DB
+                await _dbContext.EmployeesShipbuilding.AddAsync(employee);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add shipbuilding employee: {ErrorMessage}", ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
+        public async Task<EmployeeAdditionalInfo?> GetEmployeeByIdAsync(Guid employeeId)
+        {
+            var entity = await _dbContext.EmployeesShipbuilding.FindAsync(employeeId);
+
+            if (entity == null || entity.IsDeleted)
+            {
+                return null;
+            }
+
+            return new EmployeeAdditionalInfo
+            {
+                Id = entity.Id,
+                AdditionalData = CreateAdditionalData(entity)
+            };
+        }
+
         public async Task<IEnumerable<EmployeeAdditionalInfo>> GetEmployeeListAsync()
         {
             return await _dbContext.EmployeesShipbuilding
+                .Where(emp => !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
@@ -56,41 +104,13 @@ namespace Migration.Shipbuilding.Services
 
             //Mapping
             return await _dbContext.EmployeesShipbuilding
-                .Where(emp => employeeIds.Contains(emp.Id))
+                .Where(emp => employeeIds.Contains(emp.Id) && !emp.IsDeleted)
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
                     AdditionalData = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
-        }
-
-        public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
-        {
-            try
-            {
-                // Parsing fields
-                var employee = new EmployeeShipbuilding
-                {
-                    Id = request.CoreData.Id,
-                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
-                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
-                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
-                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
-                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
-                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
-                };
-
-                //Saving to DB
-                await _dbContext.EmployeesShipbuilding.AddAsync(employee);
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to add shipbuilding employee: {ErrorMessage}", ex.Message);
-            }
-
-            return request.CoreData.Id;
         }
 
         public async Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request)
@@ -119,6 +139,34 @@ namespace Migration.Shipbuilding.Services
                 return false;
             }
         }
+
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+        {
+            var entity = await _dbContext.EmployeesShipbuilding.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                entity.CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry");
+                entity.CanWeld = ParseBool(request.AdditionalData, "CanWeld");
+                entity.CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip");
+                entity.CanPaint = ParseBool(request.AdditionalData, "CanPaint");
+                entity.CanRig = ParseBool(request.AdditionalData, "CanRig");
+                entity.CanShipyard = ParseBool(request.AdditionalData, "CanShipyard");
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
+        #endregion Employees
+
+        #region Professions
 
         public async Task<IEnumerable<ProfessionCountDTO>> GetProfessionsStatsAsync()
         {
@@ -154,21 +202,6 @@ namespace Migration.Shipbuilding.Services
             return professions;
         }
 
-        public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
-        {
-            var resources = await _dbContext.ResourcesShipbuilding
-                .Select(r => new ResourceDTO
-                {
-                    Company = ServiceName,
-                    Title = r.Title,
-                    Count = r.Count,
-                    Unit = r.Unit
-                })
-                .ToListAsync();
-
-            return resources;
-        }
-
         public async Task<IEnumerable<ProfessionResourceNormDTO>> GetProfessionResourceNormsAsync()
         {
             var norms = await _dbContext.ProfessionResourceNorms
@@ -191,6 +224,25 @@ namespace Migration.Shipbuilding.Services
                 Hours = n.Hours,
                 QuantityProduced = n.QuantityProduced
             });
+        }
+
+        #endregion Professions
+
+        #region Resources
+
+        public async Task<IEnumerable<ResourceDTO>> GetResourcesAsync()
+        {
+            var resources = await _dbContext.ResourcesShipbuilding
+                .Select(r => new ResourceDTO
+                {
+                    Company = ServiceName,
+                    Title = r.Title,
+                    Count = r.Count,
+                    Unit = r.Unit
+                })
+                .ToListAsync();
+
+            return resources;
         }
 
         public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecastAsync(int days)
@@ -267,6 +319,8 @@ namespace Migration.Shipbuilding.Services
 
             return forecast;
         }
+
+        #endregion Resources
 
         #region Helpers
 
