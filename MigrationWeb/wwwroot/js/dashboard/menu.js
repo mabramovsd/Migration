@@ -250,6 +250,9 @@ async function handleEditEmployee(employeeId) {
             const companySelect = document.getElementById('employeeCompany');
             if (companySelect) {
                 companySelect.addEventListener('change', handleCompanyChange);
+
+                const eventForProfessionsLoad = new Event('change', { bubbles: true });
+                companySelect.dispatchEvent(eventForProfessionsLoad);
             }
         }, 0);
     } catch (error) {
@@ -306,6 +309,7 @@ async function handleEditEmployeeFormSubmit(event) {
         },
         AdditionalData: additionalData
     };
+    console.log(request);
     
     try {
         const response = await fetch('/HR/Update', {
