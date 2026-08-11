@@ -144,6 +144,30 @@ namespace Migration.Agro.Services
             }
         }
 
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+        {
+            var entity = await _dbContext.EmployeesAgro.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                entity.HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense");
+                entity.IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower");
+                entity.IsMilker = ParseBool(request.AdditionalData, "IsMilker");
+                entity.IsCattleman = ParseBool(request.AdditionalData, "IsCattleman");
+                entity.IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer");
+                entity.IsMiller = ParseBool(request.AdditionalData, "IsMiller");
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Agro] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
         #endregion Employees
 
         #region Professions

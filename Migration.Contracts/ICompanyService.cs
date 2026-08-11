@@ -37,6 +37,11 @@ public interface ICompanyService
     /// </summary>
     Task<bool> RemoveEmployeeAsync(RemoveEmployeeRequest request);
 
+    /// <summary>
+    /// Update employee data
+    /// </summary>
+    Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request);
+
     #endregion Employees
 
     #region Professions
