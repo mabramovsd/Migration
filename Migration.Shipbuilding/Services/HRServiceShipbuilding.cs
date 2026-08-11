@@ -140,6 +140,30 @@ namespace Migration.Shipbuilding.Services
             }
         }
 
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+        {
+            var entity = await _dbContext.EmployeesShipbuilding.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                entity.CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry");
+                entity.CanWeld = ParseBool(request.AdditionalData, "CanWeld");
+                entity.CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip");
+                entity.CanPaint = ParseBool(request.AdditionalData, "CanPaint");
+                entity.CanRig = ParseBool(request.AdditionalData, "CanRig");
+                entity.CanShipyard = ParseBool(request.AdditionalData, "CanShipyard");
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
         #endregion Employees
 
         #region Professions

@@ -100,6 +100,24 @@ namespace Migration.School.Services
             }
         }
 
+        public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+        {
+            var entity = await _dbContext.EmployeesSchool.FindAsync(request.CoreData.Id);
+            if (entity == null) return Guid.Empty;
+
+            try
+            {
+                entity.IsDeleted = request.CoreData.IsDeleted;
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[School] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+            }
+
+            return request.CoreData.Id;
+        }
+
         #endregion Employees
 
         #region Professions

@@ -162,7 +162,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Agro] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
             }
 
             return request.CoreData.Id;

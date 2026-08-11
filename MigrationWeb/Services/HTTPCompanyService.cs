@@ -138,6 +138,31 @@ public class HTTPCompanyService : ICompanyService
         }
     }
 
+    public async Task<Guid> UpdateEmployeeAsync(CreateEmployeeRequest request)
+    {
+        try
+        {
+            var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
+            using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync($"api/v1/hr/employees/{request.CoreData.Id}", content);
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var deserializedContent = JsonSerializer.Deserialize<Guid>(responseContent, _jsonOptions);
+                return deserializedContent != default ? deserializedContent : Guid.Empty;
+            }
+
+            _logger.LogError("Failed to update employee via HTTP service. Status code: {StatusCode}", response.StatusCode);
+            return Guid.Empty;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update employee via HTTP service");
+            return Guid.Empty;
+        }
+    }
+
     #endregion Employees
 
     #region Professions

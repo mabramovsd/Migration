@@ -50,4 +50,11 @@ public class HRController : ControllerBase
         var result = await _companyService.RemoveEmployeeAsync(request);
         return Ok(result);
     }
+
+    [HttpPut("employees/{id}")]
+    public async Task<ActionResult<Guid>> UpdateEmployee([FromBody] CreateEmployeeRequest request)
+    {
+        var id = await _companyService.UpdateEmployeeAsync(request);
+        return Ok(id);
+    }
 }
