@@ -175,7 +175,8 @@ namespace Migration.Shipbuilding.Services
             var employeeCounts = _dbContext.EmployeeProfessions
                 .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
                 .GroupBy(x => x.Profession.Title)
-                .ToDictionary(x => x.Key, x => x.Count());
+                .Select(g => new { Title = g.Key, Count = g.Count() })
+                .ToDictionary(x => x.Title, x => x.Count);
             employeeCounts.Add("Все", _dbContext.EmployeesShipbuilding.Count());
 
             var data = professions.Select(p => new ProfessionCountDTO
