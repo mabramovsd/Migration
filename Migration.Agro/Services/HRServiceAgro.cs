@@ -46,7 +46,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add Agro employee: {ErrorMessage}", ex.Message);
+                _logger.LogAddEmployeeError(ServiceName, ex);
             }
 
             return request.CoreData.Id;
@@ -139,7 +139,8 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Agro] Failed to remove employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
+
+                _logger.LogRemoveEmployeeError(ServiceName, request.Id, ex);
                 return false;
             }
         }
@@ -162,7 +163,7 @@ namespace Migration.Agro.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
+                _logger.LogUpdateEmployeeError(ServiceName, request.CoreData.Id, ex);
             }
 
             return request.CoreData.Id;

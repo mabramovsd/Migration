@@ -9,6 +9,7 @@ namespace Migration.School.Services
 {
     public class HRServiceSchool : ICompanyService
     {
+        private const string ServiceName = "School";
         private readonly SchoolDBContext _dbContext;
         private readonly ILogger<HRServiceSchool> _logger;
 
@@ -34,7 +35,7 @@ namespace Migration.School.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add school employee: {ErrorMessage}", ex.Message);
+                _logger.LogAddEmployeeError(ServiceName, ex);
             }
 
             return request.CoreData.Id;
@@ -95,7 +96,7 @@ namespace Migration.School.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[School] Failed to remove employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
+                _logger.LogRemoveEmployeeError(ServiceName, request.Id, ex);
                 return false;
             }
         }
@@ -112,7 +113,7 @@ namespace Migration.School.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[School] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+                _logger.LogUpdateEmployeeError(ServiceName, request.CoreData.Id, ex);
             }
 
             return request.CoreData.Id;

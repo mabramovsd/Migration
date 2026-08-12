@@ -6,7 +6,7 @@ namespace Migration.Contracts;
 
 /// <summary>
 /// Interface for managing employees.
-/// Used by Agro and Shipbuilding services.
+/// Should be implemented by company services.
 /// </summary>
 public interface ICompanyService
 {
