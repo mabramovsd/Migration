@@ -3,20 +3,18 @@ using Microsoft.Extensions.Logging;
 using Migration.Agro.Entities;
 using Migration.Agro.Services;
 using Migration.Contracts.DTO.Employees;
-using Migration.Contracts.DTO.Professions;
 using Moq;
-using System.Linq.Expressions;
 using Xunit;
 
 namespace Migration.Agro.Tests;
 
-public class HRServiceAgroTests : IDisposable
+public class HRServiceTests : IDisposable
 {
     private AgroDBContext _context;
     private HRServiceAgro _service;
     private Mock<ILogger<HRServiceAgro>> _loggerMock;
 
-    public HRServiceAgroTests()
+    public HRServiceTests()
     {
         // Use unique database and Dispose to make separate DB for each test (guaranteed)
         var dbName = "AgroTestDb" + Guid.NewGuid().ToString();
