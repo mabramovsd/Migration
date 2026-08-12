@@ -48,7 +48,7 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add shipbuilding employee: {ErrorMessage}", ex.Message);
+                _logger.LogAddEmployeeError(ServiceName, ex);
             }
 
             return request.CoreData.Id;
@@ -135,7 +135,7 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[Shipbuilding] Failed to delete employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
+                _logger.LogRemoveEmployeeError(ServiceName, request.Id, ex);
                 return false;
             }
         }
@@ -158,7 +158,7 @@ namespace Migration.Shipbuilding.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "{Service} Failed to update employee {EmployeeId}: {ErrorMessage}", ServiceName, request.CoreData.Id, ex.Message);
+                _logger.LogUpdateEmployeeError(ServiceName, request.CoreData.Id, ex);
             }
 
             return request.CoreData.Id;

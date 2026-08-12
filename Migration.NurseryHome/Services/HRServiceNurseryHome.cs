@@ -9,6 +9,7 @@ namespace Migration.NurseryHome.Services
 {
     public class HRServiceNurseryHome : ICompanyService
     {
+        private const string ServiceName = "NurseryHome";
         private readonly NurseryHomeDBContext _dbContext;
         private readonly ILogger<HRServiceNurseryHome> _logger;
 
@@ -34,7 +35,7 @@ namespace Migration.NurseryHome.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add nursery home employee: {ErrorMessage}", ex.Message);
+                _logger.LogAddEmployeeError(ServiceName, ex);
             }
 
             return request.CoreData.Id;
@@ -93,7 +94,7 @@ namespace Migration.NurseryHome.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NurseryHome] Failed to remove employee {EmployeeId}: {ErrorMessage}", request.Id, ex.Message);
+                _logger.LogRemoveEmployeeError(ServiceName, request.Id, ex);
                 return false;
             }
         }
@@ -110,7 +111,7 @@ namespace Migration.NurseryHome.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[NurseryHome] Failed to update employee {EmployeeId}: {ErrorMessage}", request.CoreData.Id, ex.Message);
+                _logger.LogUpdateEmployeeError(ServiceName, request.CoreData.Id, ex);
             }
 
             return request.CoreData.Id;
