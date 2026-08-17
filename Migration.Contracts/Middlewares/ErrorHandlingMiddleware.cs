@@ -1,10 +1,13 @@
-п»їusing System.Net;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Text.Json;
 
-namespace MigrationWeb.Middlewares;
+namespace Migration.Contracts.Middlewares;
 
 /// <summary>
-/// Centralized error handler middleware.
-/// Logs exceptions and returns ProblemDetails for API consumers.
+/// Centralized error handler for all services.
+/// Logs exceptions with CorrelationId and returns ProblemDetails.
 /// </summary>
 public class ErrorHandlingMiddleware
 {
@@ -27,15 +30,18 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred while processing request {Path}", context.Request.Path);
+            var correlationId = context.Items["CorrelationId"]?.ToString() ?? "N/A";
+            _logger.LogError(ex, "Unhandled exception. CorrelationId: {CorrelationId}, Path: {Path}",
+                correlationId, context.Request.Path);
 
-            await HandleExceptionAsync(context, ex);
+            await HandleExceptionAsync(context, ex, correlationId);
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
     {
-        context.Response.StatusCode = exception switch
+        // Определяем статус-код по типу исключения
+        var statusCode = exception switch
         {
             InvalidOperationException => (int)HttpStatusCode.BadRequest,
             ArgumentException => (int)HttpStatusCode.BadRequest,
@@ -43,17 +49,20 @@ public class ErrorHandlingMiddleware
             _ => (int)HttpStatusCode.InternalServerError
         };
 
+        context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
         var response = new
         {
-            status = context.Response.StatusCode,
+            status = statusCode,
             title = GetTitle(exception),
             detail = exception.StackTrace,
+            correlationId = correlationId,
             timestamp = DateTime.UtcNow
         };
 
-        await context.Response.WriteAsJsonAsync(response);
+        var json = JsonSerializer.Serialize(response);
+        await context.Response.WriteAsync(json);
     }
 
     private static string GetTitle(Exception exception) => exception switch

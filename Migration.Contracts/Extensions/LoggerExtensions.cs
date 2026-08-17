@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Migration.Contracts
+namespace Migration.Contracts.Extensions
 {
     /// <summary>
     /// Extensions for logger:)

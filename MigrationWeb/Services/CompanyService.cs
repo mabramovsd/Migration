@@ -3,6 +3,7 @@ using Migration.Contracts;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
+using Migration.Contracts.Interfaces;
 
 namespace MigrationWeb.Services;
 

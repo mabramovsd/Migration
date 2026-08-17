@@ -1,13 +1,14 @@
 using Migration.Shipbuilding.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Resources;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using System.Linq.Expressions;
+using Migration.Contracts.Extensions;
+using Migration.Contracts.Interfaces;
 
 namespace Migration.Shipbuilding.Services
 {

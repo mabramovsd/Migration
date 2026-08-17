@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Migration.Agro;
-using Migration.Agro.Middlewares;
 using Migration.Agro.Services;
-using Migration.Contracts;
-using System.Text.Json;
+using Migration.Contracts.Interfaces;
+using Migration.Contracts.Extensions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +14,7 @@ var agroCs = builder.Configuration.GetConnectionString("AgroDb");
 var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCorrelationIdSupport();
 builder.Services.AddScoped<ICompanyService, HRServiceAgro>();
 
 // Configure JSON serialization to not escape Unicode (for Cyrillic)
@@ -50,6 +50,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseCorrelationId();
 app.UseErrorHandling();
 
 // Configure the HTTP request pipeline.
