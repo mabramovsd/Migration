@@ -1,10 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Migration.NurseryHome;
-using Migration.NurseryHome.Middlewares;
-using Migration.NurseryHome.Services;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Migration.Contracts.Interfaces;
+using Migration.Contracts.Extensions;
+using Migration.NurseryHome;
+using Migration.NurseryHome.Services;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +14,7 @@ var agroCs = builder.Configuration.GetConnectionString("NurseryHomeDb");
 var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCorrelationIdSupport();
 builder.Services.AddScoped<ICompanyService, HRServiceNurseryHome>();
 
 // Configure JSON serialization to not escape Unicode (for Cyrillic)
@@ -50,6 +50,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseCorrelationId();
 app.UseErrorHandling();
 
 // Configure the HTTP request pipeline.

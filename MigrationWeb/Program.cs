@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
 using Migration.Contracts.Http;
 using Migration.Contracts.Interfaces;
+using Migration.Contracts.Extensions;
 using MigrationWeb;
 using MigrationWeb.Services;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +16,7 @@ var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCorrelationIdSupport();
 
 // Configure JSON serialization to not escape Unicode (for Cyrillic)
 controllers.AddJsonOptions(options =>
@@ -42,19 +43,19 @@ builder.Services.AddHttpClient("Shipbuilding", client =>
 {
     var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
     client.BaseAddress = new Uri(urls?.Shipbuilding ?? "http://localhost:5001");
-});
+}).AddHttpMessageHandler<CorrelationIdHandler>();
 
 builder.Services.AddHttpClient("School", client =>
 {
     var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
     client.BaseAddress = new Uri(urls?.School ?? "http://localhost:5003");
-});
+}).AddHttpMessageHandler<CorrelationIdHandler>();
 
 builder.Services.AddHttpClient("NurseryHome", client =>
 {
     var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
     client.BaseAddress = new Uri(urls?.NurseryHome ?? "http://localhost:5004");
-});
+}).AddHttpMessageHandler<CorrelationIdHandler>();
 
 // keyed registration for company services
 builder.Services.AddKeyedScoped<ICompanyService>("Agro", (sp, key) =>
@@ -144,6 +145,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseCorrelationId();
 app.UseErrorHandling();
 
 // Configure the HTTP request pipeline.

@@ -1,15 +1,22 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text.Json;
 
 namespace Migration.Contracts.Middlewares;
 
+/// <summary>
+/// Centralized error handler for all services.
+/// Logs exceptions with CorrelationId and returns ProblemDetails.
+/// </summary>
 public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
-    public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
+    public ErrorHandlingMiddleware(
+        RequestDelegate next,
+        ILogger<ErrorHandlingMiddleware> logger)
     {
         _next = next;
         _logger = logger;
@@ -24,27 +31,45 @@ public class ErrorHandlingMiddleware
         catch (Exception ex)
         {
             var correlationId = context.Items["CorrelationId"]?.ToString() ?? "N/A";
-            _logger.LogError(ex, "Unhandled exception. CorrelationId: {CorrelationId}", correlationId);
+            _logger.LogError(ex, "Unhandled exception. CorrelationId: {CorrelationId}, Path: {Path}",
+                correlationId, context.Request.Path);
+
             await HandleExceptionAsync(context, ex, correlationId);
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
     {
+        // Определяем статус-код по типу исключения
+        var statusCode = exception switch
+        {
+            InvalidOperationException => (int)HttpStatusCode.BadRequest,
+            ArgumentException => (int)HttpStatusCode.BadRequest,
+            KeyNotFoundException => (int)HttpStatusCode.NotFound,
+            _ => (int)HttpStatusCode.InternalServerError
+        };
+
+        context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
         var response = new
         {
-            Status = context.Response.StatusCode,
-            Message = "Internal Server Error",
-            Details = exception.Message,
-            CorrelationId = correlationId
+            status = statusCode,
+            title = GetTitle(exception),
+            detail = exception.StackTrace,
+            correlationId = correlationId,
+            timestamp = DateTime.UtcNow
         };
 
-        var json = System.Text.Json.JsonSerializer.Serialize(response);
-        context.Response.ContentType = "application/json";
-        context.Response.WriteAsync(json);
-        return Task.CompletedTask;
+        var json = JsonSerializer.Serialize(response);
+        await context.Response.WriteAsync(json);
     }
+
+    private static string GetTitle(Exception exception) => exception switch
+    {
+        InvalidOperationException => "Business Rule Violation",
+        ArgumentException => "Invalid Argument",
+        KeyNotFoundException => "Resource Not Found",
+        _ => "An unexpected error occurred"
+    };
 }

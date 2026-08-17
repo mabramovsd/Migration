@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts.Interfaces;
+using Migration.Contracts.Extensions;
 using Migration.Shipbuilding;
-using Migration.Shipbuilding.Middlewares;
 using Migration.Shipbuilding.Services;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +14,7 @@ var shipCs = builder.Configuration.GetConnectionString("ShipDb");
 var controllers = builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCorrelationIdSupport();
 builder.Services.AddScoped<ICompanyService, HRServiceShipbuilding>();
 
 // Configure JSON serialization to not escape Unicode (for Cyrillic)
@@ -50,6 +50,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+app.UseCorrelationId();
 app.UseErrorHandling();
 
 // Configure the HTTP request pipeline.
