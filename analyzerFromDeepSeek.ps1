@@ -140,6 +140,36 @@ $packageRefs = Get-ChildItem -Path $RootPath -Filter "*.csproj" -Recurse | ForEa
 } | ForEach-Object { $_.Matches.Groups[1].Value } | Sort-Object -Unique
 $packageCount = $packageRefs.Count
 
+# Методы в сервисах
+$serviceMethodPattern = 'public\s+(async\s+)?[^\s]+\s+[^\s]+\s*\('
+$serviceMethodCount = 0
+if ($serviceFiles.Count -gt 0) {
+    foreach ($file in $serviceFiles) {
+        $filePath = $file.Path
+        if (Test-Path $filePath) {
+            $content = Get-Content $filePath -Raw
+            $matches = [regex]::Matches($content, $serviceMethodPattern)
+            $serviceMethodCount += $matches.Count
+        }
+    }
+}
+
+# Тестовые методы
+$testMethodPattern = '\[(Fact|Theory)\]'
+$testMethodCount = 0
+if ($testFiles.Count -gt 0) {
+    foreach ($file in $testFiles) {
+        $content = Get-Content $file.FullName -Raw
+        $matches = [regex]::Matches($content, $testMethodPattern)
+        $testMethodCount += $matches.Count
+    }
+}
+
+$methodCoverage = 0
+if ($serviceMethodCount -gt 0) {
+    $methodCoverage = [math]::Round(($testMethodCount / $serviceMethodCount) * 100, 1)
+}
+
 # Git
 $commitCount = "N/A"
 $commitsLast30 = "N/A"
@@ -210,6 +240,9 @@ $report = @"
 🔧 Качество кода:
   TODO/FIXME/HACK  : $todoCount
   NuGet-пакетов    : $packageCount
+  Тестовых методов  : $testMethodCount
+  Методов в сервисах : $serviceMethodCount
+  Грубое покрытие   : $methodCoverage%
 
 =========================================
 "@
