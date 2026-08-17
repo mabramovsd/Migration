@@ -1,7 +1,7 @@
-using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
+using Migration.Contracts.Interfaces;
 using System.Text;
 using System.Text.Json;
 

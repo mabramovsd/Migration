@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Net;
 
-namespace Migration.Agro.Middlewares;
+namespace Migration.Contracts.Middlewares;
 
 public class ErrorHandlingMiddleware
 {
@@ -21,12 +23,13 @@ public class ErrorHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unhandled exception occurred.");
-            await HandleExceptionAsync(context, ex);
+            var correlationId = context.Items["CorrelationId"]?.ToString() ?? "N/A";
+            _logger.LogError(ex, "Unhandled exception. CorrelationId: {CorrelationId}", correlationId);
+            await HandleExceptionAsync(context, ex, correlationId);
         }
     }
 
-    private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static Task HandleExceptionAsync(HttpContext context, Exception exception, string correlationId)
     {
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -35,17 +38,13 @@ public class ErrorHandlingMiddleware
         {
             Status = context.Response.StatusCode,
             Message = "Internal Server Error",
-            Details = exception.Message
+            Details = exception.Message,
+            CorrelationId = correlationId
         };
 
-        return context.Response.WriteAsJsonAsync(response);
-    }
-}
-
-public static class ErrorHandlingMiddlewareExtensions
-{
-    public static IApplicationBuilder UseErrorHandling(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<ErrorHandlingMiddleware>();
+        var json = System.Text.Json.JsonSerializer.Serialize(response);
+        context.Response.ContentType = "application/json";
+        context.Response.WriteAsync(json);
+        return Task.CompletedTask;
     }
 }

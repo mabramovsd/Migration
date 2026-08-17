@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Migration.School;
 using Migration.School.Middlewares;
 using Migration.School.Services;
-using Migration.Contracts;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Migration.Contracts.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

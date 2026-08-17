@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Migration.Contracts;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Employees;
+using Migration.Contracts.Interfaces;
 
 namespace MigrationWeb.Services;
 

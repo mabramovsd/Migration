@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Migration.Contracts;
+using Migration.Contracts.Http;
+using Migration.Contracts.Interfaces;
 using MigrationWeb;
 using MigrationWeb.Services;
 using System.Text.Json;
@@ -34,7 +36,7 @@ builder.Services.AddHttpClient("Agro", client =>
 {
     var urls = builder.Configuration.GetSection("ServiceUrls").Get<ServiceUrls>();
     client.BaseAddress = new Uri(urls?.Agro ?? "http://localhost:5002");
-});
+}).AddHttpMessageHandler<CorrelationIdHandler>();
 
 builder.Services.AddHttpClient("Shipbuilding", client =>
 {

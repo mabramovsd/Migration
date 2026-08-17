@@ -1,10 +1,11 @@
 using Migration.Agro.Entities;
 using Microsoft.EntityFrameworkCore;
-using Migration.Contracts;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
 using System.Linq.Expressions;
+using Migration.Contracts.Extensions;
+using Migration.Contracts.Interfaces;
 
 namespace Migration.Agro.Services
 {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Migration.Contracts;
 using Migration.Contracts.DTO.Resources;
+using Migration.Contracts.Interfaces;
 
 namespace Migration.NurseryHome.Controllers;
 

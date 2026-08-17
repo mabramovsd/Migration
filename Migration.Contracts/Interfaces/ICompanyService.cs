@@ -2,7 +2,7 @@ using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
 using Migration.Contracts.DTO.Resources;
 
-namespace Migration.Contracts;
+namespace Migration.Contracts.Interfaces;
 
 /// <summary>
 /// Interface for managing employees.

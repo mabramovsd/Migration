@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Migration.Contracts;
+using Migration.Contracts.Interfaces;
 using Migration.Shipbuilding;
 using Migration.Shipbuilding.Middlewares;
 using Migration.Shipbuilding.Services;
