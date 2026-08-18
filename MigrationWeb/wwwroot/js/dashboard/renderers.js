@@ -248,7 +248,7 @@ function renderAboutSystem(services) {
             </div>
             
             <div style="max-width: 800px;">
-                <p style="color: #555; margin-bottom: 1.5rem;">HR-платформа для управления персоналом. Версия 1.0.0</p>
+                <p style="color: #555; margin-bottom: 1.5rem;">HR-платформа для управления персоналом. Версия 2.0.0</p>
                 
                 <h3 style="color: #667eea; font-size: 1.1rem; margin-bottom: 0.75rem;">Статус сервисов</h3>
                 <table class="employees-table" style="margin-top: 0.5rem;">

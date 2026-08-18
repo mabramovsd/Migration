@@ -6,7 +6,7 @@ using Migration.Contracts.Interfaces;
 namespace Migration.Shipbuilding.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class ProfessionsController : ControllerBase
 {
     private readonly ICompanyService _companyService;

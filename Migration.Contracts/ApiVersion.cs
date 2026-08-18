@@ -10,10 +10,10 @@
 public static class ApiVersion
 {
     /// <summary>
-    /// Current API version - 1.0.0
+    /// Current API version - 2.0.0
     /// Initial release with basic employee management
     /// </summary>
-    public const string CurrentVersion = "1.0.0";
+    public const string CurrentVersion = "2.0.0";
     
     /// <summary>
     /// Supported API versions

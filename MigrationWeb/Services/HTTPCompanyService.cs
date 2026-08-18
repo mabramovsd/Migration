@@ -39,7 +39,7 @@ public class HTTPCompanyService : ICompanyService
             var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
             using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/v1/hr/employees", content);
+            var response = await _httpClient.PostAsync("api/v2/hr/employees", content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
@@ -61,7 +61,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<EmployeeAdditionalInfo?>($"api/v1/hr/employees/{employeeId}");
+            var result = await GetFromJsonAsync<EmployeeAdditionalInfo?>($"api/v2/hr/employees/{employeeId}");
             return result ?? null;
         }
         catch (Exception ex)
@@ -75,7 +75,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v1/hr/employees");
+            var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>("api/v2/hr/employees");
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
         }
         catch (Exception ex)
@@ -101,8 +101,8 @@ public class HTTPCompanyService : ICompanyService
             }
 
             var requestUri = queryString.Count > 0
-                ? $"api/v1/hr/filter?{string.Join("&", queryString)}"
-                : "api/v1/hr/employees";
+                ? $"api/v2/hr/filter?{string.Join("&", queryString)}"
+                : "api/v2/hr/employees";
 
             var result = await GetFromJsonAsync<IEnumerable<EmployeeAdditionalInfo>>(requestUri);
             return result ?? Enumerable.Empty<EmployeeAdditionalInfo>();
@@ -118,7 +118,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var url = $"api/v1/hr/employees/{request.Id}?softDelete={request.SoftDelete}";
+            var url = $"api/v2/hr/employees/{request.Id}?softDelete={request.SoftDelete}";
             var response = await _httpClient.DeleteAsync(url);
 
             if (response.IsSuccessStatusCode)
@@ -145,7 +145,7 @@ public class HTTPCompanyService : ICompanyService
             var jsonRequest = JsonSerializer.Serialize(request, _jsonOptions);
             using var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync($"api/v1/hr/employees/{request.CoreData.Id}", content);
+            var response = await _httpClient.PutAsync($"api/v2/hr/employees/{request.CoreData.Id}", content);
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync();
@@ -171,7 +171,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v1/professions/stats");
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionCountDTO>>("api/v2/professions/stats");
             return result ?? Enumerable.Empty<ProfessionCountDTO>();
         }
         catch (Exception ex)
@@ -185,7 +185,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ProfessionDTO>>("api/v1/professions");
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionDTO>>("api/v2/professions");
             return result ?? Enumerable.Empty<ProfessionDTO>();
         }
         catch (Exception ex)
@@ -199,7 +199,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ProfessionResourceNormDTO>>("api/v1/professions/norms");
+            var result = await GetFromJsonAsync<IEnumerable<ProfessionResourceNormDTO>>("api/v2/professions/norms");
             return result ?? Enumerable.Empty<ProfessionResourceNormDTO>();
         }
         catch (Exception ex)
@@ -217,7 +217,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ResourceDTO>>("api/v1/resources");
+            var result = await GetFromJsonAsync<IEnumerable<ResourceDTO>>("api/v2/resources");
             return result ?? Enumerable.Empty<ResourceDTO>();
         }
         catch (Exception ex)
@@ -231,7 +231,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v1/resources/forecast?days={days}");
+            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v2/resources/forecast?days={days}");
             return result ?? Enumerable.Empty<ResourceForecastDTO>();
         }
         catch (Exception ex)
