@@ -339,10 +339,9 @@ namespace Migration.Shipbuilding.Services
             };
         }
 
-        private static bool ParseBool(Dictionary<string, object> data, string key)
+        private static bool ParseBool(Dictionary<string, bool> data, string key)
         {
-            if (!data.TryGetValue(key, out var value)) return false;
-            return value.ToString() == "true";
+            return data?.GetValueOrDefault(key) ?? false;
         }
 
         private static bool CountByColumn(EmployeeShipbuilding e, string column)
