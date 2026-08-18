@@ -35,12 +35,12 @@ namespace Migration.Shipbuilding.Services
                 var employee = new EmployeeShipbuilding
                 {
                     Id = request.CoreData.Id,
-                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
-                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
-                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
-                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
-                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
-                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
+                    CanCarpentry = ParseBool(request.Professions, "CanCarpentry"),
+                    CanWeld = ParseBool(request.Professions, "CanWeld"),
+                    CanDesignShip = ParseBool(request.Professions, "CanDesignShip"),
+                    CanPaint = ParseBool(request.Professions, "CanPaint"),
+                    CanRig = ParseBool(request.Professions, "CanRig"),
+                    CanShipyard = ParseBool(request.Professions, "CanShipyard")
                 };
 
                 //Saving to DB
@@ -67,7 +67,7 @@ namespace Migration.Shipbuilding.Services
             return new EmployeeAdditionalInfo
             {
                 Id = entity.Id,
-                AdditionalData = CreateAdditionalData(entity)
+                Professions = CreateAdditionalData(entity)
             };
         }
 
@@ -78,7 +78,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -109,7 +109,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -149,12 +149,12 @@ namespace Migration.Shipbuilding.Services
             try
             {
                 entity.IsDeleted = request.CoreData.IsDeleted;
-                entity.CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry");
-                entity.CanWeld = ParseBool(request.AdditionalData, "CanWeld");
-                entity.CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip");
-                entity.CanPaint = ParseBool(request.AdditionalData, "CanPaint");
-                entity.CanRig = ParseBool(request.AdditionalData, "CanRig");
-                entity.CanShipyard = ParseBool(request.AdditionalData, "CanShipyard");
+                entity.CanCarpentry = ParseBool(request.Professions, "CanCarpentry");
+                entity.CanWeld = ParseBool(request.Professions, "CanWeld");
+                entity.CanDesignShip = ParseBool(request.Professions, "CanDesignShip");
+                entity.CanPaint = ParseBool(request.Professions, "CanPaint");
+                entity.CanRig = ParseBool(request.Professions, "CanRig");
+                entity.CanShipyard = ParseBool(request.Professions, "CanShipyard");
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)

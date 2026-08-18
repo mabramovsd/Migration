@@ -12,6 +12,6 @@ namespace Migration.Contracts.DTO.Employees
         /// <summary>
         /// Dictionary with additional fields, depends of company
         /// </summary>
-        public Dictionary<string, object>? AdditionalData { get; init; }
+        public Dictionary<string, object>? Professions { get; init; }
     }
 }

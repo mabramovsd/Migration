@@ -101,7 +101,7 @@ public class HRService
             FullName = employeeFromCore.FullName,
             CurrentCompany = employeeFromCore.CurrentCompany,
             BirthDate = employeeFromCore.BirthDate,
-            AdditionalData = employeeAdditionalInfo != null ? employeeAdditionalInfo.AdditionalData : null
+            Professions = employeeAdditionalInfo != null ? employeeAdditionalInfo.Professions : null
         };
     }
 
@@ -157,7 +157,7 @@ public class HRService
                 FullName = employee.FullName,
                 CurrentCompany = employee.CurrentCompany,
                 BirthDate = employee.BirthDate,
-                AdditionalData = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.AdditionalData : null
+                Professions = companyDict?.TryGetValue(employee.Id, out var data) == true ? data.Professions : null
             };
         }).ToList();
     }
@@ -226,7 +226,7 @@ public class HRService
                 FullName = employee.FullName,
                 CurrentCompany = employee.CurrentCompany,
                 BirthDate = employee.BirthDate,
-                AdditionalData = allAdditionalDataByCompany[employee.CurrentCompany][employee.Id].AdditionalData
+                Professions = allAdditionalDataByCompany[employee.CurrentCompany][employee.Id].Professions
             })
             .ToList();
     }

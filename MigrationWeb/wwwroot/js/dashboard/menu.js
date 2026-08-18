@@ -155,11 +155,11 @@ async function handleAddEmployeeFormSubmit(event) {
     // Filter professions by selected company
     const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
     
-    // Build AdditionalData: all professions with true/false based on checkbox
-    const additionalData = {};
+    // Build Professions: all professions with true/false based on checkbox
+    const professions = {};
     companyProfessions.forEach(profession => {
         const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
-        additionalData[profession.column] = isChecked ? "true" : "false";
+        professions[profession.column] = isChecked !== null;
     });
     
     // Build CreateEmployeeRequest model
@@ -172,7 +172,7 @@ async function handleAddEmployeeFormSubmit(event) {
             CurrentCompany: companyId,
             IsDeleted: false
         },
-        AdditionalData: additionalData
+        Professions: professions
     };
     
     try {
@@ -290,11 +290,11 @@ async function handleEditEmployeeFormSubmit(event) {
     // Filter professions by selected company
     const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
     
-    // Build AdditionalData: all professions with true/false based on checkbox
-    const additionalData = {};
+    // Build Professions: all professions with true/false based on checkbox
+    const professions = {};
     companyProfessions.forEach(profession => {
         const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
-        additionalData[profession.column] = isChecked ? "true" : "false";
+        professions[profession.column] = isChecked !== null;
     });
     
     // Build UpdateEmployeeRequest model
@@ -307,7 +307,7 @@ async function handleEditEmployeeFormSubmit(event) {
             CurrentCompany: companyId,
             IsDeleted: false
         },
-        AdditionalData: additionalData
+        Professions: professions
     };
     console.log(request);
     
