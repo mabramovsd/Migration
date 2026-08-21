@@ -5,6 +5,74 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-08-21
+
+### Changed
+
+#### API Versioning
+- API version updated to **2.0.0**
+- **VersionController** added to all microservices (Agro, Shipbuilding, School, NurseryHome) and MigrationWeb
+  - Returns service name, assembly version, API version, and timestamp
+
+#### Employee Professions Model
+- **PrimaryProfession** DTO added — tracks primary profession with `Column`, `HireDate`, `FireDate`
+- **CreateEmployeeRequest** refactored:
+  - `AdditionalData` replaced with `Professions` (`Dictionary<string, bool>`)
+  - Added `PrimaryProfession` property (`PrimaryProfession?`)
+- **EmployeeAdditionalInfo** refactored:
+  - `AdditionalData` replaced with `Professions` (`Dictionary<string, object>?`)
+- **Shipbuilding**: Added `EmployeeProfession` entity with hire/fire date tracking
+  - `AddEmployeeAsync` — creates EmployeeProfession record for primary profession on hire
+  - `RemoveEmployeeAsync` — sets `FireDate` on current EmployeeProfession (saves hire history)
+  - `UpdateEmployeeAsync` — handles profession change (fires old, hires new)
+  - `GetProfessionsStatsAsync` — fixed date filter logic (`FireDate > DateTime.UtcNow` instead of `<`)
+
+#### Frontend
+- **Primary profession** displayed on employee detail page
+- **Professions list** used instead of additionalData for employee creation form
+- **Healthcheck** added to frontend dashboard
+- **Icons** added for company pages
+- **Dashboard.js** split into modular parts (`menu.js`, `navigator.js`, `renderers.js`, `utils.js`)
+- **CSS** styles updated
+
+### Fixed
+
+- **MIG-69**: Logging refactoring — improved `LoggerExtensions`
+- **MIG-58**: Fixed LINQ translation error — replaced `MatchFilter` with SQL-translatable expression in `GetFilteredEmployees`
+- **MIG-58**: Shipbuilding employee count logic updated for new profession-based model
+- **MIG-58**: Empty norms handled for School and NurseryHome companies
+
+### Components
+
+- **Migration.Contracts** v2.0.0
+  - `ApiVersion` updated to 2.0.0
+  - New `PrimaryProfession` DTO
+  - Refactored `CreateEmployeeRequest` and `EmployeeAdditionalInfo` (Professions model)
+  - VersionController endpoint in all microservices
+
+- **Migration.Agro** v2.0.0
+  - VersionController added
+  - Professions-based hire/update logic
+
+- **Migration.Shipbuilding** v2.0.0
+  - New `EmployeeProfession` entity and table
+  - Primary profession tracking on hire/update/remove
+  - Enhanced resource forecast calculation with profession-based employee counts
+  - VersionController added
+
+- **Migration.School** v2.0.0
+  - VersionController added
+
+- **Migration.NurseryHome** v2.0.0
+  - VersionController added
+
+- **MigrationWeb** v2.0.0
+  - Frontend: primary profession display, professions list in employee form
+  - Frontend healthcheck integration
+  - Company page icons
+  - Dashboard JS refactored into modular files
+  - Updated CSS styles
+
 ## [1.0.0] - 2026-07-14
 
 ### Added
