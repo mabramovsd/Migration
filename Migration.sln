@@ -23,6 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.Agro.Tests", "Mig
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.Shipbuilding.Tests", "Migration.Shipbuilding.Tests\Migration.Shipbuilding.Tests.csproj", "{AE8960A6-9FC3-486E-B513-DF27E1F202F7}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migration.School.Tests", "Migration.School.Tests\Migration.School.Tests.csproj", "{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{AE8960A6-9FC3-486E-B513-DF27E1F202F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE8960A6-9FC3-486E-B513-DF27E1F202F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE8960A6-9FC3-486E-B513-DF27E1F202F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +78,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{21F2A048-19A1-4E9A-B7C3-62A4E99E6B33} = {69BD8255-E050-4B88-975A-229C361ADDD6}
 		{AE8960A6-9FC3-486E-B513-DF27E1F202F7} = {69BD8255-E050-4B88-975A-229C361ADDD6}
+		{F1B9CD76-3FF5-4E59-8247-E5FBE1D1E9B0} = {69BD8255-E050-4B88-975A-229C361ADDD6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3AD8D1A3-B849-47FB-A36E-05C99D781D0E}

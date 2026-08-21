@@ -5,6 +5,7 @@ using Migration.Shipbuilding.Services;
 using Migration.Contracts.DTO.Employees;
 using Moq;
 using Xunit;
+using Migration.Contracts.DTO.Professions;
 
 namespace Migration.Shipbuilding.Tests;
 
@@ -134,6 +135,119 @@ public class HRServiceShipbuildingTests : IDisposable
         Assert.NotNull(carpenterStat);
         Assert.Equal(2, carpenterStat.Count);
     }
+
+    #region Professions, Resources
+
+    [Fact]
+    public async Task AddEmployeeAsync_WithPrimaryProfession_CreatesEmployeeProfession()
+    {
+        // Arrange
+        var profession = CreateProfession("Carpenter", "CanCarpentry");
+        await _context.Professions.AddAsync(profession);
+        await _context.SaveChangesAsync();
+
+        var hireDate = new DateTime(2026, 01, 15);
+        var request = new CreateEmployeeRequest
+        {
+            CoreData = new Employee
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Test",
+                BirthDate = DateTime.UtcNow,
+                CurrentCompany = "Shipbuilding"
+            },
+            Professions = new Dictionary<string, bool> 
+            { 
+                { 
+                    "CanCarpentry", 
+                    true 
+                } 
+            },
+            PrimaryProfession = new PrimaryProfession
+            {
+                Column = "CanCarpentry",
+                HireDate = hireDate,
+                FireDate = null
+            }
+        };
+
+        // Act
+        var result = await _service.AddEmployeeAsync(request);
+
+        // Assert
+        var empProf = await _context.EmployeeProfessions
+            .FirstOrDefaultAsync(ep => ep.EmployeeId == result);
+        Assert.NotNull(empProf);
+        Assert.Equal(profession.Id, empProf.ProfessionId);
+        Assert.Equal(hireDate, empProf.HireDate);
+        Assert.Null(empProf.FireDate);
+    }
+
+    [Fact]
+    public async Task GetResourcesAsync_ReturnsListOfResources()
+    {
+        // Arrange
+        var resource = new ResourceShipbuilding
+        {
+            Id = Guid.NewGuid(),
+            Title = "Steel",
+            Count = 100,
+            Unit = "kg"
+        };
+        await _context.ResourcesShipbuilding.AddAsync(resource);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetResourcesAsync();
+        var list = result.ToList();
+
+        // Assert
+        Assert.Single(list);
+        Assert.Equal("Steel", list[0].Title);
+        Assert.Equal(100, list[0].Count);
+        Assert.Equal("kg", list[0].Unit);
+    }
+
+    [Fact]
+    public async Task GetProfessionResourceNormsAsync_ReturnsNorms()
+    {
+        // Arrange
+        var profession = CreateProfession("Carpenter", "CanCarpentry");
+        var resource = new ResourceShipbuilding
+        {
+            Id = Guid.NewGuid(),
+            Title = "Wood",
+            Count = 200,
+            Unit = "m3"
+        };
+        await _context.Professions.AddAsync(profession);
+        await _context.ResourcesShipbuilding.AddAsync(resource);
+        await _context.SaveChangesAsync();
+
+        var norm = new ProfessionResourceNorm
+        {
+            Id = Guid.NewGuid(),
+            ProfessionId = profession.Id,
+            ResourceId = resource.Id,
+            Hours = 2,
+            QuantityProduced = 10
+        };
+        await _context.ProfessionResourceNorms.AddAsync(norm);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _service.GetProfessionResourceNormsAsync();
+        var list = result.ToList();
+
+        // Assert
+        Assert.Single(list);
+        Assert.Equal("Carpenter", list[0].Profession);
+        Assert.Equal("Wood", list[0].Resource);
+        Assert.Equal(2, list[0].Hours);
+        Assert.Equal(10, list[0].QuantityProduced);
+    }
+
+    #endregion Professions, Resources
 
     public void Dispose()
     {
