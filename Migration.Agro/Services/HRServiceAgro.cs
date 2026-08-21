@@ -33,12 +33,12 @@ namespace Migration.Agro.Services
                 var employee = new EmployeeAgro
                 {
                     Id = request.CoreData.Id,
-                    HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense"),
-                    IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower"),
-                    IsMilker = ParseBool(request.AdditionalData, "IsMilker"),
-                    IsCattleman = ParseBool(request.AdditionalData, "IsCattleman"),
-                    IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer"),
-                    IsMiller = ParseBool(request.AdditionalData, "IsMiller")
+                    HasTracktorLicense = ParseBool(request.Professions, "HasTracktorLicense"),
+                    IsVegetableGrower = ParseBool(request.Professions, "IsVegetableGrower"),
+                    IsMilker = ParseBool(request.Professions, "IsMilker"),
+                    IsCattleman = ParseBool(request.Professions, "IsCattleman"),
+                    IsPoultryFarmer = ParseBool(request.Professions, "IsPoultryFarmer"),
+                    IsMiller = ParseBool(request.Professions, "IsMiller")
                 };
 
                 // Saving to DB
@@ -65,7 +65,7 @@ namespace Migration.Agro.Services
             return new EmployeeAdditionalInfo
             {
                 Id = entity.Id,
-                AdditionalData = CreateAdditionalData(entity)
+                Professions = CreateAdditionalData(entity)
             };
         }
 
@@ -76,7 +76,7 @@ namespace Migration.Agro.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -113,7 +113,7 @@ namespace Migration.Agro.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -154,12 +154,12 @@ namespace Migration.Agro.Services
             try
             {
                 entity.IsDeleted = request.CoreData.IsDeleted;
-                entity.HasTracktorLicense = ParseBool(request.AdditionalData, "HasTracktorLicense");
-                entity.IsVegetableGrower = ParseBool(request.AdditionalData, "IsVegetableGrower");
-                entity.IsMilker = ParseBool(request.AdditionalData, "IsMilker");
-                entity.IsCattleman = ParseBool(request.AdditionalData, "IsCattleman");
-                entity.IsPoultryFarmer = ParseBool(request.AdditionalData, "IsPoultryFarmer");
-                entity.IsMiller = ParseBool(request.AdditionalData, "IsMiller");
+                entity.HasTracktorLicense = ParseBool(request.Professions, "HasTracktorLicense");
+                entity.IsVegetableGrower = ParseBool(request.Professions, "IsVegetableGrower");
+                entity.IsMilker = ParseBool(request.Professions, "IsMilker");
+                entity.IsCattleman = ParseBool(request.Professions, "IsCattleman");
+                entity.IsPoultryFarmer = ParseBool(request.Professions, "IsPoultryFarmer");
+                entity.IsMiller = ParseBool(request.Professions, "IsMiller");
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -350,10 +350,9 @@ namespace Migration.Agro.Services
             };
         }
 
-        private static bool ParseBool(Dictionary<string, object> data, string key)
+        private static bool ParseBool(Dictionary<string, bool> data, string key)
         {
-            if (!data.TryGetValue(key, out var value)) return false;
-            return value.ToString() == "true";
+            return data?.GetValueOrDefault(key) ?? false;
         }
 
         private static bool CountByColumn(EmployeeAgro e, string column)

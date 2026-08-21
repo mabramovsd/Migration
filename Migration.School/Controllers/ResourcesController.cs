@@ -5,7 +5,7 @@ using Migration.Contracts.Interfaces;
 namespace Migration.School.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v2/[controller]")]
 public class ResourcesController : ControllerBase
 {
     private readonly ICompanyService _companyService;

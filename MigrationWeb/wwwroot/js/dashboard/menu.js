@@ -112,20 +112,29 @@ function handleCompanyChange(event) {
     
     // Render checkboxes for this company's professions
     if (companyProfessions.length > 0) {
-        professionCheckboxesDiv.innerHTML = `
-            <div style="margin-top: 1rem;">
-                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Выберите профессии:</label>
-                ${companyProfessions.map(profession => `
-                    <div style="margin-bottom: 0.5rem;">
-                        <label style="display: flex; align-items: center; cursor: pointer;">
-                            <input type="checkbox" name="professions" value="${escapeHtml(profession.column)}" 
-                                   style="margin-right: 0.5rem; width: 1.2rem; height: 1.2rem;">
-                            ${escapeHtml(profession.title)}
-                        </label>
-                    </div>
-                `).join('')}
+        let html = `<div style="margin-top: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333;">Выберите профессии и укажите основную:</label>`;
+
+        companyProfessions.forEach((profession, index) => {
+            html += `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="professions" value="${escapeHtml(profession.column)}" style="margin-right: 0.5rem; width: 1.2rem; height: 1.2rem;">
+                        ${escapeHtml(profession.title)}
+                    </label>
+                    <label style="display: flex; align-items: center; cursor: pointer; margin-left: 0.5rem;">
+                        <input type="radio" name="primaryProfession" value="${escapeHtml(profession.column)}" ${index === 0 ? 'checked' : ''} style="margin-right: 0.3rem;">
+                        Основная
+                    </label>
+                </div>`;
+        });
+
+        html += `<div style="margin-top: 0.5rem;">
+                <label style="display: block; font-weight: 600; color: #333;">Дата начала работы (основной профессии):</label>
+                <input type="date" id="hireDate" name="hireDate" value="${new Date().toISOString().split('T')[0]}" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem; width: 200px;">
             </div>
-        `;
+        </div>`;
+
+        professionCheckboxesDiv.innerHTML = html;
     } else {
         professionCheckboxesDiv.innerHTML = `
             <div style="margin-top: 1rem; color: #666;">
@@ -155,14 +164,30 @@ async function handleAddEmployeeFormSubmit(event) {
     // Filter professions by selected company
     const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
     
-    // Build AdditionalData: all professions with true/false based on checkbox
-    const additionalData = {};
+    // Build Professions: all professions with true/false based on checkbox
+    const professions = {};
     companyProfessions.forEach(profession => {
-        const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
-        additionalData[profession.column] = isChecked ? "true" : "false";
+        const checkbox = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
+        professions[profession.column] = checkbox ? checkbox.checked : false;
     });
-    
-    // Build CreateEmployeeRequest model
+
+    // Collect primary profession and date
+    let primaryProfession = null;
+    const primaryRadio = document.querySelector('input[name="primaryProfession"]:checked');
+    if (primaryRadio) {
+        const hireDateInput = document.getElementById('hireDate');
+        const hireDate = hireDateInput ? hireDateInput.value : new Date().toISOString().split('T')[0];
+        primaryProfession = {
+            Column: primaryRadio.value,
+            HireDate: hireDate,
+            FireDate: null
+        };
+
+        if (!professions[primaryRadio.value]) {
+            professions[primaryRadio.value] = true;
+        }
+    }
+
     const request = {
         Event: "AddEmployee",
         CoreData: {
@@ -172,8 +197,12 @@ async function handleAddEmployeeFormSubmit(event) {
             CurrentCompany: companyId,
             IsDeleted: false
         },
-        AdditionalData: additionalData
+        Professions: professions
     };
+
+    if (primaryProfession) {
+        request.PrimaryProfession = primaryProfession;
+    }
     
     try {
         const response = await fetch('/HR/Create', {
@@ -290,14 +319,29 @@ async function handleEditEmployeeFormSubmit(event) {
     // Filter professions by selected company
     const companyProfessions = allProfessions.filter(p => p.company === companyId && p.title.toLowerCase() !== 'все');
     
-    // Build AdditionalData: all professions with true/false based on checkbox
-    const additionalData = {};
+    // Build Professions: all professions with true/false based on checkbox
+    const professions = {};
     companyProfessions.forEach(profession => {
-        const isChecked = document.querySelector(`input[name="professions"][value="${profession.column}"]:checked`);
-        additionalData[profession.column] = isChecked ? "true" : "false";
+        const checkbox = document.querySelector(`input[name="professions"][value="${profession.column}"]`);
+        professions[profession.column] = checkbox ? checkbox.checked : false;
     });
-    
-    // Build UpdateEmployeeRequest model
+
+    // Collect primry profession and date
+    let primaryProfession = null;
+    const primaryRadio = document.querySelector('input[name="primaryProfession"]:checked');
+    if (primaryRadio) {
+        const hireDateInput = document.getElementById('hireDate');
+        const hireDate = hireDateInput ? hireDateInput.value : new Date().toISOString().split('T')[0];
+        primaryProfession = {
+            Column: primaryRadio.value,
+            HireDate: hireDate,
+            FireDate: null
+        };
+        if (!professions[primaryRadio.value]) {
+            professions[primaryRadio.value] = true;
+        }
+    }
+
     const request = {
         Event: "EditEmployee",
         CoreData: {
@@ -307,9 +351,12 @@ async function handleEditEmployeeFormSubmit(event) {
             CurrentCompany: companyId,
             IsDeleted: false
         },
-        AdditionalData: additionalData
+        Professions: professions
     };
-    console.log(request);
+
+    if (primaryProfession) {
+        request.PrimaryProfession = primaryProfession;
+    }
     
     try {
         const response = await fetch('/HR/Update', {

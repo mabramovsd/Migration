@@ -35,16 +35,31 @@ namespace Migration.Shipbuilding.Services
                 var employee = new EmployeeShipbuilding
                 {
                     Id = request.CoreData.Id,
-                    CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry"),
-                    CanWeld = ParseBool(request.AdditionalData, "CanWeld"),
-                    CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip"),
-                    CanPaint = ParseBool(request.AdditionalData, "CanPaint"),
-                    CanRig = ParseBool(request.AdditionalData, "CanRig"),
-                    CanShipyard = ParseBool(request.AdditionalData, "CanShipyard")
+                    CanCarpentry = ParseBool(request.Professions, "CanCarpentry"),
+                    CanWeld = ParseBool(request.Professions, "CanWeld"),
+                    CanDesignShip = ParseBool(request.Professions, "CanDesignShip"),
+                    CanPaint = ParseBool(request.Professions, "CanPaint"),
+                    CanRig = ParseBool(request.Professions, "CanRig"),
+                    CanShipyard = ParseBool(request.Professions, "CanShipyard")
                 };
-
-                //Saving to DB
                 await _dbContext.EmployeesShipbuilding.AddAsync(employee);
+
+                if (request.PrimaryProfession != null)
+                {
+                    var profession = await _dbContext.Professions.FirstOrDefaultAsync(p => p.Column == request.PrimaryProfession.Column);
+                    if (profession != null)
+                    {
+                        var empProf = new EmployeeProfession
+                        {
+                            EmployeeId = employee.Id,
+                            ProfessionId = profession.Id,
+                            HireDate = request.PrimaryProfession.HireDate,
+                            FireDate = null
+                        };
+                        await _dbContext.EmployeeProfessions.AddAsync(empProf);
+                    }
+                }
+
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -67,7 +82,7 @@ namespace Migration.Shipbuilding.Services
             return new EmployeeAdditionalInfo
             {
                 Id = entity.Id,
-                AdditionalData = CreateAdditionalData(entity)
+                Professions = CreateAdditionalData(entity)
             };
         }
 
@@ -78,7 +93,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -94,7 +109,7 @@ namespace Migration.Shipbuilding.Services
             var employeeIds = await _dbContext.EmployeeProfessions
                 .Where(x =>
                     (x.FireDate == null || x.FireDate < DateTime.UtcNow)
-                    && x.Profession.Title == filter.Profession
+                    && x.Profession!.Title == filter.Profession
                 )
                 .Select(x => x.EmployeeId)
                 .ToListAsync();
@@ -109,7 +124,7 @@ namespace Migration.Shipbuilding.Services
                 .Select(employee => new EmployeeAdditionalInfo
                 {
                     Id = employee.Id,
-                    AdditionalData = CreateAdditionalData(employee)
+                    Professions = CreateAdditionalData(employee)
                 })
                 .ToListAsync();
         }
@@ -121,6 +136,12 @@ namespace Migration.Shipbuilding.Services
 
             try
             {
+                var currentProfession = entity.EmployeeProfessions.FirstOrDefault(ep => ep.FireDate == null);
+                if (currentProfession != null)
+                {
+                    currentProfession.FireDate = request.FireDate;
+                }
+
                 if (request.SoftDelete)
                 {
                     entity.IsDeleted = true;
@@ -149,12 +170,39 @@ namespace Migration.Shipbuilding.Services
             try
             {
                 entity.IsDeleted = request.CoreData.IsDeleted;
-                entity.CanCarpentry = ParseBool(request.AdditionalData, "CanCarpentry");
-                entity.CanWeld = ParseBool(request.AdditionalData, "CanWeld");
-                entity.CanDesignShip = ParseBool(request.AdditionalData, "CanDesignShip");
-                entity.CanPaint = ParseBool(request.AdditionalData, "CanPaint");
-                entity.CanRig = ParseBool(request.AdditionalData, "CanRig");
-                entity.CanShipyard = ParseBool(request.AdditionalData, "CanShipyard");
+                entity.CanCarpentry = ParseBool(request.Professions, "CanCarpentry");
+                entity.CanWeld = ParseBool(request.Professions, "CanWeld");
+                entity.CanDesignShip = ParseBool(request.Professions, "CanDesignShip");
+                entity.CanPaint = ParseBool(request.Professions, "CanPaint");
+                entity.CanRig = ParseBool(request.Professions, "CanRig");
+                entity.CanShipyard = ParseBool(request.Professions, "CanShipyard");
+
+                var newProfessionFromRequest = request.PrimaryProfession;
+                if (newProfessionFromRequest != null)
+                {
+                    var currentProfession = entity.EmployeeProfessions.FirstOrDefault(ep => ep.FireDate == null);
+                    var newProfession = await _dbContext.Professions.FirstOrDefaultAsync(p => p.Column == newProfessionFromRequest.Column);
+
+                    if (newProfession != null &&
+                        (currentProfession == null || currentProfession.ProfessionId != newProfession.Id)
+                    )
+                    {
+                        if (currentProfession != null)
+                        {
+                            currentProfession.FireDate = newProfessionFromRequest.HireDate.AddSeconds(-1);
+                        }
+
+                        var newEmpProf = new EmployeeProfession
+                        {
+                            EmployeeId = entity.Id,
+                            ProfessionId = newProfession.Id,
+                            HireDate = newProfessionFromRequest.HireDate,
+                            FireDate = null
+                        };
+                        await _dbContext.EmployeeProfessions.AddAsync(newEmpProf);
+                    }
+                }
+
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -174,8 +222,8 @@ namespace Migration.Shipbuilding.Services
             var professions = await _dbContext.Professions.ToListAsync();
 
             var employeeCounts = _dbContext.EmployeeProfessions
-                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
-                .GroupBy(x => x.Profession.Title)
+                .Where(x => x.FireDate == null || x.FireDate > DateTime.UtcNow)
+                .GroupBy(x => x.Profession!.Title)
                 .Select(g => new { Title = g.Key, Count = g.Count() })
                 .ToDictionary(x => x.Title, x => x.Count);
             employeeCounts.Add("Все", _dbContext.EmployeesShipbuilding.Count());
@@ -271,8 +319,8 @@ namespace Migration.Shipbuilding.Services
 
             // Employee counts
             var employeeCounts = _dbContext.EmployeeProfessions
-                .Where(x => x.FireDate == null || x.FireDate < DateTime.UtcNow)
-                .GroupBy(x => x.Profession.Title)
+                .Where(x => x.FireDate == null || x.FireDate > DateTime.UtcNow)
+                .GroupBy(x => x.Profession!.Title)
                 .ToDictionary(x => x.Key, x => x.Count());
 
             // Grouping norms by resource
@@ -339,10 +387,9 @@ namespace Migration.Shipbuilding.Services
             };
         }
 
-        private static bool ParseBool(Dictionary<string, object> data, string key)
+        private static bool ParseBool(Dictionary<string, bool> data, string key)
         {
-            if (!data.TryGetValue(key, out var value)) return false;
-            return value.ToString() == "true";
+            return data?.GetValueOrDefault(key) ?? false;
         }
 
         private static bool CountByColumn(EmployeeShipbuilding e, string column)

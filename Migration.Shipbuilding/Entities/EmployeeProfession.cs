@@ -33,6 +33,11 @@ namespace Migration.Shipbuilding.Entities
         /// <summary>
         /// Navigation property
         /// </summary>
-        public Profession Profession { get; set; } = null!;
+        public Profession? Profession { get; set; } = null!;
+
+        /// <summary>
+        /// Navigation property
+        /// </summary>
+        public EmployeeShipbuilding? Employee { get; set; } = null!;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Migration.Shipbuilding.Entities
+﻿using Migration.Contracts.DTO.Professions;
+
+namespace Migration.Shipbuilding.Entities
 {
     public class EmployeeShipbuilding
     {
@@ -34,5 +36,10 @@
         /// Can rig
         /// </summary>
         public bool CanRig { get; set; }
+
+        /// <summary>
+        /// Navigation property
+        /// </summary>
+        public ICollection<EmployeeProfession> EmployeeProfessions { get; set; } = null!;
     }
 }

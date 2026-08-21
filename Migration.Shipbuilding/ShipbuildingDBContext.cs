@@ -40,6 +40,34 @@ namespace Migration.Shipbuilding
                     .IsRequired()
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            // EmployeeProfession FK relationships
+            modelBuilder.Entity<EmployeeProfession>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne<EmployeeShipbuilding>(e => e.Employee)
+                    .WithMany(e => e.EmployeeProfessions)
+                    .HasForeignKey(e => e.EmployeeId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne<Profession>(e => e.Profession)
+                    .WithMany()
+                    .HasForeignKey(e => e.ProfessionId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<EmployeeShipbuilding>(entity =>
+            {
+                entity.HasMany(e => e.EmployeeProfessions)
+                    .WithOne(e => e.Employee)
+                    .HasForeignKey(e => e.EmployeeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Navigation(e => e.EmployeeProfessions).AutoInclude();
+            });
         }
     }
 
