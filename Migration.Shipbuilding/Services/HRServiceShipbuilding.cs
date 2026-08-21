@@ -136,6 +136,12 @@ namespace Migration.Shipbuilding.Services
 
             try
             {
+                var currentProfession = entity.EmployeeProfessions.FirstOrDefault(ep => ep.FireDate == null);
+                if (currentProfession != null)
+                {
+                    currentProfession.FireDate = request.FireDate;
+                }
+
                 if (request.SoftDelete)
                 {
                     entity.IsDeleted = true;

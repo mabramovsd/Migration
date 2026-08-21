@@ -25,4 +25,9 @@ public record RemoveEmployeeRequest
     /// </summary>
     [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
     public string? Reason { get; init; }
+
+    /// <summary>
+    /// Fire date (optional - just for employee who hired in another company)
+    /// </summary>
+    public DateTime? FireDate { get; init; } = null;
 }

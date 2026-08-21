@@ -302,10 +302,12 @@ public class HRService
             }
             else
             {
+                var fireDate = request.PrimaryProfession?.HireDate.AddSeconds(-1) ?? DateTime.UtcNow;
                 RemoveEmployeeRequest removeEmployeeRequest = new RemoveEmployeeRequest()
                 { 
                     Id = request.CoreData.Id, 
-                    SoftDelete = true
+                    SoftDelete = true,
+                    FireDate = fireDate
                 };
                 await oldService.RemoveEmployeeAsync(removeEmployeeRequest);
 
