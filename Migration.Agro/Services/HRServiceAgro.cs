@@ -181,18 +181,27 @@ namespace Migration.Agro.Services
                 .ToListAsync();
 
             var professions = await _dbContext.Professions.ToListAsync();
+            var professionCounts = await _dbContext.Professions
+                .Select(p => new ProfessionCountDTO
+                {
+                    Id = p.Id,
+                    ProfessionTitle = p.Title,
+                    Count = p.Column == "All"
+                        ? _dbContext.EmployeesAgro.Count(e => !e.IsDeleted)
+                        : _dbContext.EmployeesAgro.Count(e =>
+                            !e.IsDeleted && (
+                                (p.Column == "HasTracktorLicense" && e.HasTracktorLicense) ||
+                                (p.Column == "IsVegetableGrower" && e.IsVegetableGrower) ||
+                                (p.Column == "IsMilker" && e.IsMilker) ||
+                                (p.Column == "IsCattleman" && e.IsCattleman) ||
+                                (p.Column == "IsPoultryFarmer" && e.IsPoultryFarmer) ||
+                                (p.Column == "IsMiller" && e.IsMiller)
+                            )
+                        )
+                })
+                .ToListAsync();
 
-            var data = professions.Select(p => new ProfessionCountDTO
-            {
-                Id = p.Id,
-                ProfessionTitle = p.Title,
-                Count = allEmployees.Count(e =>
-                    p.Column == "All" ||
-                    CountByColumn(e, p.Column)
-                )
-            }).ToList();
-
-            return data;
+            return professionCounts;
         }
 
         public async Task<IEnumerable<ProfessionDTO>> GetProfessionsAsync()
@@ -274,16 +283,32 @@ namespace Migration.Agro.Services
                 .ToListAsync();
             if (norms.Count == 0) return [];
 
-            // Employee counts (ToDo: N+1 cycle)
-            var professionColumns = norms.Select(n => n.ProfessionColumn).Distinct().ToList();
-            var employeeCounts = new Dictionary<string, int>();
-            foreach (var column in professionColumns)
-            {
-                var count = await _dbContext.EmployeesAgro
-                    .Where(e => !e.IsDeleted)
-                    .CountAsync(e => CountByColumn(e, column));
+            // Employee counts
+            var employeeCountsFromDB = await _dbContext.EmployeesAgro
+                .Where(e => !e.IsDeleted)
+                .GroupBy(e => 1) // hack to use grouping in SQL
+                .Select(g => new
+                {
+                    // Count employees by profession
+                    HasTracktorLicense = g.Count(e => e.HasTracktorLicense),
+                    IsVegetableGrower = g.Count(e => e.IsVegetableGrower),
+                    IsMilker = g.Count(e => e.IsMilker),
+                    IsCattleman = g.Count(e => e.IsCattleman),
+                    IsPoultryFarmer = g.Count(e => e.IsPoultryFarmer),
+                    IsMiller = g.Count(e => e.IsMiller)
+                })
+                .FirstOrDefaultAsync();
 
-                employeeCounts[column] = count;
+            // Convert to dictionary
+            var employeeCounts = new Dictionary<string, int>();
+            if (employeeCounts != null)
+            {
+                employeeCounts["HasTracktorLicense"] = employeeCountsFromDB.HasTracktorLicense;
+                employeeCounts["IsVegetableGrower"] = employeeCountsFromDB.IsVegetableGrower;
+                employeeCounts["IsMilker"] = employeeCountsFromDB.IsMilker;
+                employeeCounts["IsCattleman"] = employeeCountsFromDB.IsCattleman;
+                employeeCounts["IsPoultryFarmer"] = employeeCountsFromDB.IsPoultryFarmer;
+                employeeCounts["IsMiller"] = employeeCountsFromDB.IsMiller;
             }
 
             // Grouping norms by resource
@@ -355,17 +380,17 @@ namespace Migration.Agro.Services
             return data?.GetValueOrDefault(key) ?? false;
         }
 
-        private static bool CountByColumn(EmployeeAgro e, string column)
+        private static Expression<Func<EmployeeAgro, bool>> BuildFilterByColumn(string column)
         {
             return column switch
             {
-                "HasTracktorLicense" => e.HasTracktorLicense,
-                "IsVegetableGrower" => e.IsVegetableGrower,
-                "IsMilker" => e.IsMilker,
-                "IsCattleman" => e.IsCattleman,
-                "IsPoultryFarmer" => e.IsPoultryFarmer,
-                "IsMiller" => e.IsMiller,
-                _ => false
+                "HasTracktorLicense" => e => e.HasTracktorLicense,
+                "IsVegetableGrower" => e => e.IsVegetableGrower,
+                "IsMilker" => e => e.IsMilker,
+                "IsCattleman" => e => e.IsCattleman,
+                "IsPoultryFarmer" => e => e.IsPoultryFarmer,
+                "IsMiller" => e => e.IsMiller,
+                _ => e => false
             };
         }
 
