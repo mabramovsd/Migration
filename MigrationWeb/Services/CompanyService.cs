@@ -95,13 +95,8 @@ public class CompanyService
     /// </summary>
     public async Task<IEnumerable<ResourceDTO>?> GetResourcesForCompanyAsync(string companyName)
     {
-        if (string.IsNullOrWhiteSpace(companyName))
-        {
-            return Enumerable.Empty<ResourceDTO>();
-        }
-
-        var service = GetServiceForCompany(companyName);
-        if (service == null)
+        if (string.IsNullOrWhiteSpace(companyName) ||
+            GetServiceForCompany(companyName) is not ICompanyService service)
         {
             return Enumerable.Empty<ResourceDTO>();
         }
@@ -122,13 +117,8 @@ public class CompanyService
     /// </summary>
     public async Task<IEnumerable<ProfessionResourceNormDTO>?> GetNormsForCompanyAsync(string companyName)
     {
-        if (string.IsNullOrWhiteSpace(companyName))
-        {
-            return Enumerable.Empty<ProfessionResourceNormDTO>();
-        }
-
-        var service = GetServiceForCompany(companyName);
-        if (service == null)
+        if (string.IsNullOrWhiteSpace(companyName) ||
+            GetServiceForCompany(companyName) is not ICompanyService service)
         {
             return Enumerable.Empty<ProfessionResourceNormDTO>();
         }
