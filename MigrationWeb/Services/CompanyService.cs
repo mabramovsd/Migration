@@ -164,7 +164,7 @@ public class CompanyService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to get resiurce forecast from microservice {Microservice}", companyName);
+            _logger.LogError(ex, "Failed to get resource forecast from microservice {Microservice}", companyName);
             return Enumerable.Empty<ResourceForecastDTO>();
         }
     }

@@ -160,24 +160,13 @@ async function handleCompanyClick(companyName, imageUrl) {
             }
         }
 
+        let forecastData = null;
         const responseForecast = await fetch(`/Company/Resources/Forecast/${encodeURIComponent(companyName)}?days=30`);
         if (responseForecast.ok) {
-            const forecastData = await responseForecast.json();
-            // отрисовать прогноз
-            console.log(forecastData);
-
-
-            // Позже, при формировании htmlContent
+            forecastData = await responseForecast.json();
             if (forecastData && forecastData.length > 0) {
                 htmlContent += renderResourceForecast(forecastData, `Прогноз ресурсов (30 дней)`);
                 htmlContent += `<div style="margin-top:1.5rem;"><canvas id="forecastChart" style="max-width:100%;height:300px;"></canvas></div>`;
-            }
-
-            //        dashboardDiv.innerHTML = htmlContent;
-
-            // После вставки HTML
-            if (forecastData && forecastData.length > 0) {
-                setTimeout(() => renderResourceForecastChart(forecastData, 'forecastChart'), 100);
             }
         }
 
@@ -192,6 +181,10 @@ async function handleCompanyClick(companyName, imageUrl) {
         htmlContent += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
     
         dashboardDiv.innerHTML = htmlContent;
+
+        if (forecastData && forecastData.length > 0) {
+            setTimeout(() => renderResourceForecastChart(forecastData, 'forecastChart'), 1000);
+        }
 
     } catch (error) {
         loadingDiv.style.display = 'none';
