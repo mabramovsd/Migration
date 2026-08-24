@@ -21,23 +21,10 @@ async function handleMenuAction(action) {
             loadingDiv.textContent = 'Загрузка формы добавления сотрудника...';
 
             // Fetch companies and professions in parallel
-            const [responseCompanies, responseProfessions] = await Promise.all([
-                fetch('/Company/All'),
-                fetch('/Company/Professions')
+            const [companies, professions] = await Promise.all([
+                getCompanies(), getProfessions()
             ]);
-            
-            if (!responseCompanies.ok) {
-                throw new Error(`Ошибка при загрузке компаний: ${responseCompanies.status} ${responseCompanies.statusText}`);
-            }
-            
-            const companies = await responseCompanies.json();
-            
-            if (!responseProfessions.ok) {
-                throw new Error(`Ошибка при загрузке профессий: ${responseProfessions.status} ${responseProfessions.statusText}`);
-            }
-            
-            const professions = await responseProfessions.json();
-            
+                        
             // Hide loading and show form
             loadingDiv.style.display = 'none';
             dashboardDiv.style.display = 'block';
@@ -244,20 +231,9 @@ async function handleEditEmployee(employeeId) {
         const employeeData = await responseEmployee.json();
 
         // Fetch companies and professions
-        const [responseCompanies, responseProfessions] = await Promise.all([
-            fetch('/Company/All'),
-            fetch('/Company/Professions')
+        const [companies, professions] = await Promise.all([
+            getCompanies(), getProfessions()
         ]);
-
-        if (!responseCompanies.ok) {
-            throw new Error(`Ошибка при загрузке компаний: ${responseCompanies.status}`);
-        }
-        if (!responseProfessions.ok) {
-            throw new Error(`Ошибка при загрузке профессий: ${responseProfessions.status}`);
-        }
-
-        const companies = await responseCompanies.json();
-        const professions = await responseProfessions.json();
 
         // Store employee ID for the submit handler
         window._editingEmployeeId = employeeId;

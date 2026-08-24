@@ -8,16 +8,7 @@ async function handleIndexClick() {
 
     try {
         // Load companies data first (for image lookup)
-        let companiesData = [];
-        try {
-            const companiesResponse = await fetch('/Company/All');
-            if (companiesResponse.ok) {
-                companiesData = await companiesResponse.json();
-            }
-        } catch (err) {
-            console.warn('Не удалось загрузить список компаний:', err);
-            companiesData = [];
-        }
+        let companiesData = await getCompanies();
 
         // Make API call to get company counts
         const response = await fetch('/HR/Stats/CompanyCounts');
