@@ -23,33 +23,40 @@ namespace MigrationWeb.Controllers
         [HttpGet("All")]
         public async Task<IEnumerable<Company>> GetAll()
         {
-            return await _companyService.GetCompanyList();
+            return await _companyService.GetCompanyListAsync();
         }
 
         [HttpGet("Professions")]
         public async Task<IEnumerable<ProfessionDTO>> GetProfessions()
         {
-            return await _companyService.GetAllProfessions();
+            return await _companyService.GetAllProfessionsAsync();
         }
 
         [HttpGet("Resources")]
         public async Task<IEnumerable<ResourceDTO>> GetResources()
         {
-            return await _companyService.GetAllResources();
+            return await _companyService.GetAllResourcesAsync();
         }
 
         [HttpGet("Resources/{companyName}")]
         public async Task<IEnumerable<ResourceDTO>> GetResourcesForCompany(string companyName)
         {
-            var resources = await _companyService.GetResourcesForCompany(companyName);
+            var resources = await _companyService.GetResourcesForCompanyAsync(companyName);
             return resources ?? Enumerable.Empty<ResourceDTO>();
         }
 
         [HttpGet("Norms/{companyName}")]
         public async Task<IEnumerable<ProfessionResourceNormDTO>> GetNormsForCompany(string companyName)
         {
-            var norms = await _companyService.GetNormsForCompany(companyName);
+            var norms = await _companyService.GetNormsForCompanyAsync(companyName);
             return norms ?? Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+
+        [HttpGet("Resources/Forecast/{companyName}")]
+        public async Task<IEnumerable<ResourceForecastDTO>> GetResourceForecast(string companyName, [FromQuery] int days = 30)
+        {
+            var result = await _companyService.GetResourceForecastAsync(companyName, days);
+            return result ?? Enumerable.Empty<ResourceForecastDTO>();
         }
     }
 }

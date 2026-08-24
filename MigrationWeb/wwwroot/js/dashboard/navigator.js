@@ -8,16 +8,7 @@ async function handleIndexClick() {
 
     try {
         // Load companies data first (for image lookup)
-        let companiesData = [];
-        try {
-            const companiesResponse = await fetch('/Company/All');
-            if (companiesResponse.ok) {
-                companiesData = await companiesResponse.json();
-            }
-        } catch (err) {
-            console.warn('Не удалось загрузить список компаний:', err);
-            companiesData = [];
-        }
+        let companiesData = await getCompanies();
 
         // Make API call to get company counts
         const response = await fetch('/HR/Stats/CompanyCounts');
@@ -160,6 +151,16 @@ async function handleCompanyClick(companyName, imageUrl) {
             }
         }
 
+        let forecastData = null;
+        const responseForecast = await fetch(`/Company/Resources/Forecast/${encodeURIComponent(companyName)}?days=30`);
+        if (responseForecast.ok) {
+            forecastData = await responseForecast.json();
+            if (forecastData && forecastData.length > 0) {
+                htmlContent += renderResourceForecast(forecastData, `Прогноз ресурсов (30 дней)`);
+                htmlContent += `<div style="margin-top:1.5rem;"><canvas id="forecastChart" style="max-width:100%;height:300px;"></canvas></div>`;
+            }
+        }
+
         // Fetch employees list for the selected company
         const responseEmployees = await fetch(`/HR/Filter?Company=${encodeURIComponent(companyName)}`);
         
@@ -171,6 +172,10 @@ async function handleCompanyClick(companyName, imageUrl) {
         htmlContent += renderEmployeesTable(employeesData, `Сотрудники компании ${escapeHtml(companyName)}`);
     
         dashboardDiv.innerHTML = htmlContent;
+
+        if (forecastData && forecastData.length > 0) {
+            setTimeout(() => renderResourceForecastChart(forecastData, 'forecastChart'), 1000);
+        }
 
     } catch (error) {
         loadingDiv.style.display = 'none';

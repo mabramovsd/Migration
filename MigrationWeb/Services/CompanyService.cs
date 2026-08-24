@@ -29,15 +29,17 @@ public class CompanyService
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
             "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            "school" => _serviceProvider.GetKeyedService<ICompanyService>("School"),
+            "nurseryhome" => _serviceProvider.GetKeyedService<ICompanyService>("NurseryHome"),
             _ => null
         };
 
-    public async Task<IEnumerable<Company>> GetCompanyList()
+    public async Task<IEnumerable<Company>> GetCompanyListAsync()
     {
         return await _coreDBContext.Companies.ToListAsync();
     }
 
-    public async Task<IEnumerable<ProfessionDTO>> GetAllProfessions()
+    public async Task<IEnumerable<ProfessionDTO>> GetAllProfessionsAsync()
     {
         var professions = new List<ProfessionDTO>();
         
@@ -64,7 +66,7 @@ public class CompanyService
     /// <summary>
     /// Get all resources from both companies
     /// </summary>
-    public async Task<IEnumerable<ResourceDTO>> GetAllResources()
+    public async Task<IEnumerable<ResourceDTO>> GetAllResourcesAsync()
     {
         var resources = new List<ResourceDTO>();
         
@@ -91,15 +93,10 @@ public class CompanyService
     /// <summary>
     /// Get resources for a specific company
     /// </summary>
-    public async Task<IEnumerable<ResourceDTO>?> GetResourcesForCompany(string companyName)
+    public async Task<IEnumerable<ResourceDTO>?> GetResourcesForCompanyAsync(string companyName)
     {
-        if (string.IsNullOrWhiteSpace(companyName))
-        {
-            return null;
-        }
-
-        var service = GetServiceForCompany(companyName);
-        if (service == null)
+        if (string.IsNullOrWhiteSpace(companyName) ||
+            GetServiceForCompany(companyName) is not ICompanyService service)
         {
             return Enumerable.Empty<ResourceDTO>();
         }
@@ -115,19 +112,13 @@ public class CompanyService
         }
     }
 
-
     /// <summary>
     /// Get norms for a specific company
     /// </summary>
-    public async Task<IEnumerable<ProfessionResourceNormDTO>?> GetNormsForCompany(string companyName)
+    public async Task<IEnumerable<ProfessionResourceNormDTO>?> GetNormsForCompanyAsync(string companyName)
     {
-        if (string.IsNullOrWhiteSpace(companyName))
-        {
-            return null;
-        }
-
-        var service = GetServiceForCompany(companyName);
-        if (service == null)
+        if (string.IsNullOrWhiteSpace(companyName) ||
+            GetServiceForCompany(companyName) is not ICompanyService service)
         {
             return Enumerable.Empty<ProfessionResourceNormDTO>();
         }
@@ -140,6 +131,28 @@ public class CompanyService
         {
             _logger.LogError(ex, "Failed to get norms from microservice {Microservice}", companyName);
             return Enumerable.Empty<ProfessionResourceNormDTO>();
+        }
+    }
+
+    /// <summary>
+    /// Get resource forecast for a specific company
+    /// </summary>
+    public async Task<IEnumerable<ResourceForecastDTO>?> GetResourceForecastAsync(string companyName, int days)
+    {
+        if (string.IsNullOrWhiteSpace(companyName) || 
+            GetServiceForCompany(companyName) is not ICompanyService service)
+        {
+            return Enumerable.Empty<ResourceForecastDTO>();
+        }
+
+        try
+        {
+            return await service.GetResourceForecastAsync(days);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get resource forecast from microservice {Microservice}", companyName);
+            return Enumerable.Empty<ResourceForecastDTO>();
         }
     }
 }

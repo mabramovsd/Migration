@@ -13,13 +13,7 @@ async function loadCompaniesOnMap() {
 
     try {
         // Загружаем список компаний с координатами
-        const response = await fetch('/Company/All');
-        
-        if (!response.ok) {
-            throw new Error(`Ошибка при загрузке компаний: ${response.status} ${response.statusText}`);
-        }
-        
-        const companies = await response.json();
+        const companies = await getCompanies();
         
         // Фильтруем только компании с валидными координатами и изображениями
         const companiesWithCoords = companies.filter(c => 
