@@ -29,6 +29,8 @@ public class CompanyService
         {
             "agro" => _serviceProvider.GetKeyedService<ICompanyService>("Agro"),
             "shipbuilding" => _serviceProvider.GetKeyedService<ICompanyService>("Shipbuilding"),
+            "school" => _serviceProvider.GetKeyedService<ICompanyService>("School"),
+            "nurseryhome" => _serviceProvider.GetKeyedService<ICompanyService>("NurseryHome"),
             _ => null
         };
 
@@ -147,6 +149,9 @@ public class CompanyService
     /// </summary>
     public async Task<IEnumerable<ResourceForecastDTO>?> GetResourceForecastAsync(string companyName, int days)
     {
+        if (string.IsNullOrWhiteSpace(companyName) || 
+            GetServiceForCompany(companyName) is not ICompanyService service)
+
         if (string.IsNullOrWhiteSpace(companyName))
         {
             return Enumerable.Empty<ResourceForecastDTO>();
