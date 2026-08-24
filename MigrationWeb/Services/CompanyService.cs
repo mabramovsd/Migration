@@ -151,14 +151,6 @@ public class CompanyService
     {
         if (string.IsNullOrWhiteSpace(companyName) || 
             GetServiceForCompany(companyName) is not ICompanyService service)
-
-        if (string.IsNullOrWhiteSpace(companyName))
-        {
-            return Enumerable.Empty<ResourceForecastDTO>();
-        }
-
-        var service = GetServiceForCompany(companyName);
-        if (service == null)
         {
             return Enumerable.Empty<ResourceForecastDTO>();
         }
