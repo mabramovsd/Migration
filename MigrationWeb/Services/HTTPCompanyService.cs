@@ -231,7 +231,7 @@ public class HTTPCompanyService : ICompanyService
     {
         try
         {
-            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v2/resources/forecast?days={days}");
+            var result = await GetFromJsonAsync<IEnumerable<ResourceForecastDTO>>($"api/v2/resources/forecast/{days}");
             return result ?? Enumerable.Empty<ResourceForecastDTO>();
         }
         catch (Exception ex)

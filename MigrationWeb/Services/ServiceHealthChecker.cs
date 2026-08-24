@@ -53,7 +53,7 @@ public class ServiceHealthChecker
     {
         try
         {
-            var companies = await _companyService.GetCompanyList();
+            var companies = await _companyService.GetCompanyListAsync();
             var count = companies.Count();
 
             _logger.LogInformation("Core Database is available (found {Count} companies)", count);

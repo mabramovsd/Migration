@@ -277,9 +277,89 @@ function renderAboutSystem(services) {
     `;
 }
 
+function renderResourceForecast(forecastData, title) {
+    if (!forecastData || forecastData.length === 0) {
+        return '<p style="margin-top:1rem;color:#666;">Нет данных для прогноза</p>';
+    }
+
+    let html = `<div style="margin-top:1.5rem;">
+        <div style="color:#667eea;font-size:1.2rem;font-weight:600;">${title}</div>
+        <table class="resources-table">
+            <thead><tr>
+                <th>Ресурс</th>
+                <th>Текущий запас</th>
+                <th>Прогноз через ${forecastData[0]?.days || 30} дней</th>
+                <th>Прирост</th>
+            </tr></thead>
+            <tbody>
+                ${forecastData.map(item => `
+                    <tr>
+                        <td>${escapeHtml(item.resource)}</td>
+                        <td>${item.currentAmount} ${escapeHtml(item.unit)}</td>
+                        <td>${item.totalAmount.toFixed(1)} ${escapeHtml(item.unit)}</td>
+                        <td style="color: ${item.producedAmount >= 0 ? '#28a745' : '#dc3545'};">
+                            ${item.producedAmount >= 0 ? '+' : ''}${item.producedAmount.toFixed(1)} ${escapeHtml(item.unit)}
+                        </td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>`;
+
+    return html;
+}
+
+function renderResourceForecastChart(forecastData, canvasId) {
+    if (!forecastData || forecastData.length === 0) return;
+
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+
+    // Для простоты показываем bar chart или line chart
+    // Здесь можно показать текущий запас и прогнозный
+    const labels = forecastData.map(f => f.resource);
+    const current = forecastData.map(f => f.currentAmount);
+    const forecast = forecastData.map(f => f.totalAmount);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Текущий запас',
+                    data: current,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Прогноз через 30 дней',
+                    data: forecast,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Прогноз ресурсов' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
 // Export functions for use in other modules
 window.renderEmployeesTable = renderEmployeesTable;
 window.renderAddEmployeeForm = renderAddEmployeeForm;
 window.renderEditEmployeeForm = renderEditEmployeeForm;
 window.renderResourcesTable = renderResourcesTable;
 window.renderAboutSystem = renderAboutSystem;
+window.renderResourceForecast = renderResourceForecast;
+window.renderResourceForecastChart = renderResourceForecastChart;
