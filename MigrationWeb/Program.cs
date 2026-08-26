@@ -87,6 +87,8 @@ builder.Services.AddKeyedScoped<ICompanyService>("NurseryHome", (sp, key) =>
 });
 #endregion Company Services
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IAuditService, AuditService>();
 builder.Services.AddScoped<HRService>();
 builder.Services.AddScoped<CompanyService>();
 builder.Services.AddScoped<ServiceHealthChecker>();
