@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Migration.Contracts.DTO;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Employees;
 
@@ -15,6 +16,7 @@ namespace Migration.Contracts
 
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<AuditRecord> AuditRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

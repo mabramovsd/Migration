@@ -12,15 +12,18 @@ public class HRService
     private readonly CoreDBContext _coreDBContext;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<HRService> _logger;
+    private readonly IAuditService _auditService;
 
     public HRService(
         CoreDBContext coreDBContext,
         IServiceProvider serviceProvider,
-        ILogger<HRService> logger)
+        ILogger<HRService> logger,
+        IAuditService auditService)
     {
         _coreDBContext = coreDBContext;
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _auditService = auditService;
     }
 
     public ICompanyService? GetServiceForCompany(string? companyName) =>
@@ -34,6 +37,15 @@ public class HRService
         };
 
     #region Employees
+
+    private static Employee CreateSnapshot(Employee employee) => new Employee
+    {
+        Id = employee.Id,
+        FullName = employee.FullName,
+        CurrentCompany = employee.CurrentCompany,
+        BirthDate = employee.BirthDate,
+        IsDeleted = employee.IsDeleted
+    };
 
     public async Task<Guid> AddEmployeeAsync(CreateEmployeeRequest request)
     {
@@ -52,17 +64,21 @@ public class HRService
         try
         {
             // Core part
-            await _coreDBContext.Employees.AddAsync(new Employee
+            var employee = new Employee
             {
                 Id = employeeId,
                 FullName = request.CoreData.FullName,
                 CurrentCompany = companyName,
                 BirthDate = request.CoreData.BirthDate,
-            });
+            };
+            await _coreDBContext.Employees.AddAsync(employee);
             await _coreDBContext.SaveChangesAsync();
 
             // Special part
             await service.AddEmployeeAsync(request);
+
+            // Audit
+            await _auditService.LogCreateAsync(employeeId, "Employee", null, employee);
 
             return employeeId;
         }
@@ -237,6 +253,7 @@ public class HRService
         if (employee == null) return false;
 
         var companyName = employee.CurrentCompany ?? string.Empty;
+        var oldEmployee = CreateSnapshot(employee);
 
         var service = GetServiceForCompany(companyName);
         if (service == null)
@@ -263,6 +280,9 @@ public class HRService
                 await service.RemoveEmployeeAsync(request);
             }
 
+            // Audit
+            await _auditService.LogDeleteAsync(request.Id, "Employee", null, oldEmployee);
+
             return true;
         }
         catch (Exception ex)
@@ -278,6 +298,9 @@ public class HRService
         if (employee == null) return Guid.Empty;
 
         var companyName = employee.CurrentCompany ?? string.Empty;
+
+        // Save old values before update
+        var oldEmployee = CreateSnapshot(employee);
 
         var oldService = GetServiceForCompany(companyName);
         if (oldService == null)
@@ -319,6 +342,10 @@ public class HRService
 
                 await newService.AddEmployeeAsync(request);
             }
+
+            // Audit
+            var newEmployee = CreateSnapshot(employee);
+            await _auditService.LogUpdateAsync(request.CoreData.Id, "Employee", null, oldEmployee, newEmployee);
 
             return request.CoreData.Id;
         }
