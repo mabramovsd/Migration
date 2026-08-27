@@ -149,6 +149,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCorrelationId();
 app.UseErrorHandling();
+app.UseValidationException();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
