@@ -24,18 +24,18 @@ public class ValidationExceptionMiddleware
         }
         catch (ValidationException ex)
         {
+            var correlationId = context.Items["CorrelationId"]?.ToString() ?? "N/A";
             _logger.LogWarning(ex, "Validation failed for {Path}", context.Request.Path);
+
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/json";
 
             var errors = ex.Errors
                 .GroupBy(e => e.PropertyName)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.Select(e => e.ErrorMessage).ToArray()
-            );
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-            var json = JsonSerializer.Serialize(new { errors });
+            var response = new { errors, correlationId };
+            var json = JsonSerializer.Serialize(response);
             await context.Response.WriteAsync(json);
         }
     }

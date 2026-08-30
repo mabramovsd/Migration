@@ -6,6 +6,9 @@ using Migration.Contracts.Extensions;
 using MigrationWeb;
 using MigrationWeb.Services;
 using System.Text.Json.Serialization;
+using Migration.Contracts.Validators;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 var coreCs = builder.Configuration.GetConnectionString("CoreDb");
 
 // Add services to the container.
-var controllers = builder.Services.AddControllers();
+var controllers = builder.Services.AddControllers(); 
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateEmployeeRequestValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCorrelationIdSupport();

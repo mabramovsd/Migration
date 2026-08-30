@@ -204,8 +204,20 @@ async function handleAddEmployeeFormSubmit(event) {
             alert('Сотрудник успешно создан!');
             handleIndexClick(); // Return to dashboard
         } else {
-            const error = await response.json();
-            alert(`Ошибка при создании сотрудника: ${error.message}`);
+            const errorData = await response.json();
+            let errorMessage = 'Ошибка при создании сотрудника';
+
+            if (errorData.errors) {
+                // Собираем все сообщения в одну строку
+                const messages = Object.values(errorData.errors)
+                    .flat()
+                    .join('; ');
+                errorMessage = messages || errorMessage;
+            } else if (errorData.message) {
+                errorMessage = errorData.message;
+            }
+
+            alert(errorMessage);
         }
     } catch (error) {
         alert(`Ошибка при создании сотрудника: ${error.message}`);
@@ -348,8 +360,20 @@ async function handleEditEmployeeFormSubmit(event) {
             window._editingEmployeeId = null; // Clear the global variable
             handleIndexClick(); // Return to dashboard
         } else {
-            const error = await response.json();
-            alert(`Ошибка при обновлении сотрудника: ${error.message}`);
+            const errorData = await response.json();
+            let errorMessage = 'Ошибка при обновлении сотрудника';
+
+            if (errorData.errors) {
+                // Собираем все сообщения в одну строку
+                const messages = Object.values(errorData.errors)
+                    .flat()
+                    .join('; ');
+                errorMessage = messages || errorMessage;
+            } else if (errorData.message) {
+                errorMessage = errorData.message;
+            }
+
+            alert(errorMessage);
         }
     } catch (error) {
         alert(`Ошибка при обновлении сотрудника: ${error.message}`);
