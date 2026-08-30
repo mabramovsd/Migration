@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Migration.Contracts.DTO;
 using Migration.Contracts.DTO.Companies;
 using Migration.Contracts.DTO.Employees;
 using Migration.Contracts.DTO.Professions;
@@ -20,6 +21,7 @@ namespace MigrationWeb.Controllers
         }
 
         [HttpPost("Create")]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] CreateEmployeeRequest request)
         {
             Guid userId = await _hrService.AddEmployeeAsync(request);
@@ -45,6 +47,7 @@ namespace MigrationWeb.Controllers
         }
 
         [HttpDelete("Delete")]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete([FromBody] RemoveEmployeeRequest request)
         {
             var success = await _hrService.RemoveEmployeeAsync(request);
@@ -61,6 +64,7 @@ namespace MigrationWeb.Controllers
         }
 
         [HttpPost("Update")]
+        [ProducesResponseType(typeof(ValidationErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromBody] CreateEmployeeRequest request)
         {
             Guid userId = await _hrService.UpdateEmployeeAsync(request);

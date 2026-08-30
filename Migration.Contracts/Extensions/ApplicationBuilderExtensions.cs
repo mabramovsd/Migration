@@ -15,5 +15,10 @@ namespace Migration.Contracts.Extensions
         {
             return builder.UseMiddleware<ErrorHandlingMiddleware>();
         }
+
+        public static IApplicationBuilder UseValidationException(this IApplicationBuilder app)
+        {
+            return app.UseMiddleware<ValidationExceptionMiddleware>();
+        }
     }
 }
